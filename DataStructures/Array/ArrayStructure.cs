@@ -21,10 +21,10 @@ namespace DataStructuresVisualizer.DataStructures.Array
             this.size = 0;
         }
 
-        public ArrayStructure() : this(3)  // Call the existing constructor with a capacity of 3
+        public ArrayStructure() : this(Constants.DEFAULT_ARRAY_CAPACITY)  // Call the existing constructor with a capacity of 3
         {
             Random random = new Random();
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < Constants.DEFAULT_ARRAY_CAPACITY; i++)
             {
                 this.Add(random.Next(1, 100));
             }

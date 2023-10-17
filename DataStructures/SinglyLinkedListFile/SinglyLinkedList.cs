@@ -8,16 +8,16 @@ namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
 {
     public class SinglyLinkedList
     {
-        public Node head;
+        public SinglyLinkedListNode head { get; set; }
 
         public SinglyLinkedList() //Constructor that builds a linked list with 3 Nodes
         {
             Random random = new Random();
-            Node current = null;
+            SinglyLinkedListNode current = null;
 
             for (int i = 0; i < 3; i++)
             {
-                Node newNode = new Node(random.Next(1, 100));
+                SinglyLinkedListNode newNode = new SinglyLinkedListNode(random.Next(1, 100));
 
                 if (head == null)
                 {
@@ -34,7 +34,7 @@ namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
 
             public void Append(int data)
         {
-            Node newNode = new Node(data);
+            SinglyLinkedListNode newNode = new SinglyLinkedListNode(data);
 
             if (head == null)
             {
@@ -42,7 +42,7 @@ namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
                 return;
             }
 
-            Node current = head;
+            SinglyLinkedListNode current = head;
             while (current.Next != null)
             {
                 current = current.Next;
@@ -53,7 +53,7 @@ namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
 
         public void Prepend(int data)
         {
-            Node newNode = new Node(data);
+            SinglyLinkedListNode newNode = new SinglyLinkedListNode(data);
 
             if (head == null)
             {
@@ -67,7 +67,7 @@ namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
         }
         public void InsertAt(int index, int data)
         {
-            Node newNode = new Node(data);
+            SinglyLinkedListNode newNode = new SinglyLinkedListNode(data);
             if (index == 0)
             {
                 newNode.Next = head;
@@ -75,7 +75,7 @@ namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
                 return;
             }
 
-            Node current = head;
+            SinglyLinkedListNode current = head;
             int currentIndex = 0;
             while (current != null && currentIndex < index - 1)
             {
@@ -102,7 +102,7 @@ namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
                 return;
             }
 
-            Node current = head;
+            SinglyLinkedListNode current = head;
             while (current.Next != null && current.Next.Data != data)
             {
                 current = current.Next;
@@ -148,7 +148,7 @@ namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
                 return;
             }
 
-            Node current = head;
+            SinglyLinkedListNode current = head;
             while (current.Next.Next != null)
             {
                 current = current.Next;
@@ -158,7 +158,7 @@ namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
 
         public int Search(int data)
         {
-            Node current = head;
+            SinglyLinkedListNode current = head;
             while (current != null)
             {
                 if (current.Data == data)
@@ -173,7 +173,7 @@ namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
         public override string ToString()
         {
             string result = "";
-            Node current = head;
+            SinglyLinkedListNode current = head;
             while (current != null)
             {
                 result += current.Data + " -> ";
@@ -184,7 +184,7 @@ namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
 
         public bool Contains(int value)
         {
-            Node current = head;
+            SinglyLinkedListNode current = head;
             while (current != null)
             {
                 if (current.Data == value)
@@ -200,16 +200,16 @@ namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
         {
             if (head == null)
             {
-                head = new Node(value);
+                head = new SinglyLinkedListNode(value);
                 return;
             }
 
-            Node current = head;
+            SinglyLinkedListNode current = head;
             while (current.Next != null)
             {
                 current = current.Next;
             }
-            current.Next = new Node(value);
+            current.Next = new SinglyLinkedListNode(value);
         }
 
         public void Remove(int value)
@@ -222,8 +222,8 @@ namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
                 return;
             }
 
-            Node current = head;
-            Node prev = null;
+            SinglyLinkedListNode current = head;
+            SinglyLinkedListNode prev = null;
             while (current != null && current.Data != value)
             {
                 prev = current;
@@ -235,5 +235,7 @@ namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
                 prev.Next = current.Next;
             }
         }
+
+       
     }
 }

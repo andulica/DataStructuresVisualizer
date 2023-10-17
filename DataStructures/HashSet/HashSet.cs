@@ -59,7 +59,7 @@ namespace DataStructuresVisualizer.DataStructures.HashSet
 
             private void PrintBucket(SinglyLinkedList bucket)
             {
-                Node current = bucket.head;  // Assuming head is public or internal, or use a method to get the head
+                SinglyLinkedListNode current = bucket.head;  // Assuming head is public or internal, or use a method to get the head
 
                 while (current != null)
                 {

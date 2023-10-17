@@ -42,7 +42,7 @@ namespace DataStructuresVisualizer.DataStructures.Stack
 
         public void PrintStack()
         {
-            Node current = list.head;
+            SinglyLinkedListNode current = list.head;
             while (current != null)
             {
                 Console.WriteLine(current.Data);
