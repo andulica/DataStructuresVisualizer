@@ -2,7 +2,7 @@
 {
     public class BinarySearchTree
     {
-        public Node Root { get; private set; }
+        public TreeNode Root { get; private set; }
 
         public BinarySearchTree()
         {
@@ -18,11 +18,11 @@
             Root = InsertRecursive(Root, value);
         }
 
-        private Node InsertRecursive(Node node, int value)
+        private TreeNode InsertRecursive(TreeNode node, int value)
         {
             if (node == null)
             {
-                node = new Node(value);
+                node = new TreeNode(value);
                 return node;
             }
 
@@ -34,12 +34,12 @@
             return node;
         }
 
-        public Node Search(int value)
+        public TreeNode Search(int value)
         {
             return SearchRecursive(Root, value);
         }
 
-        private Node SearchRecursive(Node node, int value)
+        private TreeNode SearchRecursive(TreeNode node, int value)
         {
             if (node == null || node.Value == value)
                 return node;
@@ -50,9 +50,9 @@
             return SearchRecursive(node.Right, value);
         }
 
-        public Node SearchMin()
+        public TreeNode SearchMin()
         {
-            Node current = Root;
+            TreeNode current = Root;
             while (current.Left != null)
             {
                 current = current.Left;
@@ -60,9 +60,9 @@
             return current;
         }
 
-        public Node SearchMax()
+        public TreeNode SearchMax()
         {
-            Node current = Root;
+            TreeNode current = Root;
             while (current.Right != null)
             {
                 current = current.Right;
@@ -75,7 +75,7 @@
             Root = RemoveRecursive(Root, value);
         }
 
-        private Node RemoveRecursive(Node node, int value)
+        private TreeNode RemoveRecursive(TreeNode node, int value)
         {
             if (node == null) return null;
 
@@ -92,7 +92,7 @@
                     return node.Left;
 
                 // node with two children
-                Node temp = SearchMin(node.Right);
+                TreeNode temp = SearchMin(node.Right);
                 node.Value = temp.Value;
                 node.Right = RemoveRecursive(node.Right, temp.Value);
             }
@@ -100,9 +100,9 @@
             return node;
         }
 
-        private Node SearchMin(Node node)
+        private TreeNode SearchMin(TreeNode node)
         {
-            Node current = node;
+            TreeNode current = node;
             while (current.Left != null)
             {
                 current = current.Left;
@@ -110,7 +110,7 @@
             return current;
         }
 
-        public void Traverse(Node node)
+        public void Traverse(TreeNode node)
         {
             if (node != null)
             {
@@ -120,7 +120,7 @@
             }
         }
 
-        public void PreOrder(Node node)
+        public void PreOrder(TreeNode node)
         {
             if (node != null)
             {
@@ -130,7 +130,7 @@
             }
         }
 
-        public void PostOrder(Node node)
+        public void PostOrder(TreeNode node)
         {
             if (node != null)
             {
@@ -178,7 +178,7 @@
             PostOrder(Root, Console.WriteLine);
         }
 
-        private void Traverse(Node node, Action<int> action)
+        private void Traverse(TreeNode node, Action<int> action)
         {
             if (node != null)
             {
@@ -188,7 +188,7 @@
             }
         }
 
-        private void PreOrder(Node node, Action<int> action)
+        private void PreOrder(TreeNode node, Action<int> action)
         {
             if (node != null)
             {
@@ -198,7 +198,7 @@
             }
         }
 
-        private void PostOrder(Node node, Action<int> action)
+        private void PostOrder(TreeNode node, Action<int> action)
         {
             if (node != null)
             {
