@@ -1,6 +1,4 @@
-﻿using System;
-using DataStructuresVisualizer.DataStructures;
-using DataStructuresVisualizer.DataStructures.DoublyLinkedListFile;
+﻿using DataStructuresVisualizer.DataStructures.DoublyLinkedListFile;
 
 namespace DataStructuresVisualizer.DataStructures
 {

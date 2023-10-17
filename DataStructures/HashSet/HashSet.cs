@@ -1,6 +1,4 @@
-﻿
-
-using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
+﻿using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
 
 namespace DataStructuresVisualizer.DataStructures.HashSet
 {

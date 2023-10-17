@@ -1,5 +1,4 @@
-﻿
-namespace DataStructuresVisualizer.DataStructures.HashMap
+﻿namespace DataStructuresVisualizer.DataStructures.HashMap
 {
     internal class HashMap
     {
