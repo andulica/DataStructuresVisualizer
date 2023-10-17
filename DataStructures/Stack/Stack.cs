@@ -32,7 +32,7 @@ namespace DataStructuresVisualizer.DataStructures.Stack
 
         public int? Peek()
         {
-            return list.head?.Data;
+            return list.head?.data;
         }
 
         public void PrintStack()
@@ -40,7 +40,7 @@ namespace DataStructuresVisualizer.DataStructures.Stack
             SinglyLinkedListNode current = list.head;
             while (current != null)
             {
-                Console.WriteLine(current.Data);
+                Console.WriteLine(current.data);
                 current = current.Next;
             }
         }

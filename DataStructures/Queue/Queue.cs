@@ -1,4 +1,5 @@
 ﻿using DataStructuresVisualizer.DataStructures.DoublyLinkedListFile;
+using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
 
 namespace DataStructuresVisualizer.DataStructures
 {
@@ -35,20 +36,20 @@ namespace DataStructuresVisualizer.DataStructures
 
         public int? PeekFront()
         {
-            return list.Head?.Data;
+            return list.Head?.data;
         }
 
         public int? PeekBack()
         {
-            return list.Tail?.Data;
+            return list.Tail?.data;
         }
 
         public void PrintQueue()
         {
-            Node current = list.Head;
+            DoublyLinkedListNode current = list.Head;
             while (current != null)
             {
-                Console.WriteLine(current.Data);
+                Console.WriteLine(current.data);
                 current = current.Next;
             }
         }

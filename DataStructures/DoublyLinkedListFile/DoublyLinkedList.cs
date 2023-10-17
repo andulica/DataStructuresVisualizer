@@ -4,20 +4,20 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
 {
     public class DoublyLinkedList
     {
-        private Node head;
-        private Node tail;
+        private DoublyLinkedListNode head;
+        private DoublyLinkedListNode tail;
         private int count;
         public int Count => count;
-        public Node Head => head;
-        public Node Tail => tail;
+        public DoublyLinkedListNode Head => head;
+        public DoublyLinkedListNode Tail => tail;
 
         public DoublyLinkedList()
         {
-            Node current = null;
+            DoublyLinkedListNode current = null;
 
             for (int i = 0; i < 3; i++)  // Create 3 nodes
             {
-                Node newNode = new Node(Utilities.randomGenerator.Next(1, 100));
+                DoublyLinkedListNode newNode = new DoublyLinkedListNode(Utilities.randomGenerator.Next(1, 100));
 
                 if (head == null)
                 {
@@ -37,7 +37,7 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
 
         public void Append(int data)
         {
-            Node newNode = new Node(data);
+            DoublyLinkedListNode newNode = new DoublyLinkedListNode(data);
             if (tail == null)
             {
                 head = tail = newNode;
@@ -53,7 +53,7 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
 
         public void InsertAt(int data, int index)
         {
-            Node newNode = new Node(data);
+            DoublyLinkedListNode newNode = new DoublyLinkedListNode(data);
 
             if (index == 0)
             {
@@ -61,7 +61,7 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
                 return;
             }
 
-            Node current = head;
+            DoublyLinkedListNode current = head;
             int currentIndex = 0;
 
             while (current != null)
@@ -95,7 +95,7 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
 
         public void Prepend(int data)
         {
-            Node newNode = new Node(data);
+            DoublyLinkedListNode newNode = new DoublyLinkedListNode(data);
             if (head == null)
             {
                 head = tail = newNode;
@@ -112,10 +112,10 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
 
         public void Delete(int data)
         {
-            Node current = head;
+            DoublyLinkedListNode current = head;
             while (current != null)
             {
-                if (current.Data == data)
+                if (current.data == data)
                 {
                     if (current.Prev != null)
                     {
@@ -163,7 +163,7 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         {
             if (Head == null) throw new InvalidOperationException("The list is empty.");
 
-            int value = head.Data;
+            int value = head.data;
             head = head.Next;
             if (head == null)
             {
@@ -198,10 +198,10 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
 
         public bool Search(int data)
         {
-            Node current = head;
+            DoublyLinkedListNode current = head;
             while (current != null)
             {
-                if (current.Data == data) return true;
+                if (current.data == data) return true;
                 current = current.Next;
             }
             return false;
@@ -210,10 +210,10 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         public override string ToString()
         {
             string result = "";
-            Node current = head;
+            DoublyLinkedListNode current = head;
             while (current != null)
             {
-                result += current.Data + " <-> ";
+                result += current.data + " <-> ";
                 current = current.Next;
             }
             return result + "null";

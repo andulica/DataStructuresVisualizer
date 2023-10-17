@@ -61,7 +61,7 @@ namespace DataStructuresVisualizer.DataStructures.HashSet
 
                 while (current != null)
                 {
-                    Console.Write($"{current.Data} -> ");
+                    Console.Write($"{current.data} -> ");
                     current = current.Next;
                 }
                 Console.WriteLine("null");

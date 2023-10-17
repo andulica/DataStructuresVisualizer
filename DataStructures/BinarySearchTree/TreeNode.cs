@@ -1,14 +1,15 @@
 ﻿namespace DataStructuresVisualizer.DataStructures.BinarySearchTree
 {
-    public class TreeNode
+    public class TreeNode : Node
     {
-        public int Value { get; set; }
         public TreeNode Left { get; set; }
         public TreeNode Right { get; set; }
+        public TreeNode Root { get; set; }
 
-        public TreeNode(int value)
+        public TreeNode(int data) : base(data)
         {
-            Value = value;
+            Right = null;
+            Left = null;
         }
     }
 }

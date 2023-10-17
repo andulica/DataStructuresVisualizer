@@ -91,14 +91,14 @@ namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
         {
             if (head == null) return;
 
-            if (head.Data == data)
+            if (head.data == data)
             {
                 head = head.Next;
                 return;
             }
 
             SinglyLinkedListNode current = head;
-            while (current.Next != null && current.Next.Data != data)
+            while (current.Next != null && current.Next.data != data)
             {
                 current = current.Next;
             }
@@ -116,7 +116,7 @@ namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
                 throw new InvalidOperationException("The list is empty.");
             }
 
-            int value = head.Data;
+            int value = head.data;
             head = head.Next;
             return value;
         }
@@ -156,7 +156,7 @@ namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
             SinglyLinkedListNode current = head;
             while (current != null)
             {
-                if (current.Data == data)
+                if (current.data == data)
                 {
                     return data;
                 }
@@ -171,7 +171,7 @@ namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
             SinglyLinkedListNode current = head;
             while (current != null)
             {
-                result += current.Data + " -> ";
+                result += current.data + " -> ";
                 current = current.Next;
             }
             return result + "null";
@@ -182,7 +182,7 @@ namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
             SinglyLinkedListNode current = head;
             while (current != null)
             {
-                if (current.Data == value)
+                if (current.data == value)
                 {
                     return true;
                 }
@@ -211,7 +211,7 @@ namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
         {
             if (head == null) return;
 
-            if (head.Data == value)
+            if (head.data == value)
             {
                 head = head.Next;
                 return;
@@ -219,7 +219,7 @@ namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
 
             SinglyLinkedListNode current = head;
             SinglyLinkedListNode prev = null;
-            while (current != null && current.Data != value)
+            while (current != null && current.data != value)
             {
                 prev = current;
                 current = current.Next;
