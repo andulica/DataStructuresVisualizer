@@ -9,7 +9,6 @@
 
   <ItemGroup>
     <Folder Include="DataStructures\Common\Interfaces\" />
-    <Folder Include="DataStructures\Common\Utilities\" />
   </ItemGroup>
 
 </Project>

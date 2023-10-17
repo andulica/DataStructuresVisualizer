@@ -1,4 +1,6 @@
-﻿namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
+﻿using DataStructuresVisualizer.DataStructures.Common.Utilities;
+
+namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
 {
     public class SinglyLinkedList
     {
@@ -6,12 +8,11 @@
 
         public SinglyLinkedList() //Constructor that builds a linked list with 3 Nodes
         {
-            Random random = new Random();
             SinglyLinkedListNode current = null;
 
             for (int i = 0; i < 3; i++)
             {
-                SinglyLinkedListNode newNode = new SinglyLinkedListNode(random.Next(1, 100));
+                SinglyLinkedListNode newNode = new SinglyLinkedListNode(Utilities.randomGenerator.Next(1, 100));
 
                 if (head == null)
                 {

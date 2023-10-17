@@ -1,4 +1,6 @@
-﻿namespace DataStructuresVisualizer.DataStructures.BinarySearchTree
+﻿using DataStructuresVisualizer.DataStructures.Common.Utilities;
+
+namespace DataStructuresVisualizer.DataStructures.BinarySearchTree
 {
     public class BinarySearchTree
     {
@@ -6,10 +8,9 @@
 
         public BinarySearchTree()
         {
-            Random random = new Random();
             for (int i = 0; i < 10; i++)
             {
-                Insert(random.Next(1, 100));
+                Insert(Utilities.randomGenerator.Next(1, 100));
             }
         }
 

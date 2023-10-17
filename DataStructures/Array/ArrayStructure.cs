@@ -1,4 +1,6 @@
-﻿namespace DataStructuresVisualizer.DataStructures.Array
+﻿using DataStructuresVisualizer.DataStructures.Common.Utilities;
+
+namespace DataStructuresVisualizer.DataStructures.Array
 {
     internal class ArrayStructure
     {
@@ -16,10 +18,9 @@
 
         public ArrayStructure() : this(Constants.DEFAULT_ARRAY_CAPACITY)  // Call the existing constructor with a capacity of 3
         {
-            Random random = new Random();
             for (int i = 0; i < Constants.DEFAULT_ARRAY_CAPACITY; i++)
             {
-                this.Add(random.Next(1, 100));
+                this.Add(Utilities.randomGenerator.Next(1, 100));
             }
         }
 

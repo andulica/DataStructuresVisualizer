@@ -1,4 +1,6 @@
-﻿namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
+﻿using DataStructuresVisualizer.DataStructures.Common.Utilities;
+
+namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
 {
     public class DoublyLinkedList
     {
@@ -11,12 +13,11 @@
 
         public DoublyLinkedList()
         {
-            Random random = new Random();
             Node current = null;
 
             for (int i = 0; i < 3; i++)  // Create 3 nodes
             {
-                Node newNode = new Node(random.Next(1, 100));
+                Node newNode = new Node(Utilities.randomGenerator.Next(1, 100));
 
                 if (head == null)
                 {
