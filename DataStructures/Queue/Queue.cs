@@ -1,5 +1,4 @@
 ﻿using DataStructuresVisualizer.DataStructures.DoublyLinkedListFile;
-using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
 
 namespace DataStructuresVisualizer.DataStructures
 {

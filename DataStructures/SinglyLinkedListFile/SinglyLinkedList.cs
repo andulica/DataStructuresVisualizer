@@ -1,10 +1,13 @@
 ﻿using DataStructuresVisualizer.DataStructures.Common.Utilities;
+using DataStructuresVisualizer.DataStructures.HashMap;
+using System.Collections;
 
 namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
 {
     public class SinglyLinkedList
     {
         public SinglyLinkedListNode head { get; set; }
+
 
         public SinglyLinkedList() //Constructor that builds a linked list with 3 Nodes
         {
@@ -27,7 +30,7 @@ namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
             }
         }
 
-            public void Append(int data)
+        public void Append(int data)
         {
             SinglyLinkedListNode newNode = new SinglyLinkedListNode(data);
 
@@ -230,7 +233,5 @@ namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
                 prev.Next = current.Next;
             }
         }
-
-       
     }
 }

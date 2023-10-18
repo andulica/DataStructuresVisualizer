@@ -1,4 +1,6 @@
-﻿namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
+﻿using DataStructuresVisualizer.DataStructures.HashMap;
+
+namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
 {
     public class SinglyLinkedListNode : Node
     {
