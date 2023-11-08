@@ -1,58 +1,55 @@
-﻿using DataStructuresVisualizer.DataStructures.DoublyLinkedListFile;
+﻿using System;
+using System.Collections.Generic;
 
-namespace DataStructuresVisualizer.DataStructures
+public class Queue<T>
 {
-    public class Queue
+    private LinkedList<T> list = new LinkedList<T>();
+
+    // Adds an item to the end of the queue
+    public void Enqueue(T value)
     {
-        private DoublyLinkedList list;
-        public int Count => list.Count;
+        list.AddLast(value);
+    }
 
-        public Queue()
+    // Removes and returns the item at the front of the queue
+    public T Dequeue()
+    {
+        if (list.Count == 0)
         {
-            list = new DoublyLinkedList();
+            throw new InvalidOperationException("The queue is empty.");
         }
 
-        public void Enqueue(int value)
+        T value = list.First.Value;
+        list.RemoveFirst();
+        return value;
+    }
+
+    // Returns the item at the front of the queue without removing it
+    public T Peek()
+    {
+        if (list.Count == 0)
         {
-            list.Append(value);
+            throw new InvalidOperationException("The queue is empty.");
         }
 
-        public int? Dequeue(int k)
-        {
-            if (k <= 0 || k > list.Count)
-            {
-                throw new ArgumentOutOfRangeException("k", "k should be a positive integer and less than or equal to the count of elements in the queue.");
-            }
+        return list.First.Value;
+    }
 
-            int? dequeuedValue = null;
-            for (int i = 0; i < k; i++)
-            {
-                dequeuedValue = list.DeleteHeadForQueue();
-            }
+    // Checks if the queue is empty
+    public bool IsEmpty()
+    {
+        return list.Count == 0;
+    }
 
-            return dequeuedValue;
-        }
+    // Returns the number of items in the queue
+    public int Size()
+    {
+        return list.Count;
+    }
 
-        public int? PeekFront()
-        {
-            return list.Head?.data;
-        }
-
-        public int? PeekBack()
-        {
-            return list.Tail?.data;
-        }
-
-        public void PrintQueue()
-        {
-            DoublyLinkedListNode current = list.Head;
-            while (current != null)
-            {
-                Console.WriteLine(current.data);
-                current = current.Next;
-            }
-        }
+    // Clears the queue
+    public void Clear()
+    {
+        list.Clear();
     }
 }
-
-

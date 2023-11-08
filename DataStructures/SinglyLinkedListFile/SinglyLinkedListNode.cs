@@ -1,12 +1,10 @@
-﻿using DataStructuresVisualizer.DataStructures.HashMap;
-
-namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
+﻿namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
 {
-    public class SinglyLinkedListNode : Node
+    public class SinglyLinkedListNode<T> : Node<T>
     {
-        public SinglyLinkedListNode Next { get; set; }
+        public SinglyLinkedListNode <T> Next { get; set; }
 
-        public SinglyLinkedListNode(int data) : base(data)
+        public SinglyLinkedListNode(T data) : base(data)
         {
             Next = null;
         }

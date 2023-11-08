@@ -1,13 +1,13 @@
 ﻿namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
 {
-    public class DoublyLinkedListNode : Node
+    public class DoublyLinkedListNode<T> : Node<T>
     {
-        public DoublyLinkedListNode Next { get; set; }
-        public DoublyLinkedListNode Prev { get; set; }
+        public DoublyLinkedListNode<T> Next { get; set; }
+        public DoublyLinkedListNode<T> Prev { get; set; }
 
 
 
-        public DoublyLinkedListNode(int data) : base(data)
+        public DoublyLinkedListNode(T data) : base(data)
         {
             Next = null;
             Prev = null;

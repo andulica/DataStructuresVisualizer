@@ -2,58 +2,63 @@
 
 namespace DataStructuresVisualizer.DataStructures.BinarySearchTree
 {
-    public class BinarySearchTree
+    public class BinarySearchTree<T>
     {
-        public TreeNode Root { get; private set; }
+        public TreeNode<T> Root { get; private set; }
 
-        public BinarySearchTree()
-        {
-            for (int i = 0; i < 10; i++)
-            {
-                Insert(Utilities.randomGenerator.Next(1, 100));
-            }
-        }
-
-        public void Insert(int value)
+        public void Insert(T value)
         {
             Root = InsertRecursive(Root, value);
         }
 
-        private TreeNode InsertRecursive(TreeNode node, int value)
+        private TreeNode<T> InsertRecursive(TreeNode<T> node, T value)
         {
+
+            var comparer = Comparer<T>.Default;
+
             if (node == null)
             {
-                node = new TreeNode(value);
+                node = new TreeNode<T>(value);
                 return node;
             }
 
-            if (value < node.data)
+            if (comparer.Compare(value, node.data) < 0)
+            {
                 node.Left = InsertRecursive(node.Left, value);
-            else if (value > node.data)
+            }
+            else if (comparer.Compare(value,node.data) > 0)
+            { 
                 node.Right = InsertRecursive(node.Right, value);
+            }
 
             return node;
         }
 
-        public TreeNode Search(int value)
+        public TreeNode<T> Search(T value)
         {
             return SearchRecursive(Root, value);
         }
 
-        private TreeNode SearchRecursive(TreeNode node, int value)
+        private TreeNode<T> SearchRecursive(TreeNode<T> node, T value)
         {
-            if (node == null || node.data == value)
-                return node;
+            var comparer = Comparer<T>.Default;
 
-            if (value < node.data)
+            if (node == null || EqualityComparer<T>.Default.Equals(node.data, value))
+            {
+                return node;
+            }
+
+            if (comparer.Compare(value,node.data) < 0)
+            {
                 return SearchRecursive(node.Left, value);
+            }
 
             return SearchRecursive(node.Right, value);
         }
 
-        public TreeNode SearchMin()
+        public TreeNode<T> SearchMin()
         {
-            TreeNode current = Root;
+            TreeNode<T> current = Root;
             while (current.Left != null)
             {
                 current = current.Left;
@@ -61,9 +66,9 @@ namespace DataStructuresVisualizer.DataStructures.BinarySearchTree
             return current;
         }
 
-        public TreeNode SearchMax()
+        public TreeNode<T> SearchMax()
         {
-            TreeNode current = Root;
+            TreeNode<T> current = Root;
             while (current.Right != null)
             {
                 current = current.Right;
@@ -71,19 +76,25 @@ namespace DataStructuresVisualizer.DataStructures.BinarySearchTree
             return current;
         }
 
-        public void Remove(int value)
+        public void Remove(T value)
         {
             Root = RemoveRecursive(Root, value);
         }
 
-        private TreeNode RemoveRecursive(TreeNode node, int value)
+        private TreeNode<T> RemoveRecursive(TreeNode<T> node, T value)
         {
+            var comparer = Comparer<T>.Default;
+
             if (node == null) return null;
 
-            if (value < node.data)
+            if (comparer.Compare(value, node.data) < 0)
+            {
                 node.Left = RemoveRecursive(node.Left, value);
-            else if (value > node.data)
+            }
+            else if (comparer.Compare(value, node.data) > 0)
+            {
                 node.Right = RemoveRecursive(node.Right, value);
+            }
             else
             {
                 // node with only one child or no child
@@ -93,7 +104,7 @@ namespace DataStructuresVisualizer.DataStructures.BinarySearchTree
                     return node.Left;
 
                 // node with two children
-                TreeNode temp = SearchMin(node.Right);
+                TreeNode <T> temp = SearchMin(node.Right);
                 node.data = temp.data;
                 node.Right = RemoveRecursive(node.Right, temp.data);
             }
@@ -101,9 +112,9 @@ namespace DataStructuresVisualizer.DataStructures.BinarySearchTree
             return node;
         }
 
-        private TreeNode SearchMin(TreeNode node)
+        private TreeNode<T> SearchMin(TreeNode<T> node)
         {
-            TreeNode current = node;
+            TreeNode<T> current = node;
             while (current.Left != null)
             {
                 current = current.Left;
@@ -111,7 +122,7 @@ namespace DataStructuresVisualizer.DataStructures.BinarySearchTree
             return current;
         }
 
-        public void Traverse(TreeNode node)
+        public void Traverse(TreeNode<T> node)
         {
             if (node != null)
             {
@@ -121,7 +132,7 @@ namespace DataStructuresVisualizer.DataStructures.BinarySearchTree
             }
         }
 
-        public void PreOrder(TreeNode node)
+        public void PreOrder(TreeNode<T> node)
         {
             if (node != null)
             {
@@ -131,7 +142,7 @@ namespace DataStructuresVisualizer.DataStructures.BinarySearchTree
             }
         }
 
-        public void PostOrder(TreeNode node)
+        public void PostOrder(TreeNode<T> node)
         {
             if (node != null)
             {
@@ -143,7 +154,7 @@ namespace DataStructuresVisualizer.DataStructures.BinarySearchTree
 
         // code testing methods
 
-        public void PrintSearch(int value)
+        public void PrintSearch(T value)
         {
             var node = Search(value);
             Console.WriteLine(node != null ? $"Node with value {value} found." : $"Node with value {value} not found.");
@@ -164,22 +175,23 @@ namespace DataStructuresVisualizer.DataStructures.BinarySearchTree
         public void PrintTraverse()
         {
             Console.WriteLine("In-Order Traversal:");
-            Traverse(Root, Console.WriteLine);
+            Traverse(Root, data => Console.WriteLine(data));
         }
 
         public void PrintPreOrder()
         {
             Console.WriteLine("Pre-Order Traversal:");
-            PreOrder(Root, Console.WriteLine);
+            PreOrder(Root,data => Console.WriteLine(data));
         }
+
 
         public void PrintPostOrder()
         {
             Console.WriteLine("Post-Order Traversal:");
-            PostOrder(Root, Console.WriteLine);
+            PostOrder(Root,data => Console.WriteLine(data));
         }
 
-        private void Traverse(TreeNode node, Action<int> action)
+        private void Traverse(TreeNode<T> node, Action<T> action)
         {
             if (node != null)
             {
@@ -189,7 +201,7 @@ namespace DataStructuresVisualizer.DataStructures.BinarySearchTree
             }
         }
 
-        private void PreOrder(TreeNode node, Action<int> action)
+        private void PreOrder(TreeNode<T> node, Action<T> action)
         {
             if (node != null)
             {
@@ -199,7 +211,7 @@ namespace DataStructuresVisualizer.DataStructures.BinarySearchTree
             }
         }
 
-        private void PostOrder(TreeNode node, Action<int> action)
+        private void PostOrder(TreeNode<T> node, Action<T> action)
         {
             if (node != null)
             {

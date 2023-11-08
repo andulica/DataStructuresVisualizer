@@ -4,69 +4,54 @@ namespace DataStructuresVisualizer.DataStructures.HashSet
 {
     namespace DataStructuresVisualizer.DataStructures
     {
-        public class HashSet
+        using System;
+        using System.Collections.Generic;
+
+        public class SimpleHashSet<T>
         {
-            private SinglyLinkedList[] data;
-            private int size;
-            private SinglyLinkedList[] buckets;
+            private LinkedList<T>[] buckets;
+            private int capacity;
 
-            public HashSet()
+            public SimpleHashSet(int capacity)
             {
-                data = new SinglyLinkedList[10];
-                for (int i = 0; i < data.Length; i++)
+                this.capacity = capacity;
+                buckets = new LinkedList<T>[capacity];
+                for (int i = 0; i < capacity; i++)
                 {
-                    data[i] = new SinglyLinkedList();
+                    buckets[i] = new LinkedList<T>();
                 }
             }
 
-            public bool Search(int value)
+            private int GetBucketIndex(T item)
             {
-                int hash = GetHash(value);
-                return data[hash].Search(value) != -1;  // Assumes Search returns -1 if the value is not found
+                int hash = item.GetHashCode();
+                int index = hash % capacity;
+                return Math.Abs(index);
             }
 
-            public void Insert(int value)
+            public void Add(T item)
             {
-                int hash = GetHash(value);
-                if (data[hash].Search(value) == -1)  // Check if the value is not already present
+                int bucketIndex = GetBucketIndex(item);
+                LinkedList<T> bucket = buckets[bucketIndex];
+                if (!bucket.Contains(item))
                 {
-                    data[hash].Append(value);  // Assumes Append adds value at the end
+                    bucket.AddLast(item);
                 }
             }
 
-            public void Delete(int value)
+            public bool Remove(T item)
             {
-                int hash = GetHash(value);
-                data[hash].Delete(value);  // Assumes Delete removes the value if present
+                int bucketIndex = GetBucketIndex(item);
+                return buckets[bucketIndex].Remove(item);
             }
 
-            private int GetHash(int value)
+            public bool Contains(T item)
             {
-                return value % data.Length;
-            }
-
-            public void Print()
-            {
-                for (int i = 0; i < size; i++)
-                {
-                    SinglyLinkedList bucket = buckets[i];
-                    Console.Write($"Bucket {i}: ");
-                    PrintBucket(bucket);
-                }
-            }
-
-            private void PrintBucket(SinglyLinkedList bucket)
-            {
-                SinglyLinkedListNode current = bucket.head;  // Assuming head is public or internal, or use a method to get the head
-
-                while (current != null)
-                {
-                    Console.Write($"{current.data} -> ");
-                    current = current.Next;
-                }
-                Console.WriteLine("null");
+                int bucketIndex = GetBucketIndex(item);
+                return buckets[bucketIndex].Contains(item);
             }
         }
+
     }
 
 }

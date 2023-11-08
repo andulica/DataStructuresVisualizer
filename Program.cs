@@ -1,5 +1,6 @@
-﻿using DataStructuresVisualizer.DataStructures.HashMap;
-using DataStructuresVisualizer.Test;
+﻿using DataStructuresVisualizer.DataStructures.BinarySearchTree;
+using DataStructuresVisualizer.DataStructures.HashMap;
+using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
 
 namespace DataStructuresVisualizer
 {
@@ -9,11 +10,15 @@ namespace DataStructuresVisualizer
         static void Main(string[] args)
         {
 
-            HashMap map = new HashMap(2);
+            BinarySearchTree<int> tree = new BinarySearchTree<int>();
 
-            map.Add(2, 3);
+            tree.Insert(2);
+            tree.Insert(5);
+            tree.Insert(1);
 
-            Console.WriteLine(map.Get(2));
+            tree.PrintTraverse();
+            tree.PrintSearchMax();
+
 
         //    // Initialize grid with nulls
         //    GridElement[,] grid = new GridElement[20, 20];

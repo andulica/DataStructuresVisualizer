@@ -2,47 +2,35 @@
 
 namespace DataStructuresVisualizer.DataStructures.Stack
 {
-    public class Stack
+    public class Stack <T>
     {
-        private SinglyLinkedList list;
+        private LinkedList<T> list = new LinkedList<T>();
 
-        public Stack()
+        public void Push(T value)
         {
-            list = new SinglyLinkedList();
+            list.AddFirst(value);
         }
 
-        public void Push(int value)
+        public T Pop()
         {
-            list.Prepend(value);
-        }
-
-        public int? Pop(int k)
-        {
-            int? lastPopped = null;
-            for (int i = 0; i < k; i++)
+            if (list.Count == 0)
             {
-                lastPopped = list.DeleteHeadForStack();
-                if (lastPopped == null)
-                {
-                    throw new InvalidOperationException("Stack is empty.");
-                }
+                throw new InvalidOperationException("The stack is empty.");
             }
-            return lastPopped;
+
+            T value = list.First.Value;
+            list.RemoveFirst();
+            return value;
         }
 
-        public int? Peek()
+        public T Peek()
         {
-            return list.head?.data;
-        }
-
-        public void PrintStack()
-        {
-            SinglyLinkedListNode current = list.head;
-            while (current != null)
+            if (list.Count == 0)
             {
-                Console.WriteLine(current.data);
-                current = current.Next;
+                throw new InvalidOperationException("The stack is empty.");
             }
+
+            return list.First.Value;
         }
     }
 }
