@@ -22,11 +22,11 @@ namespace DataStructuresVisualizer.DataStructures.BinarySearchTree
                 return node;
             }
 
-            if (comparer.Compare(value, node.data) < 0)
+            if (comparer.Compare(value, node.Data) < 0)
             {
                 node.Left = InsertRecursive(node.Left, value);
             }
-            else if (comparer.Compare(value,node.data) > 0)
+            else if (comparer.Compare(value,node.Data) > 0)
             { 
                 node.Right = InsertRecursive(node.Right, value);
             }
@@ -43,12 +43,12 @@ namespace DataStructuresVisualizer.DataStructures.BinarySearchTree
         {
             var comparer = Comparer<T>.Default;
 
-            if (node == null || EqualityComparer<T>.Default.Equals(node.data, value))
+            if (node == null || EqualityComparer<T>.Default.Equals(node.Data, value))
             {
                 return node;
             }
 
-            if (comparer.Compare(value,node.data) < 0)
+            if (comparer.Compare(value,node.Data) < 0)
             {
                 return SearchRecursive(node.Left, value);
             }
@@ -87,11 +87,11 @@ namespace DataStructuresVisualizer.DataStructures.BinarySearchTree
 
             if (node == null) return null;
 
-            if (comparer.Compare(value, node.data) < 0)
+            if (comparer.Compare(value, node.Data) < 0)
             {
                 node.Left = RemoveRecursive(node.Left, value);
             }
-            else if (comparer.Compare(value, node.data) > 0)
+            else if (comparer.Compare(value, node.Data) > 0)
             {
                 node.Right = RemoveRecursive(node.Right, value);
             }
@@ -105,8 +105,8 @@ namespace DataStructuresVisualizer.DataStructures.BinarySearchTree
 
                 // node with two children
                 TreeNode <T> temp = SearchMin(node.Right);
-                node.data = temp.data;
-                node.Right = RemoveRecursive(node.Right, temp.data);
+                node.Data = temp.Data;
+                node.Right = RemoveRecursive(node.Right, temp.Data);
             }
 
             return node;
@@ -127,7 +127,7 @@ namespace DataStructuresVisualizer.DataStructures.BinarySearchTree
             if (node != null)
             {
                 Traverse(node.Left);
-                Console.WriteLine(node.data);
+                Console.WriteLine(node.Data);
                 Traverse(node.Right);
             }
         }
@@ -136,7 +136,7 @@ namespace DataStructuresVisualizer.DataStructures.BinarySearchTree
         {
             if (node != null)
             {
-                Console.WriteLine(node.data);
+                Console.WriteLine(node.Data);
                 PreOrder(node.Left);
                 PreOrder(node.Right);
             }
@@ -148,7 +148,7 @@ namespace DataStructuresVisualizer.DataStructures.BinarySearchTree
             {
                 PostOrder(node.Left);
                 PostOrder(node.Right);
-                Console.WriteLine(node.data);
+                Console.WriteLine(node.Data);
             }
         }
 
@@ -163,13 +163,13 @@ namespace DataStructuresVisualizer.DataStructures.BinarySearchTree
         public void PrintSearchMin()
         {
             var node = SearchMin();
-            Console.WriteLine(node != null ? $"Minimum value: {node.data}" : "Tree is empty.");
+            Console.WriteLine(node != null ? $"Minimum value: {node.Data}" : "Tree is empty.");
         }
 
         public void PrintSearchMax()
         {
             var node = SearchMax();
-            Console.WriteLine(node != null ? $"Maximum value: {node.data}" : "Tree is empty.");
+            Console.WriteLine(node != null ? $"Maximum value: {node.Data}" : "Tree is empty.");
         }
 
         public void PrintTraverse()
@@ -196,7 +196,7 @@ namespace DataStructuresVisualizer.DataStructures.BinarySearchTree
             if (node != null)
             {
                 Traverse(node.Left, action);
-                action(node.data);
+                action(node.Data);
                 Traverse(node.Right, action);
             }
         }
@@ -205,7 +205,7 @@ namespace DataStructuresVisualizer.DataStructures.BinarySearchTree
         {
             if (node != null)
             {
-                action(node.data);
+                action(node.Data);
                 PreOrder(node.Left, action);
                 PreOrder(node.Right, action);
             }
@@ -217,7 +217,7 @@ namespace DataStructuresVisualizer.DataStructures.BinarySearchTree
             {
                 PostOrder(node.Left, action);
                 PostOrder(node.Right, action);
-                action(node.data);
+                action(node.Data);
             }
         }
     }

@@ -1,11 +1,13 @@
 ﻿namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
 {
-    public class SinglyLinkedListNode<T> : Node<T>
+    public class SinglyLinkedListNode<T>
     {
+        public T Data { get; set; }
         public SinglyLinkedListNode <T> Next { get; set; }
 
-        public SinglyLinkedListNode(T data) : base(data)
+        public SinglyLinkedListNode(T data)
         {
+            this.Data = data;
             Next = null;
         }
     }

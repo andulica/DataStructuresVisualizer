@@ -93,7 +93,7 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
             DoublyLinkedListNode<T> current = head;
             while (current != null)
             {
-                if (EqualityComparer<T>.Default.Equals(current.data,data))
+                if (EqualityComparer<T>.Default.Equals(current.Data,data))
                 {
                     if (current.Prev != null)
                     {
@@ -141,7 +141,7 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         {
             if (Head == null) throw new InvalidOperationException("The list is empty.");
 
-            T value = head.data;
+            T value = head.Data;
             head = head.Next;
             if (head == null)
             {
@@ -179,7 +179,7 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
             DoublyLinkedListNode <T> current = head;
             while (current != null)
             {
-                if (EqualityComparer<T>.Default.Equals(current.data,data)) return true;
+                if (EqualityComparer<T>.Default.Equals(current.Data,data)) return true;
                 current = current.Next;
             }
             return false;
@@ -191,7 +191,7 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
             DoublyLinkedListNode<T> current = head;
             while (current != null)
             {
-                result += current.data + " <-> ";
+                result += current.Data + " <-> ";
                 current = current.Next;
             }
             return result + "null";

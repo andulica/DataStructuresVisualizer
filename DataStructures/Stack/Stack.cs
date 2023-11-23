@@ -1,6 +1,4 @@
-﻿using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
-
-namespace DataStructuresVisualizer.DataStructures.Stack
+﻿namespace DataStructuresVisualizer.DataStructures.Stack
 {
     public class Stack <T>
     {

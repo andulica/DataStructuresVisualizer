@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-public class Queue<T>
+﻿public class Queue<T>
 {
     private LinkedList<T> list = new LinkedList<T>();
 

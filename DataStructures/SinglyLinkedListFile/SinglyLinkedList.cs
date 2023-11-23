@@ -72,14 +72,14 @@ namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
         {
             if (head == null) return;
 
-            if (!EqualityComparer<T>.Default.Equals(head.data, data))
+            if (!EqualityComparer<T>.Default.Equals(head.Data, data))
             {
                 head = head.Next;
                 return;
             }
 
             SinglyLinkedListNode<T> current = head;
-            while (current.Next != null && !EqualityComparer<T>.Default.Equals(current.Next.data, data))
+            while (current.Next != null && !EqualityComparer<T>.Default.Equals(current.Next.Data, data))
             {
                 current = current.Next;
             }
@@ -97,7 +97,7 @@ namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
                 throw new InvalidOperationException("The list is empty.");
             }
 
-            T value = head.data;
+            T value = head.Data;
             head = head.Next;
             return value;
         }
@@ -137,7 +137,7 @@ namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
             SinglyLinkedListNode<T> current = head;
             while (current != null)
             {
-                if (EqualityComparer<T>.Default.Equals(current.data, data))
+                if (EqualityComparer<T>.Default.Equals(current.Data, data))
                 {
                     return data;
                 }
@@ -154,7 +154,7 @@ namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
             SinglyLinkedListNode<T> current = head;
             while (current != null)
             {
-                result += current.data + " -> ";
+                result += current.Data + " -> ";
                 current = current.Next;
             }
             return result + "null";
@@ -165,7 +165,7 @@ namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
             SinglyLinkedListNode<T> current = head;
             while (current != null)
             {
-                if (EqualityComparer<T>.Default.Equals(current.data,value))
+                if (EqualityComparer<T>.Default.Equals(current.Data,value))
                 {
                     return true;
                 }
@@ -194,7 +194,7 @@ namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
         {
             if (head == null) return;
 
-            if (EqualityComparer<T>.Default.Equals(head.data,value))
+            if (EqualityComparer<T>.Default.Equals(head.Data,value))
             {
                 head = head.Next;
                 return;
@@ -202,7 +202,7 @@ namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
 
             SinglyLinkedListNode<T> current = head;
             SinglyLinkedListNode<T> prev = null;
-            while (current != null && !EqualityComparer<T>.Default.Equals(head.data, value))
+            while (current != null && !EqualityComparer<T>.Default.Equals(head.Data, value))
             {
                 prev = current;
                 current = current.Next;
