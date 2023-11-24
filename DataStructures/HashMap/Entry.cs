@@ -1,14 +1,15 @@
 ﻿namespace DataStructuresVisualizer.DataStructures.HashMap
 {
-    public class Entry
+    public class Entry<TKey, TValue>
     {
-        public int Key { get; set; }
-        public int Value { get; set; }
+        public TKey Key { get; set; }
+        public TValue Value { get; set; }
 
-        public Entry(int key, int value)
+        public Entry(TKey key, TValue value)
         {
             Key = key;
             Value = value;
         }
     }
+
 }

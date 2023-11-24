@@ -1,217 +1,139 @@
-﻿using DataStructuresVisualizer.DataStructures.Common.Utilities;
+﻿using DataStructuresVisualizer.DataStructures.HashMap;
+using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
+using System.Collections;
+using System.Collections.Generic;
+using System.Text;
 
-namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile
+public class SinglyLinkedList<TKey, TValue> : IEnumerable<Entry<TKey, TValue>>
 {
-    public class SinglyLinkedList<T>
+    public SinglyLinkedListNode<TKey, TValue> Head { get; private set; }
+
+    public void Append(TKey key, TValue value)
     {
-        public SinglyLinkedListNode<T> head { get; set; }
+        Entry<TKey, TValue> newEntry = new Entry<TKey, TValue>(key, value);
+        SinglyLinkedListNode<TKey, TValue> newNode = new SinglyLinkedListNode<TKey, TValue>(newEntry);
 
-
-
-        public void Append(T data)
+        if (Head == null)
         {
-            SinglyLinkedListNode<T> newNode = new SinglyLinkedListNode<T>(data);
-
-            if (head == null)
-            {
-                head = newNode;
-                return;
-            }
-
-            SinglyLinkedListNode<T> current = head;
-            while (current.Next != null)
-            {
-                current = current.Next;
-            }
-
-            current.Next = newNode;
+            Head = newNode;
+            return;
         }
 
-        public void Prepend(T data)
+        SinglyLinkedListNode<TKey, TValue> current = Head;
+        while (current.Next != null)
         {
-            SinglyLinkedListNode<T> newNode = new SinglyLinkedListNode<T>(data);
-
-            if (head == null)
-            {
-                head = newNode;
-            }
-            else
-            {
-                newNode.Next = head;
-                head = newNode;
-            }
-        }
-        public void InsertAt(int index, T data)
-        {
-            SinglyLinkedListNode<T> newNode = new SinglyLinkedListNode<T>(data);
-            if (index == 0)
-            {
-                newNode.Next = head;
-                head = newNode;
-                return;
-            }
-
-            SinglyLinkedListNode<T> current = head;
-            int currentIndex = 0;
-            while (current != null && currentIndex < index - 1)
-            {
-                current = current.Next;
-                currentIndex++;
-            }
-
-            if (current == null)
-            {
-                throw new IndexOutOfRangeException("Index out of range for the linked list.");
-            }
-
-            newNode.Next = current.Next;
-            current.Next = newNode;
+            current = current.Next;
         }
 
-        public void Delete(T data)
+        current.Next = newNode;
+    }
+
+    public void Prepend(TKey key, TValue value)
+    {
+        Entry<TKey, TValue> newEntry = new Entry<TKey, TValue>(key, value);
+        SinglyLinkedListNode<TKey, TValue> newNode = new SinglyLinkedListNode<TKey, TValue>(newEntry)
         {
-            if (head == null) return;
+            Next = Head
+        };
+        Head = newNode;
+    }
 
-            if (!EqualityComparer<T>.Default.Equals(head.Data, data))
-            {
-                head = head.Next;
-                return;
-            }
+    public void InsertAt(int index, TKey key, TValue value)
+    {
+        Entry<TKey, TValue> newEntry = new Entry<TKey, TValue>(key, value);
+        SinglyLinkedListNode<TKey, TValue> newNode = new SinglyLinkedListNode<TKey, TValue>(newEntry);
 
-            SinglyLinkedListNode<T> current = head;
-            while (current.Next != null && !EqualityComparer<T>.Default.Equals(current.Next.Data, data))
-            {
-                current = current.Next;
-            }
-
-            if (current.Next != null)
-            {
-                current.Next = current.Next.Next;
-            }
+        if (index == 0)
+        {
+            newNode.Next = Head;
+            Head = newNode;
+            return;
         }
 
-        public T DeleteHeadForStack()
+        SinglyLinkedListNode<TKey, TValue> current = Head;
+        for (int i = 0; current != null && i < index - 1; i++)
         {
-            if (head == null)
-            {
-                throw new InvalidOperationException("The list is empty.");
-            }
-
-            T value = head.Data;
-            head = head.Next;
-            return value;
+            current = current.Next;
         }
 
-        public void DeleteHead()
+        if (current == null)
         {
-            if (head == null)
-            {
-                throw new InvalidOperationException("List is empty.");
-            }
-            head = head.Next;
+            throw new IndexOutOfRangeException("Index out of range.");
         }
 
-        public void DeleteTail()
+        newNode.Next = current.Next;
+        current.Next = newNode;
+    }
+
+    public bool Remove(TKey key)
+    {
+        if (Head == null) return false;
+
+        if (EqualityComparer<TKey>.Default.Equals(Head.Data.Key, key))
         {
-            if (head == null)
-            {
-                throw new InvalidOperationException("List is empty.");
-            }
-
-            if (head.Next == null)
-            {
-                head = null;
-                return;
-            }
-
-            SinglyLinkedListNode<T> current = head;
-            while (current.Next.Next != null)
-            {
-                current = current.Next;
-            }
-            current.Next = null;
+            Head = Head.Next;
+            return true;
         }
 
-        public T Search(T data)
+        SinglyLinkedListNode<TKey, TValue> current = Head;
+        while (current.Next != null && !EqualityComparer<TKey>.Default.Equals(current.Next.Data.Key, key))
         {
-            SinglyLinkedListNode<T> current = head;
-            while (current != null)
-            {
-                if (EqualityComparer<T>.Default.Equals(current.Data, data))
-                {
-                    return data;
-                }
-                current = current.Next;
-            }
-
-            // You might need a different way to handle not-found cases.
-            throw new KeyNotFoundException("Value not found in the list.");
+            current = current.Next;
         }
 
-        public override string ToString()
+        if (current.Next == null) return false;
+
+        current.Next = current.Next.Next;
+        return true;
+    }
+
+    public Entry<TKey, TValue> Search(TKey key)
+    {
+        SinglyLinkedListNode<TKey, TValue> current = Head;
+        while (current != null)
         {
-            string result = "";
-            SinglyLinkedListNode<T> current = head;
-            while (current != null)
+            if (EqualityComparer<TKey>.Default.Equals(current.Data.Key, key))
             {
-                result += current.Data + " -> ";
-                current = current.Next;
+                return current.Data;
             }
-            return result + "null";
+
+            current = current.Next;
         }
 
-        public bool Contains(T value)
+        return null;
+    }
+
+    public bool Contains(TKey key)
+    {
+        return Search(key) != null;
+    }
+
+    public IEnumerator<Entry<TKey, TValue>> GetEnumerator()
+    {
+        SinglyLinkedListNode<TKey, TValue> current = Head;
+        while (current != null)
         {
-            SinglyLinkedListNode<T> current = head;
-            while (current != null)
-            {
-                if (EqualityComparer<T>.Default.Equals(current.Data,value))
-                {
-                    return true;
-                }
-                current = current.Next;
-            }
-            return false;
-        }
-
-        public void AddLast(T value)
-        {
-            if (head == null)
-            {
-                head = new SinglyLinkedListNode<T>(value);
-                return;
-            }
-
-            SinglyLinkedListNode<T> current = head;
-            while (current.Next != null)
-            {
-                current = current.Next;
-            }
-            current.Next = new SinglyLinkedListNode<T>(value);
-        }
-
-        public void Remove(T value)
-        {
-            if (head == null) return;
-
-            if (EqualityComparer<T>.Default.Equals(head.Data,value))
-            {
-                head = head.Next;
-                return;
-            }
-
-            SinglyLinkedListNode<T> current = head;
-            SinglyLinkedListNode<T> prev = null;
-            while (current != null && !EqualityComparer<T>.Default.Equals(head.Data, value))
-            {
-                prev = current;
-                current = current.Next;
-            }
-
-            if (current != null)
-            {
-                prev.Next = current.Next;
-            }
+            yield return current.Data;
+            current = current.Next;
         }
     }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
+
+    public override string ToString()
+    {
+        var result = new StringBuilder();
+        SinglyLinkedListNode<TKey, TValue> current = Head;
+        while (current != null)
+        {
+            result.Append($"[{current.Data.Key}, {current.Data.Value}] -> ");
+            current = current.Next;
+        }
+        result.Append("null");
+        return result.ToString();
+    }
 }
+

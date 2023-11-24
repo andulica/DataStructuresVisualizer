@@ -1,66 +1,62 @@
 ﻿using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
+using System.Collections.Generic;
 
 namespace DataStructuresVisualizer.DataStructures.HashMap
 {
-    public class HashMap
+    public class HashMap<TKey, TValue>
     {
-        private readonly EntrySinglyLinkedList[] _buckets;
+        private readonly SinglyLinkedList<TKey, TValue>[] _buckets;
 
         public HashMap(int size)
         {
-            _buckets = new EntrySinglyLinkedList[size];
+            _buckets = new SinglyLinkedList<TKey, TValue>[size];
             for (int i = 0; i < size; i++)
             {
-                _buckets[i] = new EntrySinglyLinkedList();
+                _buckets[i] = new SinglyLinkedList<TKey, TValue>();
             }
         }
 
-        private int Hash(int key)
+        private int Hash(TKey key)
         {
-            return Math.Abs(key) % _buckets.Length;
+            int hashCode = key.GetHashCode();
+            return Math.Abs(hashCode % _buckets.Length);
         }
 
-        public void Add(int key, int value)
+        public void Add(TKey key, TValue value)
         {
-            var entry = new Entry(key, value);
-            var bucket = _buckets[Hash(key)];
+            var entry = new Entry<TKey, TValue>(key, value);
+            var index = Hash(key);
+            var bucket = _buckets[index];
 
-            foreach (EntrySinglyLinkedListNode node in bucket)
+            foreach (var node in bucket)
             {
-                if (node.data.Key == key)
+                if (EqualityComparer<TKey>.Default.Equals(node.Key, key))
                 {
-                    node.data.Value = value;
+                    node.Value = value;
                     return;
                 }
             }
-            bucket.AppendEntry(entry);
+            bucket.Append(key, value);
         }
 
-        public int Get(int key)
+        public TValue Get(TKey key)
         {
             var bucket = _buckets[Hash(key)];
-            foreach (EntrySinglyLinkedListNode node in bucket)
+            foreach (var entry in bucket)
             {
-                if (node.data.Key == key)
+                if (EqualityComparer<TKey>.Default.Equals(entry.Key, key))
                 {
-                    return (node.data).Value;
+                    return entry.Value;
                 }
             }
             throw new KeyNotFoundException($"The key {key} was not found.");
         }
 
-        public bool Remove(int key)
+        public bool Remove(TKey key)
         {
             var bucket = _buckets[Hash(key)];
-            foreach (EntrySinglyLinkedListNode node in bucket)
-            {
-                if (node.data.Key == key)
-                {
-                    bucket.RemoveEntry(node.data.Key);
-                    return true;
-                }
-            }
-            return false;
+            return bucket.Remove(key);
         }
     }
 }
+

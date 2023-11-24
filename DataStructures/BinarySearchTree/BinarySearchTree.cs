@@ -1,6 +1,4 @@
-﻿using DataStructuresVisualizer.DataStructures.Common.Utilities;
-
-namespace DataStructuresVisualizer.DataStructures.BinarySearchTree
+﻿namespace DataStructuresVisualizer.DataStructures.BinarySearchTree
 {
     public class BinarySearchTree<T>
     {
