@@ -1,14 +1,13 @@
 ﻿namespace DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
-    using DataStructuresVisualizer.DataStructures.HashMap;
 
-public class SinglyLinkedListNode<TKey, TValue>
+public class SinglyLinkedListNode<T>
 {
-    public Entry<TKey, TValue> Data { get; set; }
-    public SinglyLinkedListNode<TKey, TValue> Next { get; set; }
+    public T _data;
+    public SinglyLinkedListNode<T> Next { get; set; }
 
-    public SinglyLinkedListNode(Entry<TKey, TValue> data)
+    public SinglyLinkedListNode(T data)
     {
-        Data = data;
+        _data = data;
         Next = null;
     }
 }

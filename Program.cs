@@ -19,12 +19,19 @@ namespace DataStructuresVisualizer
             tree.PrintTraverse();
             tree.PrintSearchMax();
 
-            SinglyLinkedList<int, int> list = new SinglyLinkedList<int, int>();
+            
             HashMap<int, int> map = new HashMap<int, int>(2);
 
             map.Add(2, 3);
             Console.WriteLine(map.ToString());
-            Console.WriteLine(map.Get(2));
+            Console.WriteLine(map.GetValue(2));
+            
+
+            LinkedList<int> list = new LinkedList<int>();
+            Dictionary<int, int> mappp = new Dictionary<int, int>();
+            
+             
+                
             
 
 

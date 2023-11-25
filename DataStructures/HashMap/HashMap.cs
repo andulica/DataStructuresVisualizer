@@ -6,14 +6,14 @@ namespace DataStructuresVisualizer.DataStructures.HashMap
 {
     public class HashMap<TKey, TValue>
     {
-        private readonly SinglyLinkedList<TKey, TValue>[] _buckets;
+        private readonly SinglyLinkedList<Entry<TKey, TValue>>[] _buckets;
 
         public HashMap(int size)
         {
-            _buckets = new SinglyLinkedList<TKey, TValue>[size];
+            _buckets = new SinglyLinkedList<Entry<TKey, TValue>>[size];
             for (int i = 0; i < size; i++)
             {
-                _buckets[i] = new SinglyLinkedList<TKey, TValue>();
+                _buckets[i] = new SinglyLinkedList<Entry<TKey, TValue>>();
             }
         }
 
@@ -29,26 +29,34 @@ namespace DataStructuresVisualizer.DataStructures.HashMap
             var index = Hash(key);
             var bucket = _buckets[index];
 
-            foreach (var node in bucket)
+            // Iterate through the nodes in the bucket to see if the key exists
+            SinglyLinkedListNode<Entry<TKey, TValue>> current = bucket.head;
+            while (current != null)
             {
-                if (EqualityComparer<TKey>.Default.Equals(node.Key, key))
+                if (EqualityComparer<TKey>.Default.Equals(current._data.Key, key))
                 {
-                    node.Value = value;
+                    // Key exists, update the value
+                    current._data.Value = value;
                     return;
                 }
+                current = current.Next;
             }
-            bucket.Append(key, value);
+
+            // Key does not exist, append new entry
+            bucket.Append(entry);
         }
 
-        public TValue Get(TKey key)
+        public TValue GetValue(TKey key)
         {
             var bucket = _buckets[Hash(key)];
-            foreach (var entry in bucket)
+            SinglyLinkedListNode<Entry<TKey, TValue>> current = bucket.head;
+            while (current != null)
             {
-                if (EqualityComparer<TKey>.Default.Equals(entry.Key, key))
+                if (EqualityComparer<TKey>.Default.Equals(current._data.Key, key))
                 {
-                    return entry.Value;
+                    return current._data.Value;
                 }
+                current = current.Next;
             }
             throw new KeyNotFoundException($"The key {key} was not found.");
         }
@@ -56,7 +64,25 @@ namespace DataStructuresVisualizer.DataStructures.HashMap
         public bool Remove(TKey key)
         {
             var bucket = _buckets[Hash(key)];
-            return bucket.Remove(key);
+            if (bucket.head == null) return false;
+
+            if (EqualityComparer<TKey>.Default.Equals(bucket.head._data.Key, key))
+            {
+                bucket.head = bucket.head.Next;
+                return true;
+            }
+
+            SinglyLinkedListNode<Entry<TKey, TValue>> current = bucket.head;
+            while (current.Next != null)
+            {
+                if (EqualityComparer<TKey>.Default.Equals(current.Next._data.Key, key))
+                {
+                    current.Next = current.Next.Next;
+                    return true;
+                }
+                current = current.Next;
+            }
+            return false;
         }
 
         public override string ToString()
@@ -67,15 +93,17 @@ namespace DataStructuresVisualizer.DataStructures.HashMap
             for (int i = 0; i < _buckets.Length; i++)
             {
                 stringBuilder.Append($"Bucket {i}: ");
-                if (_buckets[i].Head == null)
+                var current = _buckets[i].head;
+                if (current == null)
                 {
                     stringBuilder.AppendLine("Empty");
                     continue;
                 }
 
-                foreach (var entry in _buckets[i])
+                while (current != null)
                 {
-                    stringBuilder.Append($"[{entry.Key}, {entry.Value}] -> ");
+                    stringBuilder.Append($"[{current._data.Key}, {current._data.Value}] -> ");
+                    current = current.Next;
                 }
                 stringBuilder.AppendLine("null");
             }
