@@ -19,6 +19,14 @@ namespace DataStructuresVisualizer
             tree.PrintTraverse();
             tree.PrintSearchMax();
 
+            SinglyLinkedList<int, int> list = new SinglyLinkedList<int, int>();
+            HashMap<int, int> map = new HashMap<int, int>(2);
+
+            map.Add(2, 3);
+            Console.WriteLine(map.ToString());
+            Console.WriteLine(map.Get(2));
+            
+
 
         //    // Initialize grid with nulls
         //    GridElement[,] grid = new GridElement[20, 20];

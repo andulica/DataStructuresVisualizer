@@ -1,5 +1,6 @@
 ﻿using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
 using System.Collections.Generic;
+using System.Text;
 
 namespace DataStructuresVisualizer.DataStructures.HashMap
 {
@@ -56,6 +57,30 @@ namespace DataStructuresVisualizer.DataStructures.HashMap
         {
             var bucket = _buckets[Hash(key)];
             return bucket.Remove(key);
+        }
+
+        public override string ToString()
+        {
+            var stringBuilder = new StringBuilder();
+            stringBuilder.AppendLine("HashMap:");
+
+            for (int i = 0; i < _buckets.Length; i++)
+            {
+                stringBuilder.Append($"Bucket {i}: ");
+                if (_buckets[i].Head == null)
+                {
+                    stringBuilder.AppendLine("Empty");
+                    continue;
+                }
+
+                foreach (var entry in _buckets[i])
+                {
+                    stringBuilder.Append($"[{entry.Key}, {entry.Value}] -> ");
+                }
+                stringBuilder.AppendLine("null");
+            }
+
+            return stringBuilder.ToString();
         }
     }
 }
