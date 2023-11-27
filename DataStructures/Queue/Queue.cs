@@ -1,14 +1,22 @@
 ﻿public class Queue<T>
 {
+    // Internal linked list to store the elements of the queue.
     private LinkedList<T> list = new LinkedList<T>();
 
-    // Adds an item to the end of the queue
+    /// <summary>
+    /// Adds an item to the end of the queue.
+    /// </summary>
+    /// <param name="value">The item to add to the queue.</param>
     public void Enqueue(T value)
     {
         list.AddLast(value);
     }
 
-    // Removes and returns the item at the front of the queue
+    /// <summary>
+    /// Removes and returns the item at the front of the queue.
+    /// </summary>
+    /// <returns>The item at the front of the queue.</returns>
+    /// <exception cref="InvalidOperationException">Thrown if the queue is empty.</exception>
     public T Dequeue()
     {
         if (list.Count == 0)
@@ -21,7 +29,11 @@
         return value;
     }
 
-    // Returns the item at the front of the queue without removing it
+    /// <summary>
+    /// Returns the item at the front of the queue without removing it.
+    /// </summary>
+    /// <returns>The item at the front of the queue.</returns>
+    /// <exception cref="InvalidOperationException">Thrown if the queue is empty.</exception>
     public T Peek()
     {
         if (list.Count == 0)
@@ -32,19 +44,27 @@
         return list.First.Value;
     }
 
-    // Checks if the queue is empty
+    /// <summary>
+    /// Checks if the queue is empty.
+    /// </summary>
+    /// <returns>True if the queue is empty; otherwise, false.</returns>
     public bool IsEmpty()
     {
         return list.Count == 0;
     }
 
-    // Returns the number of items in the queue
+    /// <summary>
+    /// Returns the number of items in the queue.
+    /// </summary>
+    /// <returns>The number of items in the queue.</returns>
     public int Size()
     {
         return list.Count;
     }
 
-    // Clears the queue
+    /// <summary>
+    /// Clears all items from the queue.
+    /// </summary>
     public void Clear()
     {
         list.Clear();

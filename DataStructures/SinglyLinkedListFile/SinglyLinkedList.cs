@@ -3,8 +3,13 @@ using System.Collections;
 
 public class SinglyLinkedList<T> : IEnumerable
 {
+    // The head node of the singly linked list.
     public SinglyLinkedListNode<T> head { get; set; }
 
+    /// <summary>
+    /// Appends a new node with the specified data to the end of the list.
+    /// </summary>
+    /// <param name="data">The data to append to the list.</param>
     public void Append(T data)
     {
         SinglyLinkedListNode<T> newNode = new SinglyLinkedListNode<T>(data);
@@ -24,6 +29,10 @@ public class SinglyLinkedList<T> : IEnumerable
         current.Next = newNode;
     }
 
+    /// <summary>
+    /// Prepends a new node with the specified data to the beginning of the list.
+    /// </summary>
+    /// <param name="data">The data to prepend to the list.</param>
     public void Prepend(T data)
     {
         SinglyLinkedListNode<T> newNode = new SinglyLinkedListNode<T>(data);
@@ -38,6 +47,13 @@ public class SinglyLinkedList<T> : IEnumerable
             head = newNode;
         }
     }
+
+    /// <summary>
+    /// Inserts a new node with the specified data at the specified index.
+    /// </summary>
+    /// <param name="index">The index at which to insert the node.</param>
+    /// <param name="data">The data to insert into the list.</param>
+    /// <exception cref="IndexOutOfRangeException">Thrown if the index is out of range.</exception>
     public void InsertAt(int index, T data)
     {
         SinglyLinkedListNode<T> newNode = new SinglyLinkedListNode<T>(data);
@@ -65,6 +81,10 @@ public class SinglyLinkedList<T> : IEnumerable
         current.Next = newNode;
     }
 
+    /// <summary>
+    /// Deletes the first occurrence of a node with the specified data from the list.
+    /// </summary>
+    /// <param name="data">The data of the node to delete.</param>
     public void Delete(T data)
     {
         if (head == null) return;
@@ -87,6 +107,11 @@ public class SinglyLinkedList<T> : IEnumerable
         }
     }
 
+    /// <summary>
+    /// Deletes the head node of the list and returns its data. Used for stack-like operations.
+    /// </summary>
+    /// <returns>The data of the deleted head node.</returns>
+    /// <exception cref="InvalidOperationException">Thrown if the list is empty.</exception>
     public T DeleteHeadForStack()
     {
         if (head == null)
@@ -99,6 +124,10 @@ public class SinglyLinkedList<T> : IEnumerable
         return value;
     }
 
+    /// <summary>
+    /// Deletes the head node of the list.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if the list is empty.</exception>
     public void DeleteHead()
     {
         if (head == null)
@@ -108,6 +137,10 @@ public class SinglyLinkedList<T> : IEnumerable
         head = head.Next;
     }
 
+    /// <summary>
+    /// Deletes the last node of the list.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if the list is empty.</exception>
     public void DeleteTail()
     {
         if (head == null)
@@ -129,6 +162,12 @@ public class SinglyLinkedList<T> : IEnumerable
         current.Next = null;
     }
 
+    /// <summary>
+    /// Searches for a node with the specified data and returns it.
+    /// </summary>
+    /// <param name="data">The data to search for in the list.</param>
+    /// <returns>The data if found in the list.</returns>
+    /// <exception cref="KeyNotFoundException">Thrown if the value is not found in the list.</exception>
     public T Search(T data)
     {
         SinglyLinkedListNode<T> current = head;
@@ -140,11 +179,13 @@ public class SinglyLinkedList<T> : IEnumerable
             }
             current = current.Next;
         }
-
-        // You might need a different way to handle not-found cases.
         throw new KeyNotFoundException("Value not found in the list.");
     }
 
+    /// <summary>
+    /// Returns a string representation of the linked list.
+    /// </summary>
+    /// <returns>A string representing the linked list.</returns>
     public override string ToString()
     {
         string result = "";
@@ -157,6 +198,11 @@ public class SinglyLinkedList<T> : IEnumerable
         return result + "null";
     }
 
+    /// <summary>
+    /// Determines whether the list contains a specific value.
+    /// </summary>
+    /// <param name="value">The value to locate in the list.</param>
+    /// <returns>True if the value is found; otherwise, false.</returns>
     public bool Contains(T value)
     {
         SinglyLinkedListNode<T> current = head;
@@ -171,6 +217,10 @@ public class SinglyLinkedList<T> : IEnumerable
         return false;
     }
 
+    /// <summary>
+    /// Adds a new node with the specified value to the end of the list.
+    /// </summary>
+    /// <param name="value">The value to add to the list.</param>
     public void AddLast(T value)
     {
         if (head == null)
@@ -187,6 +237,10 @@ public class SinglyLinkedList<T> : IEnumerable
         current.Next = new SinglyLinkedListNode<T>(value);
     }
 
+    /// <summary>
+    /// Removes the first occurrence of a node with the specified value from the list.
+    /// </summary>
+    /// <param name="value">The value of the node to remove.</param>
     public void Remove(T value)
     {
         if (head == null) return;
@@ -211,6 +265,10 @@ public class SinglyLinkedList<T> : IEnumerable
         }
     }
 
+    /// <summary>
+    /// Returns an enumerator that iterates through the linked list.
+    /// </summary>
+    /// <returns>An IEnumerator for the linked list.</returns>
     public IEnumerator GetEnumerator()
     {
         SinglyLinkedListNode<T> current = head;
@@ -221,4 +279,3 @@ public class SinglyLinkedList<T> : IEnumerable
         }
     }
 }
-

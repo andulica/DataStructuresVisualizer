@@ -3,15 +3,28 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
 {
     public class DoublyLinkedList<T>
     {
+        // Head node of the doubly linked list.
         private DoublyLinkedListNode<T> head;
+
+        // Tail node of the doubly linked list.
         private DoublyLinkedListNode<T> tail;
+
+        // Count of nodes in the doubly linked list.
         private int count;
+
+        // Public property to access the count.
         public int Count => count;
+
+        // Public property to access the head node.
         public DoublyLinkedListNode<T> Head => head;
+
+        // Public property to access the tail node.
         public DoublyLinkedListNode<T> Tail => tail;
 
-        
-
+        /// <summary>
+        /// Appends a new node with the specified data at the end of the list.
+        /// </summary>
+        /// <param name="data">The data to be appended.</param>
         public void Append(T data)
         {
             DoublyLinkedListNode<T> newNode = new DoublyLinkedListNode<T>(data);
@@ -28,6 +41,12 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
             count++;
         }
 
+        /// <summary>
+        /// Inserts a new node with specified data at a given index.
+        /// </summary>
+        /// <param name="data">Data for the new node.</param>
+        /// <param name="index">Index at which to insert the new node.</param>
+        /// <exception cref="IndexOutOfRangeException">Thrown if the index is out of bounds.</exception>
         public void InsertAt(T data, int index)
         {
             DoublyLinkedListNode<T> newNode = new DoublyLinkedListNode<T>(data);
@@ -70,6 +89,10 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
             throw new IndexOutOfRangeException("Index out of range for the linked list.");
         }
 
+        /// <summary>
+        /// Prepends a new node with specified data at the start of the list.
+        /// </summary>
+        /// <param name="data">Data for the new node.</param>
         public void Prepend(T data)
         {
             DoublyLinkedListNode<T> newNode = new DoublyLinkedListNode<T>(data);
@@ -87,6 +110,10 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
             count++;
         }
 
+        /// <summary>
+        /// Deletes the first node with the specified data from the list.
+        /// </summary>
+        /// <param name="data">Data of the node to be deleted.</param>
         public void Delete(T data)
         {
             DoublyLinkedListNode<T> current = head;
@@ -116,6 +143,10 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
                 count--;
             }
         }
+        /// <summary>
+        /// Deletes the last node of the list.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Thrown if the list is empty.</exception>
         public void DeleteTail()
         {
             if (tail == null)
@@ -136,6 +167,10 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
             count--;
         }
 
+        /// <summary>
+        /// Deletes the head node of the list.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Thrown if the list is empty.</exception>
         public T DeleteHeadForQueue()
         {
             if (Head == null) throw new InvalidOperationException("The list is empty.");
@@ -153,6 +188,10 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
             count--;  // Decrement count whenever a node is removed
             return value;
         }
+        /// <summary>
+        /// Deletes the head node of the list.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Thrown if the list is empty.</exception>
         public void DeleteHead()
         {
             if (head == null)
@@ -173,6 +212,11 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
             count--;
         }
 
+        /// <summary>
+        /// Searches for a node with the specified data.
+        /// </summary>
+        /// <param name="data">Data to search for.</param>
+        /// <returns>True if the data is found, otherwise false.</returns>
         public bool Search(T data)
         {
             DoublyLinkedListNode <T> current = head;
@@ -184,6 +228,11 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
             return false;
         }
 
+
+        /// <summary>
+        /// Returns a string representation of the doubly linked list.
+        /// </summary>
+        /// <returns>A string showing all the nodes in the list.</returns>
         public override string ToString()
         {
             string result = "";

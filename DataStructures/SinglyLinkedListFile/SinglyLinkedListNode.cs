@@ -2,34 +2,21 @@
 
 public class SinglyLinkedListNode<T>
 {
+    // The data contained in the node.
     public T _data;
+
+    /// <summary>
+    /// Gets or sets the next node in the singly linked list.
+    /// </summary>
     public SinglyLinkedListNode<T> Next { get; set; }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SinglyLinkedListNode{T}"/> class with the specified data.
+    /// </summary>
+    /// <param name="data">The data to store in the node.</param>
     public SinglyLinkedListNode(T data)
     {
-        _data = data;
-        Next = null;
+        _data = data; // Set the data of the node.
+        Next = null;  // Initially, the next node is null.
     }
 }
-
-
-
-
-//public class SingleListNodeView
-//{
-//    public bool Highlighted { get; set; }
-
-//    SinglyLinkedListNode Node { get; set; }
-
-//}
-
-//public class ArrowView
-//{
-//    public bool Highlighted { get; set; }
-//    public SingleListNodeView From { get; set; }
-//    public SingleListNodeView To { get; set; }
-//    public bool TwoHeads { get; set; }
-
-
-//}
-

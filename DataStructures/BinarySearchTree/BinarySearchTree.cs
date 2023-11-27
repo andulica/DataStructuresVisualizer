@@ -1,115 +1,167 @@
 ﻿namespace DataStructuresVisualizer.DataStructures.BinarySearchTree
 {
     public class BinarySearchTree<T>
+{
+    // Root node of the binary search tree.
+    public TreeNode<T> Root { get; private set; }
+
+    /// <summary>
+    /// Inserts a new value into the binary search tree.
+    /// </summary>
+    /// <param name="value">The value to be inserted.</param>
+    public void Insert(T value)
     {
-        public TreeNode<T> Root { get; private set; }
+        Root = InsertRecursive(Root, value);
+    }
 
-        public void Insert(T value)
+    /// <summary>
+    /// Helper method for recursively inserting a new value into the tree.
+    /// </summary>
+    /// <param name="node">Current node in the recursion.</param>
+    /// <param name="value">Value to insert.</param>
+    /// <returns>The updated node after insertion.</returns>
+    private TreeNode<T> InsertRecursive(TreeNode<T> node, T value)
+    {
+        // Comparer to handle generic types
+        var comparer = Comparer<T>.Default;
+
+        // Create new node if current node is null
+        if (node == null)
         {
-            Root = InsertRecursive(Root, value);
-        }
-
-        private TreeNode<T> InsertRecursive(TreeNode<T> node, T value)
-        {
-
-            var comparer = Comparer<T>.Default;
-
-            if (node == null)
-            {
-                node = new TreeNode<T>(value);
-                return node;
-            }
-
-            if (comparer.Compare(value, node.Data) < 0)
-            {
-                node.Left = InsertRecursive(node.Left, value);
-            }
-            else if (comparer.Compare(value,node.Data) > 0)
-            { 
-                node.Right = InsertRecursive(node.Right, value);
-            }
-
+            node = new TreeNode<T>(value);
             return node;
         }
 
-        public TreeNode<T> Search(T value)
+        // Recursive calls for left or right subtree based on comparison
+        if (comparer.Compare(value, node.Data) < 0)
         {
-            return SearchRecursive(Root, value);
+            node.Left = InsertRecursive(node.Left, value);
+        }
+        else if (comparer.Compare(value, node.Data) > 0)
+        {
+            node.Right = InsertRecursive(node.Right, value);
         }
 
-        private TreeNode<T> SearchRecursive(TreeNode<T> node, T value)
+        return node;
+    }
+
+    /// <summary>
+    /// Searches for a value in the binary search tree.
+    /// </summary>
+    /// <param name="value">Value to search for.</param>
+    /// <returns>The node containing the value, if found; otherwise null.</returns>
+    public TreeNode<T> Search(T value)
+    {
+        return SearchRecursive(Root, value);
+    }
+
+    /// <summary>
+    /// Helper method for recursively searching a value in the tree.
+    /// </summary>
+    /// <param name="node">Current node in the recursion.</param>
+    /// <param name="value">Value to search for.</param>
+    /// <returns>The node containing the value, if found; otherwise null.</returns>
+    private TreeNode<T> SearchRecursive(TreeNode<T> node, T value)
+    {
+        // Comparer to handle generic types
+        var comparer = Comparer<T>.Default;
+
+        // Return node if found or if reached end of branch
+        if (node == null || EqualityComparer<T>.Default.Equals(node.Data, value))
         {
-            var comparer = Comparer<T>.Default;
-
-            if (node == null || EqualityComparer<T>.Default.Equals(node.Data, value))
-            {
-                return node;
-            }
-
-            if (comparer.Compare(value,node.Data) < 0)
-            {
-                return SearchRecursive(node.Left, value);
-            }
-
-            return SearchRecursive(node.Right, value);
+            return node;
         }
 
-        public TreeNode<T> SearchMin()
+        // Recursive calls for left or right subtree based on comparison
+        if (comparer.Compare(value, node.Data) < 0)
         {
-            TreeNode<T> current = Root;
-            while (current.Left != null)
-            {
-                current = current.Left;
-            }
-            return current;
+            return SearchRecursive(node.Left, value);
         }
 
-        public TreeNode<T> SearchMax()
+        return SearchRecursive(node.Right, value);
+    }
+
+    /// <summary>
+    /// Searches for the minimum value in the binary search tree.
+    /// </summary>
+    /// <returns>The node containing the minimum value.</returns>
+    public TreeNode<T> SearchMin()
+    {
+        TreeNode<T> current = Root;
+        while (current.Left != null)
         {
-            TreeNode<T> current = Root;
-            while (current.Right != null)
-            {
-                current = current.Right;
-            }
-            return current;
+            current = current.Left;
         }
+        return current;
+    }
 
-        public void Remove(T value)
+    /// <summary>
+    /// Searches for the maximum value in the binary search tree.
+    /// </summary>
+    /// <returns>The node containing the maximum value.</returns>
+    public TreeNode<T> SearchMax()
+    {
+        TreeNode<T> current = Root;
+        while (current.Right != null)
         {
-            Root = RemoveRecursive(Root, value);
+            current = current.Right;
         }
+        return current;
+    }
 
-        private TreeNode<T> RemoveRecursive(TreeNode<T> node, T value)
+    /// <summary>
+    /// Removes a value from the binary search tree.
+    /// </summary>
+    /// <param name="value">Value to be removed.</param>
+    public void Remove(T value)
+    {
+        Root = RemoveRecursive(Root, value);
+    }
+
+    /// <summary>
+    /// Helper method for recursively removing a value from the tree.
+    /// </summary>
+    /// <param name="node">Current node in the recursion.</param>
+    /// <param name="value">Value to remove.</param>
+    /// <returns>The updated node after removal.</returns>
+    private TreeNode<T> RemoveRecursive(TreeNode<T> node, T value)
+    {
+        // Comparer to handle generic types
+        var comparer = Comparer<T>.Default;
+
+        if (node == null) return null;
+
+        // Navigate to the node to be removed
+        if (comparer.Compare(value, node.Data) < 0)
         {
-            var comparer = Comparer<T>.Default;
-
-            if (node == null) return null;
-
-            if (comparer.Compare(value, node.Data) < 0)
-            {
-                node.Left = RemoveRecursive(node.Left, value);
-            }
-            else if (comparer.Compare(value, node.Data) > 0)
-            {
-                node.Right = RemoveRecursive(node.Right, value);
-            }
-            else
-            {
-                // node with only one child or no child
-                if (node.Left == null)
+            node.Left = RemoveRecursive(node.Left, value);
+        }
+        else if (comparer.Compare(value, node.Data) > 0)
+        {
+            node.Right = RemoveRecursive(node.Right, value);
+        }
+        else
+        {
+            // Handle nodes with only one child or no child
+            if (node.Left == null)
                     return node.Right;
                 if (node.Right == null)
                     return node.Left;
 
-                // node with two children
-                TreeNode <T> temp = SearchMin(node.Right);
-                node.Data = temp.Data;
-                node.Right = RemoveRecursive(node.Right, temp.Data);
+                // Node with two children: Get the inorder successor (smallest in the right subtree)
+                TreeNode<T> temp = SearchMin(node.Right);
+                node.Data = temp.Data; // Copy the inorder successor's data to this node
+                node.Right = RemoveRecursive(node.Right, temp.Data); // Delete the inorder successor
             }
 
             return node;
         }
 
+        /// <summary>
+        /// Searches for the minimum value starting from a given node.
+        /// </summary>
+        /// <param name="node">The node from which to start the search.</param>
+        /// <returns>The node containing the minimum value.</returns>
         private TreeNode<T> SearchMin(TreeNode<T> node)
         {
             TreeNode<T> current = node;
@@ -120,6 +172,10 @@
             return current;
         }
 
+        /// <summary>
+        /// Traverses the tree in in-order and performs an action on each node.
+        /// </summary>
+        /// <param name="node">The starting node for traversal.</param>
         public void Traverse(TreeNode<T> node)
         {
             if (node != null)
@@ -130,6 +186,10 @@
             }
         }
 
+        /// <summary>
+        /// Traverses the tree in pre-order and performs an action on each node.
+        /// </summary>
+        /// <param name="node">The starting node for pre-order traversal.</param>
         public void PreOrder(TreeNode<T> node)
         {
             if (node != null)
@@ -140,6 +200,10 @@
             }
         }
 
+        /// <summary>
+        /// Traverses the tree in post-order and performs an action on each node.
+        /// </summary>
+        /// <param name="node">The starting node for post-order traversal.</param>
         public void PostOrder(TreeNode<T> node)
         {
             if (node != null)
@@ -150,45 +214,70 @@
             }
         }
 
-        // code testing methods
+        // Additional methods for testing and demonstration
 
+        /// <summary>
+        /// Prints the result of searching a specific value.
+        /// </summary>
+        /// <param name="value">The value to search for.</param>
         public void PrintSearch(T value)
         {
             var node = Search(value);
             Console.WriteLine(node != null ? $"Node with value {value} found." : $"Node with value {value} not found.");
         }
 
+        /// <summary>
+        /// Prints the minimum value in the binary search tree.
+        /// </summary>
         public void PrintSearchMin()
         {
             var node = SearchMin();
             Console.WriteLine(node != null ? $"Minimum value: {node.Data}" : "Tree is empty.");
         }
 
+        /// <summary>
+        /// Prints the maximum value in the binary search tree.
+        /// </summary>
         public void PrintSearchMax()
         {
             var node = SearchMax();
             Console.WriteLine(node != null ? $"Maximum value: {node.Data}" : "Tree is empty.");
         }
 
+        /// <summary>
+        /// Prints all the nodes in the tree using in-order traversal.
+        /// </summary>
         public void PrintTraverse()
         {
             Console.WriteLine("In-Order Traversal:");
             Traverse(Root, data => Console.WriteLine(data));
         }
 
+        /// <summary>
+        /// Prints all the nodes in the tree using pre-order traversal.
+        /// </summary>
         public void PrintPreOrder()
         {
             Console.WriteLine("Pre-Order Traversal:");
-            PreOrder(Root,data => Console.WriteLine(data));
+            PreOrder(Root, data => Console.WriteLine(data));
         }
 
-
+        /// <summary>
+        /// Prints all the nodes in the tree using post-order traversal.
+        /// </summary>
         public void PrintPostOrder()
         {
             Console.WriteLine("Post-Order Traversal:");
-            PostOrder(Root,data => Console.WriteLine(data));
+            PostOrder(Root, data => Console.WriteLine(data));
         }
 
+        // Generic traversal methods with an action parameter
+
+        /// <summary>
+        /// Generic method for in-order traversal with a specified action.
+        /// </summary>
+        /// <param name="node">Starting node for traversal.</param>
+        /// <param name="action">Action to perform on each node's data.</param>
         private void Traverse(TreeNode<T> node, Action<T> action)
         {
             if (node != null)
@@ -198,7 +287,11 @@
                 Traverse(node.Right, action);
             }
         }
-
+        /// <summary>
+        /// Generic method for pre-order traversal with a specified action.
+        /// </summary>
+        /// <param name="node">Starting node for traversal.</param>
+        /// <param name="action">Action to perform on each node's data.</param>
         private void PreOrder(TreeNode<T> node, Action<T> action)
         {
             if (node != null)
@@ -209,6 +302,11 @@
             }
         }
 
+        /// <summary>
+        /// Generic method for post-order traversal with a specified action.
+        /// </summary>
+        /// <param name="node">Starting node for traversal.</param>
+        /// <param name="action">Action to perform on each node's data.</param>
         private void PostOrder(TreeNode<T> node, Action<T> action)
         {
             if (node != null)
