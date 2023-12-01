@@ -8,6 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="BlazorAppForDataStructures\**" />
+    <EmbeddedResource Remove="BlazorAppForDataStructures\**" />
+    <None Remove="BlazorAppForDataStructures\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="DataStructures\Common\Interfaces\" />
   </ItemGroup>
 
