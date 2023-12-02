@@ -1,40 +1,52 @@
 ﻿@page "/grid-page"
 
-<table>
-    @for (int i = 0; i < grid.GetLength(0); i++)
+<div id="linked-list">
+    @foreach (var node in linkedList)
     {
-            <tr>
-            @for (int j = 0; j < grid.GetLength(1); j++)
-            {
-                        <td>
-                    @if (grid[i, j].HasValue)
-                    {
-                                    <Node Data="@grid[i, j].Value" />
-                    }
-                    else
-                    {
-                        @:Blank
-                    }
-                        </td>
-            }
-            </tr>
+        <div class="node">
+            @node._data
+        </div>
+        @if (node.Next != null)
+        {
+            <div class="arrow">→</div>
+        }
     }
-</table>
+    <div class="node null-node">null</div>
+</div>
+
+<style>
+    #linked-list {
+        display: flex;
+        align-items: center;
+        gap: 10px; /* Adjust the space between nodes */
+    }
+
+    .node {
+        padding: 10px;
+        border: 2px solid black;
+        border-radius: 5px; /* Round corners for node */
+        text-align: center;
+    }
+
+    .null-node {
+        background-color: lightgray;
+    }
+
+    .arrow {
+        font-size: 20px;
+    }
+</style>
 
 @code {
-    private int?[,] grid;
+    private SinglyLinkedList<int> linkedList;
 
     protected override void OnInitialized()
     {
-        int rows = 5; 
-        int columns = 5; 
-        grid = new int?[rows, columns];
-
-        // Initialize some cells with node data for demonstration
-        grid[0, 0] = 1; // Node with data '1'
-        grid[1, 1] = 2; // Node with data '2'
-        // Other cells will be null, representing blank cells
+        linkedList = new SinglyLinkedList<int>();
+        // Add elements to your linked list
+        linkedList.Append(1);
+        linkedList.Append(2);
+        linkedList.Append(3);
+        // Continue adding nodes as required
     }
 }
-
-

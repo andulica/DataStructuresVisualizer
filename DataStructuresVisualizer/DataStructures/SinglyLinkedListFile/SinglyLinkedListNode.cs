@@ -3,7 +3,7 @@
 public class SinglyLinkedListNode<T>
 {
     // The data contained in the node.
-    public T _data;
+    public T _data { get; set; }
 
     /// <summary>
     /// Gets or sets the next node in the singly linked list.

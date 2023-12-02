@@ -1,7 +1,7 @@
 ﻿using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
 using System.Collections;
 
-public class SinglyLinkedList<T> : IEnumerable
+public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
 {
     // The head node of the singly linked list.
     public SinglyLinkedListNode<T> head { get; set; }
@@ -269,7 +269,7 @@ public class SinglyLinkedList<T> : IEnumerable
     /// Returns an enumerator that iterates through the linked list.
     /// </summary>
     /// <returns>An IEnumerator for the linked list.</returns>
-    public IEnumerator GetEnumerator()
+    public IEnumerator<SinglyLinkedListNode<T>> GetEnumerator()
     {
         SinglyLinkedListNode<T> current = head;
         while (current != null)
@@ -277,5 +277,10 @@ public class SinglyLinkedList<T> : IEnumerable
             yield return current;
             current = current.Next;
         }
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
     }
 }
