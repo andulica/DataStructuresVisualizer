@@ -12,19 +12,31 @@
         }
     }
     <div class="node null-node">null</div>
-</div>
+    <p>
+    <Button class="btn btn-primary" @onclick ="buttonAddNodeEnd">Add Node End</Button>
+        <Button class="btn btn-primary" @onclick="buttonRemoveNodeEnd">Remove Node End</Button>
+        <Button class="btn btn-secondary" @onclick="buttonRemoveNodeEnd">Remove Node End</Button>
 
+        <input @bind="inputData" type="text" placeholder="Enter node data" />
+        <button class="btn btn-secondary" @onclick="buttonRemoveSpecificNode">Remove Specific Node</button>
+    </p>
+</div>
+<div class="card-body">
+    <h5 class="card-title">Card title</h5>
+    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+    <a href="#" class="btn btn-primary">Go somewhere</a>
+</div>
 <style>
     #linked-list {
         display: flex;
         align-items: center;
-        gap: 10px; /* Adjust the space between nodes */
+        gap: 10px; 
     }
 
     .node {
         padding: 10px;
         border: 2px solid black;
-        border-radius: 5px; /* Round corners for node */
+        border-radius: 5px; 
         text-align: center;
     }
 
@@ -39,14 +51,35 @@
 
 @code {
     private SinglyLinkedList<int> linkedList;
+    private int  inputData;
 
+
+    void buttonAddNodeEnd()
+    {
+        linkedList.Append(inputData);
+    }
+    void buttonRemoveNodeEnd()
+    {
+        linkedList.DeleteTail();
+    }
     protected override void OnInitialized()
     {
         linkedList = new SinglyLinkedList<int>();
-        // Add elements to your linked list
+
         linkedList.Append(1);
         linkedList.Append(2);
         linkedList.Append(3);
-        // Continue adding nodes as required
     }
+
+    void addNodeAtIndex()
+    {
+        
+    }
+
+    void buttonRemoveSpecificNode()
+    {
+        linkedList.Delete(inputData);
+    }
+
+
 }

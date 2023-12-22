@@ -1,17 +1,7 @@
 ﻿@inject IJSRuntime JSRuntime
+@page "/arrow"
+<div id="@arrowId" class="arrow">-></div>
 
-<div id="@arrowId" class="arrow"></div>
-
-<style>
-    .arrow {
-        width: 2px; /* Width of the arrow line */
-        height: 100%; /* Initial height, will be adjusted dynamically */
-        background-color: black; /* Color of the arrow */
-        position: absolute;
-    }
-
-    /* Add additional styling for the arrowhead if needed */
-</style>
 
 @code {
     [Parameter] public Node SourceId { get; set; }
@@ -22,7 +12,7 @@
     {
         if (firstRender)
         {
-            await JSRuntime.InvokeVoidAsync("drawArrow", SourceId, TargetId, arrowId);
+   //         await JSRuntime.InvokeVoidAsync("drawArrow", SourceId, TargetId, arrowId);
         }
     }
 }
