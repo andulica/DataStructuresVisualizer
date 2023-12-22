@@ -1,4 +1,6 @@
-﻿public class Queue<T>
+﻿namespace DataStructuresVisualizer.DataStructures.Queue;
+
+public class Queue<T>
 {
     // Internal linked list to store the elements of the queue.
     private LinkedList<T> list = new LinkedList<T>();
