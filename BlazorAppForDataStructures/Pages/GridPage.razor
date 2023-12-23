@@ -12,13 +12,13 @@
 <div id="linked-list">
     <!-- Data Structure Selection -->
     <h3>Select a Data Structure</h3>
-    <select @bind="selectedDataStructure">
-        @foreach (var dataStructure in dataStructures)
+    <select @bind="operation">
+        @foreach (var operation in operations)
         {
-            <option value="@dataStructure">@dataStructure</option>
+            <option value="@operation">@operation</option>
         }
     </select>
-    <p>You have selected: @selectedDataStructure</p>
+    <p>You have selected: @operation</p>
 
     <!-- Linked List Display -->
     <h3>Linked List</h3>
@@ -35,9 +35,8 @@
     <!-- Node Actions -->
     <h3>Node Actions</h3>
     <div class="node-actions">
-        <Button class="btn btn-primary" @onclick="buttonAddNodeEnd">Add Node End</Button>
-        <Button class="btn btn-primary" @onclick="buttonRemoveNodeEnd">Remove Node End</Button>
-        <Button class="btn btn-primary" @onclick="buttonRemoveSpecificNode">Remove Specific Node</Button>
+        <Button class="btn btn-primary" @onclick="(() => buttonVisualize(operation))">Visualize</Button>
+        
         <input @bind="inputData" type="text" placeholder="Enter node data" />
     </div>
 </div>
@@ -71,8 +70,8 @@
 @code {
     private SinglyLinkedList<int> linkedList; 
     private int  inputData;
-    private string [] dataStructures = {"SinglyLinkedList", "DoublyLinkedList", "HashMap", "HashSet", "Stack", "Queue", "Array", "BinarySearchTree"};
-    private string selectedDataStructure;
+    private string [] operations = {"Insert", "Delete", "Search", "Create"};
+    private string operation;
 
 
     void buttonAddNodeEnd()
@@ -94,12 +93,23 @@
 
     void addNodeAtIndex()
     {
-        
+
     }
 
     void buttonRemoveSpecificNode()
     {
         linkedList.Delete(inputData);
+    }
+
+    void buttonVisualize(string operation)
+    {
+        switch(operation)
+        {
+            case "Insert":
+                linkedList.Append(inputData);
+                break;
+
+        }
     }
 
 
