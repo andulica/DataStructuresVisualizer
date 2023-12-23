@@ -87,25 +87,28 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// <param name="data">The data of the node to delete.</param>
     public void Delete(T data)
     {
-        if (head == null) return;
+        if (head == null) return; // Check if the list is empty
 
-        if (!EqualityComparer<T>.Default.Equals(head._data, data))
+        // Check if the head contains the data to be deleted
+        if (EqualityComparer<T>.Default.Equals(head._data, data))
         {
-            head = head.Next;
+            head = head.Next; // Delete the head node
             return;
         }
 
         SinglyLinkedListNode<T> current = head;
         while (current.Next != null && !EqualityComparer<T>.Default.Equals(current.Next._data, data))
         {
-            current = current.Next;
+            current = current.Next; // Traverse the list
         }
 
+        // If the node after the current node needs to be deleted
         if (current.Next != null)
         {
-            current.Next = current.Next.Next;
+            current.Next = current.Next.Next; // Delete the node
         }
     }
+
 
     /// <summary>
     /// Deletes the head node of the list and returns its data. Used for stack-like operations.
