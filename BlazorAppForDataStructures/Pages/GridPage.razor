@@ -66,40 +66,11 @@
 </style>
 
 
-
 @code {
     private SinglyLinkedList<int> linkedList; 
     private int  inputData;
     private string [] operations = {"Insert", "Delete", "Search", "Create"};
     private string operation;
-
-
-    void buttonAddNodeEnd()
-    {
-        linkedList.Append(inputData);
-    }
-    void buttonRemoveNodeEnd()
-    {
-        linkedList.DeleteTail();
-    }
-    protected override void OnInitialized()
-    {
-        linkedList = new SinglyLinkedList<int>();
-
-        linkedList.Append(1);
-        linkedList.Append(2);
-        linkedList.Append(3);
-    }
-
-    void addNodeAtIndex()
-    {
-
-    }
-
-    void buttonRemoveSpecificNode()
-    {
-        linkedList.Delete(inputData);
-    }
 
     void buttonVisualize(string operation)
     {
@@ -111,6 +82,4 @@
 
         }
     }
-
-
 }
