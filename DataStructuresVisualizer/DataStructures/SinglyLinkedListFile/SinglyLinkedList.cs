@@ -186,6 +186,30 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     }
 
     /// <summary>
+    /// Searches for the first occurrence of the specified value within the linked list and returns its index.
+    /// </summary>
+    /// <param name="data">The value to search for in the list.</param>
+    /// <returns>The zero-based index of the first occurrence of the value in the list, if found.</returns>
+    /// <exception cref="KeyNotFoundException">Thrown when the value is not present in the list.</exception>
+    public int FindIndexOf(T data)
+    {
+        SinglyLinkedListNode<T> current = head;
+        int index = 0;
+
+        while (current != null)
+        {
+            if (EqualityComparer<T>.Default.Equals(current._data, data))
+            {
+                return index += 1;
+            }
+            current = current.Next;
+            index++;
+        }
+        return -1;
+    }
+
+
+    /// <summary>
     /// Returns a string representation of the linked list.
     /// </summary>
     /// <returns>A string representing the linked list.</returns>
