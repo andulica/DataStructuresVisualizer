@@ -1,8 +1,8 @@
 ﻿namespace DataStructuresVisualizer.DataStructures
 {
-    internal class Constants
+    public class Constants
     {
-        public const int DEFAULT_ARRAY_CAPACITY = 3;
+        public const int DEFAULT_ARRAY_CAPACITY = 8;
 
     }
 }

@@ -1,0 +1,19 @@
+﻿@page "/dataStructure"
+@inject NavigationManager NavigationManager
+
+<h1>Select a Data Structure to Visualize</h1>
+
+@foreach (var ds in dataStructures)
+{
+    <button @onclick="() => NavigateToVisualizer(ds)">@ds</button>
+}
+
+@code {
+    private string[] dataStructures = { "Array", "SinglyLinkedList","DoublyLinkedList", "BinarySearchTree", "Queue", "Stack", "HashTable", "HashMap" };
+
+    private void NavigateToVisualizer(string dataStructure)
+    {
+        NavigationManager.NavigateTo($"/visualize/{dataStructure}");
+    }
+}
+

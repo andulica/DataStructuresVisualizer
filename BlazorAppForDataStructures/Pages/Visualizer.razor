@@ -1,0 +1,25 @@
+﻿
+@page "/visualize/{DataStructure}"
+@using BlazorAppForDataStructures.Pages.DataStructuresComponents;
+
+@switch (DataStructure)
+{
+    case "Array":
+        <Array />
+        break;
+    case "SinglyLinkedList":
+        <SinglyLinkedList />
+        break;
+    case "BinaryTree":
+        <BinaryTreeVisualizer />
+        break;
+    // Add cases for other data structures
+    default:
+        <p>Select a valid data structure to visualize.</p>
+        break;
+}
+
+@code {
+    [Parameter]
+    public string DataStructure { get; set; }
+}
