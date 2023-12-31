@@ -1,7 +1,8 @@
-﻿
+﻿using System.Collections;
+
 namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
 {
-    public class DoublyLinkedList<T>
+    public class DoublyLinkedList<T> : IEnumerable<DoublyLinkedListNode<T>>
     {
         // Head node of the doubly linked list.
         private DoublyLinkedListNode<T> head;
@@ -44,7 +45,7 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         /// <summary>
         /// Inserts a new node with specified data at a given index.
         /// </summary>
-        /// <param name="data">Data for the new node.</param>
+        /// <param name="data">_data for the new node.</param>
         /// <param name="index">Index at which to insert the new node.</param>
         /// <exception cref="IndexOutOfRangeException">Thrown if the index is out of bounds.</exception>
         public void InsertAt(T data, int index)
@@ -92,7 +93,7 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         /// <summary>
         /// Prepends a new node with specified data at the start of the list.
         /// </summary>
-        /// <param name="data">Data for the new node.</param>
+        /// <param name="data">_data for the new node.</param>
         public void Prepend(T data)
         {
             DoublyLinkedListNode<T> newNode = new DoublyLinkedListNode<T>(data);
@@ -113,13 +114,13 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         /// <summary>
         /// Deletes the first node with the specified data from the list.
         /// </summary>
-        /// <param name="data">Data of the node to be deleted.</param>
+        /// <param name="data">_data of the node to be deleted.</param>
         public void Delete(T data)
         {
             DoublyLinkedListNode<T> current = head;
             while (current != null)
             {
-                if (EqualityComparer<T>.Default.Equals(current.Data,data))
+                if (EqualityComparer<T>.Default.Equals(current._data,data))
                 {
                     if (current.Prev != null)
                     {
@@ -142,6 +143,63 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
                 current = current.Next;
                 count--;
             }
+        }
+        public void DeleteAt(int index)
+        {
+            if (index < 0 || index >= count)
+            {
+                throw new IndexOutOfRangeException($"Index {index} is out of range for the linked list.");
+            }
+
+            if (index == 0)
+            {
+                DeleteHead();
+                return;
+            }
+
+            if (index == count - 1)
+            {
+                DeleteTail();
+                return;
+            }
+
+            DoublyLinkedListNode<T> current = head;
+            for (int i = 0; i < index; i++)
+            {
+                current = current.Next;
+            }
+
+            // Unlink the node from the list
+            current.Prev.Next = current.Next;
+            if (current.Next != null)
+            {
+                current.Next.Prev = current.Prev;
+            }
+
+            count--;
+        }
+        /// <summary>
+        /// Finds the index of the first occurrence of the specified data in the doubly linked list.
+        /// </summary>
+        /// <param name="data">The data to locate in the list.</param>
+        /// <returns>The zero-based index of the first occurrence of the data, if found; otherwise, -1.</returns>
+        public int FindIndexOf(T data)
+        {
+            int index = 0;
+            DoublyLinkedListNode<T> current = head;
+
+            while (current != null)
+            {
+                if (EqualityComparer<T>.Default.Equals(current._data, data))
+                {
+                    return index;
+                }
+
+                current = current.Next;
+                index++;
+            }
+
+            return -1; // Data not found
         }
         /// <summary>
         /// Deletes the last node of the list.
@@ -175,7 +233,7 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         {
             if (Head == null) throw new InvalidOperationException("The list is empty.");
 
-            T value = head.Data;
+            T value = head._data;
             head = head.Next;
             if (head == null)
             {
@@ -215,14 +273,14 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         /// <summary>
         /// Searches for a node with the specified data.
         /// </summary>
-        /// <param name="data">Data to search for.</param>
+        /// <param name="data">_data to search for.</param>
         /// <returns>True if the data is found, otherwise false.</returns>
         public bool Search(T data)
         {
             DoublyLinkedListNode <T> current = head;
             while (current != null)
             {
-                if (EqualityComparer<T>.Default.Equals(current.Data,data)) return true;
+                if (EqualityComparer<T>.Default.Equals(current._data,data)) return true;
                 current = current.Next;
             }
             return false;
@@ -239,10 +297,25 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
             DoublyLinkedListNode<T> current = head;
             while (current != null)
             {
-                result += current.Data + " <-> ";
+                result += current._data + " <-> ";
                 current = current.Next;
             }
             return result + "null";
+        }
+       
+        public IEnumerator<DoublyLinkedListNode<T>> GetEnumerator()
+        {
+            DoublyLinkedListNode<T> current = head;
+            while (current != null)
+            {
+                yield return current;
+                current = current.Next;
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

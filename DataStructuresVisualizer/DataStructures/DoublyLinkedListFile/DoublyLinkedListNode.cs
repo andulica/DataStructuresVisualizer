@@ -9,7 +9,7 @@
         /// <summary>
         /// Gets or sets the data contained in the node.
         /// </summary>
-        public T Data { get; set; }
+        public T _data { get; set; }
 
         /// <summary>
         /// Gets or sets the next node in the doubly linked list.
@@ -27,7 +27,7 @@
         /// <param name="data">The data to store in the node.</param>
         public DoublyLinkedListNode(T data)
         {
-            Data = data; // Set the data of the node.
+            _data = data; // Set the data of the node.
             Next = null; // Initially, the next node is null.
             Prev = null; // Initially, the previous node is null.
         }

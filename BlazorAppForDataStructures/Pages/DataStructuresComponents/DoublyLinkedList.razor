@@ -1,13 +1,8 @@
-﻿@page "/grid-page"
-@using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
+﻿@inject NavigationManager NavigationManager
 @using DataStructuresVisualizer.DataStructures.DoublyLinkedListFile;
-@using DataStructuresVisualizer.DataStructures.BinarySearchTree;
-@using DataStructuresVisualizer.DataStructures.HashMap;
-@using DataStructuresVisualizer.DataStructures.HashSet;
-@using DataStructuresVisualizer.DataStructures.Stack;
-@using DataStructuresVisualizer.DataStructures.Queue;
 
-<div id="linked-list">
+<div id="doubly-linked-list">
+    <h3>DoublyLinkedList</h3>
 
     <!-- Operation list selection -->
     <h5>Select Operation</h5>
@@ -18,9 +13,31 @@
         }
     </select>
 
-    <!-- Linked List Display -->
-    <h5>Linked List</h5>
-    @foreach (var node in linkedList)
+    @if (operation == "Insert at")
+    {
+        <h5>Choose Position</h5>
+        <select @bind="desiredPosition">
+            @for (int i = 0; i < doublyLinkedList.Count; i++)
+            {
+                <option value="@i">@i</option>
+            }
+        </select>
+    }
+
+    @if (operation == "Delete at")
+    {
+        <h5>Choose Position</h5>
+        <select @bind="desiredPosition">
+            @for (int i = 0; i < doublyLinkedList.Count; i++)
+            {
+                <option value="@i">@i</option>
+            }
+        </select>
+    }
+
+    <!-- Doubly Linked List -->
+    <h5>Doubly Linked List</h5>
+    @foreach (var node in doublyLinkedList)
     {
         <div class="node">@node._data</div>
         @if (node.Next != null)
@@ -28,6 +45,8 @@
             <div class="arrow">→</div>
         }
     }
+
+
     <div class="node null-node">null</div>
 
     <Button class="btn btn-primary" @onclick="(() => buttonVisualize(operation))">Visualize</Button>
@@ -62,37 +81,45 @@
 
 
 @code {
-    private SinglyLinkedList<int> linkedList = new SinglyLinkedList<int>();
+    private DoublyLinkedList<int> doublyLinkedList = new DoublyLinkedList<int>();
     private int inputData;
-    private string[] operations = { "Insert", "Delete", "Search", "Create" };
+    private int desiredPosition;
+    private string[] operations = { "Insert at", "Append", "Prepend", "Delete at","Delete", "Search", "Create" };
     private string operation;
     private string resultMessage;
     Random rand = new Random();
 
-
     protected override void OnInitialized()
     {
-        linkedList = new SinglyLinkedList<int>();
-        linkedList.Append(rand.Next(1,30));
-        linkedList.Append(rand.Next(1,30));
-        linkedList.Append(rand.Next(1,30));
+        doublyLinkedList = new DoublyLinkedList<int>();
+        doublyLinkedList.Append(rand.Next(1, 30));
+        doublyLinkedList.Append(rand.Next(1, 30));
+        doublyLinkedList.Append(rand.Next(1, 30));      
+
     }
 
     void buttonVisualize(string operation)
     {
         switch (operation)
         {
-            case "Insert":
-                linkedList.Append(inputData);
+            case "Insert at":
+                doublyLinkedList.InsertAt(inputData, desiredPosition);
                 break;
-
+            case "Append":
+                doublyLinkedList.Append(inputData);
+                break;
+            case "Prepend":
+                doublyLinkedList.Prepend(inputData);
+                break;
             case "Delete":
-                linkedList.Delete(inputData);
+                doublyLinkedList.Delete(inputData);
                 break;
-
+            case "Delete at":
+                doublyLinkedList.DeleteAt(desiredPosition);
+                break;
             case "Search":
-                var position = linkedList.FindIndexOf(inputData);
-                if (position != -1) 
+                var position = doublyLinkedList.FindIndexOf(inputData);
+                if (position != -1)
                 {
                     resultMessage = $"The node with value {inputData} was found at position {position}.";
                 }

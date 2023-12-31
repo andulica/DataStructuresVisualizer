@@ -98,7 +98,7 @@ namespace DataStructuresVisualizer
         //                    Console.ForegroundColor = ConsoleColor.Blue;
         //                }
 
-        //                Console.Write(grid[i, j].Node.Data.ToString("D"));
+        //                Console.Write(grid[i, j].Node._data.ToString("D"));
         //                Console.ResetColor();
 
         //                // Print an arrow if there's another node in the next column
