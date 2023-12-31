@@ -39,7 +39,13 @@
     <h5>Doubly Linked List</h5>
     @foreach (var node in doublyLinkedList)
     {
+        @if (node.Prev != null)
+        {
+            <div class="reverse-arrow">←</div>
+        }
+
         <div class="node">@node._data</div>
+
         @if (node.Next != null)
         {
             <div class="arrow">→</div>
