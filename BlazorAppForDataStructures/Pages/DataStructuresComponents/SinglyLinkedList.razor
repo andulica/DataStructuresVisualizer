@@ -13,6 +13,27 @@
         }
     </select>
 
+    @if (operation == "Insert at")
+    {
+        <h5>Choose Position</h5>
+        <select @bind="desiredPosition">
+            @for (int i = 0; i <= linkedList.Count; i++)
+            {
+                <option value="@i">@i</option>
+            }
+        </select>
+    }
+
+    @if (operation == "Delete at")
+    {
+        <h5>Choose Position</h5>
+        <select @bind="desiredPosition">
+            @for (int i = 0; i <= linkedList.Count; i++)
+            {
+                <option value="@i">@i</option>
+            }
+        </select>
+    }
     <!-- Linked List Display -->
     <h5>Linked List</h5>
     @foreach (var node in linkedList)
@@ -59,7 +80,8 @@
 @code {
     private SinglyLinkedList<int> linkedList = new SinglyLinkedList<int>();
     private int inputData;
-    private string[] operations = { "Insert", "Delete", "Search", "Create" };
+    private int desiredPosition;
+    private string[] operations = { "Insert at","Append","Prepend","Delete at", "Delete", "Search", "Create" };
     private string operation;
     private string resultMessage;
     Random rand = new Random();
@@ -77,14 +99,21 @@
     {
         switch (operation)
         {
-            case "Insert":
+            case "Append":
                 linkedList.Append(inputData);
                 break;
-
+            case "Prepend":
+                linkedList.Prepend(inputData);
+                break;
+            case "Insert at":
+                linkedList.InsertAt(desiredPosition, inputData);
+                break;
             case "Delete":
                 linkedList.Delete(inputData);
                 break;
-
+            case "Delete at":
+                linkedList.DeleteAt(desiredPosition);
+                break;
             case "Search":
                 var position = linkedList.FindIndexOf(inputData);
                 if (position != -1)

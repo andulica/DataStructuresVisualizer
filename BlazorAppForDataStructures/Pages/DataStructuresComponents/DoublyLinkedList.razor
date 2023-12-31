@@ -12,12 +12,11 @@
             <option value="@operation">@operation</option>
         }
     </select>
-
     @if (operation == "Insert at")
     {
         <h5>Choose Position</h5>
         <select @bind="desiredPosition">
-            @for (int i = 0; i < doublyLinkedList.Count; i++)
+            @for (int i = 0; i <= doublyLinkedList.Count; i++)
             {
                 <option value="@i">@i</option>
             }
@@ -28,7 +27,7 @@
     {
         <h5>Choose Position</h5>
         <select @bind="desiredPosition">
-            @for (int i = 0; i < doublyLinkedList.Count; i++)
+            @for (int i = 0; i <= doublyLinkedList.Count; i++)
             {
                 <option value="@i">@i</option>
             }
@@ -36,37 +35,38 @@
     }
 
     <!-- Doubly Linked List -->
-    <h5>Doubly Linked List</h5>
+    <h3>DoublyLinkedList</h3>
+
+    <!-- Doubly Linked List Display -->
     @foreach (var node in doublyLinkedList)
     {
-        @if (node.Prev != null)
-        {
-            <div class="reverse-arrow">←</div>
-        }
-
-        <div class="node">@node._data</div>
-
-        @if (node.Next != null)
-        {
-            <div class="arrow">→</div>
-        }
+        <div class="node-with-arrows">
+            @if (node.Prev != null)
+            {
+                <div class="arrow up">←</div>
+            }
+            <div class="node">@node._data</div>
+            @if (node.Next != null)
+            {
+                <div class="arrow down">→</div>
+            }
+        </div>
     }
-
-
-    <div class="node null-node">null</div>
-
-    <Button class="btn btn-primary" @onclick="(() => buttonVisualize(operation))">Visualize</Button>
-    <input @bind="inputData" type="text" placeholder="Enter node data" />
-
-    <div>@resultMessage</div>
 </div>
 
 
+<Button class="btn btn-primary" @onclick="(() => buttonVisualize(operation))">Visualize</Button>
+<input @bind="inputData" type="text" placeholder="Enter node data" />
+<div>@resultMessage</div>
+
+
 <style>
-    #linked-list {
+
+
+    .node-container {
         display: flex;
+        flex-direction: column;
         align-items: center;
-        gap: 10px;
     }
 
     .node {
@@ -80,17 +80,28 @@
         background-color: lightgray;
     }
 
-    .arrow {
+    .arrow, .reverse-arrow {
         font-size: 20px;
+        height: 20px; /* Ensure the arrows have a set height for proper alignment */
+    }
+
+    /* Optional: Add some space between the arrows and the node */
+    .arrow {
+        margin-bottom: 5px;
+    }
+
+    .reverse-arrow {
+        margin-top: 5px;
     }
 </style>
+
 
 
 @code {
     private DoublyLinkedList<int> doublyLinkedList = new DoublyLinkedList<int>();
     private int inputData;
     private int desiredPosition;
-    private string[] operations = { "Insert at", "Append", "Prepend", "Delete at","Delete", "Search", "Create" };
+    private string[] operations = { "Insert at", "Append", "Prepend", "Delete at", "Delete", "Search", "Create" };
     private string operation;
     private string resultMessage;
     Random rand = new Random();
@@ -100,7 +111,7 @@
         doublyLinkedList = new DoublyLinkedList<int>();
         doublyLinkedList.Append(rand.Next(1, 30));
         doublyLinkedList.Append(rand.Next(1, 30));
-        doublyLinkedList.Append(rand.Next(1, 30));      
+        doublyLinkedList.Append(rand.Next(1, 30));
 
     }
 

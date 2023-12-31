@@ -5,6 +5,12 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
 {
     // The head node of the singly linked list.
     public SinglyLinkedListNode<T> head { get; set; }
+    
+    // Count of nodes in the singly linked list.
+    private int count;
+
+    // Public property to access the count.
+    public int Count => count;
 
     /// <summary>
     /// Appends a new node with the specified data to the end of the list.
@@ -25,6 +31,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         {
             current = current.Next;
         }
+        count++;
 
         current.Next = newNode;
     }
@@ -46,6 +53,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
             newNode.Next = head;
             head = newNode;
         }
+        count++;
     }
 
     /// <summary>
@@ -70,6 +78,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         {
             current = current.Next;
             currentIndex++;
+            count++;
         }
 
         if (current == null)
@@ -107,6 +116,45 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         {
             current.Next = current.Next.Next; // Delete the node
         }
+        count--;
+    }
+    /// <summary>
+    /// Deletes a node at the specified index from the singly linked list.
+    /// </summary>
+    /// <remarks>
+    /// This method allows for deletion of nodes at any position within the list.
+    /// It can handle deletion of the head or tail nodes, as well as any node in between.
+    /// The list is zero-indexed.
+    /// </remarks>
+    /// <param name="index">The zero-based index of the node to be deleted.</param>
+    /// <exception cref="IndexOutOfRangeException">
+    /// Thrown when the specified index is less than 0 or greater than or equal to the size of the list.
+    /// </exception>
+    public void DeleteAt(int index)
+    {
+        if (index < 0 || index >= count)
+        {
+            throw new IndexOutOfRangeException($"Index {index} is out of range for the linked list.");
+        }
+
+        if (index == 0)
+        {
+            DeleteHead();
+            return;
+        }
+
+        if (index == count - 1)
+        {
+            DeleteTail();
+            return;
+        }
+
+        SinglyLinkedListNode<T> current = head;
+        for (int i = 0; i < index; i++)
+        {
+            current = current.Next;
+        }
+        count--;
     }
 
 
@@ -124,6 +172,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
 
         T value = head._data;
         head = head.Next;
+        count--;
         return value;
     }
 
@@ -138,6 +187,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
             throw new InvalidOperationException("List is empty.");
         }
         head = head.Next;
+        count--;
     }
 
     /// <summary>
@@ -154,6 +204,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         if (head.Next == null)
         {
             head = null;
+            count--;
             return;
         }
 
@@ -163,6 +214,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
             current = current.Next;
         }
         current.Next = null;
+        count--;
     }
 
     /// <summary>
