@@ -120,7 +120,7 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
             DoublyLinkedListNode<T> current = head;
             while (current != null)
             {
-                if (EqualityComparer<T>.Default.Equals(current._data,data))
+                if (EqualityComparer<T>.Default.Equals(current._data, data))
                 {
                     if (current.Prev != null)
                     {
@@ -144,6 +144,18 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
                 count--;
             }
         }
+        /// <summary>
+        /// Deletes a node at the specified index from the doubly linked list.
+        /// </summary>
+        /// <remarks>
+        /// This method allows for deletion of nodes at any position within the list.
+        /// It can handle deletion of the head or tail nodes, as well as any node in between.
+        /// The list is zero-indexed.
+        /// </remarks>
+        /// <param name="index">The zero-based index of the node to be deleted.</param>
+        /// <exception cref="IndexOutOfRangeException">
+        /// Thrown when the specified index is less than 0 or greater than or equal to the size of the list.
+        /// </exception>
         public void DeleteAt(int index)
         {
             if (index < 0 || index >= count)
@@ -220,7 +232,7 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
             {
                 head = null;  // If there's only one node
             }
-            
+
             tail = tail.Prev;
             count--;
         }
@@ -277,10 +289,10 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         /// <returns>True if the data is found, otherwise false.</returns>
         public bool Search(T data)
         {
-            DoublyLinkedListNode <T> current = head;
+            DoublyLinkedListNode<T> current = head;
             while (current != null)
             {
-                if (EqualityComparer<T>.Default.Equals(current._data,data)) return true;
+                if (EqualityComparer<T>.Default.Equals(current._data, data)) return true;
                 current = current.Next;
             }
             return false;
@@ -302,7 +314,7 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
             }
             return result + "null";
         }
-       
+
         public IEnumerator<DoublyLinkedListNode<T>> GetEnumerator()
         {
             DoublyLinkedListNode<T> current = head;
