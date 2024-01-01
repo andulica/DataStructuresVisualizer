@@ -1,0 +1,112 @@
+﻿@inject NavigationManager NavigationManager
+@using DataStructuresVisualizer.DataStructures.Stack;
+
+
+<div id="stack-component">
+    <h3>Stack</h3>
+
+    <!-- Operation list selection -->
+    <h5>Select Operation</h5>
+    <select @bind="operation">
+        @foreach (var op in operations)
+        {
+            <option value="@op">@op</option>
+        }
+    </select>
+
+    <!-- Stack Display -->
+    <div class="stack-container">
+        <!-- Use a reversed loop to render stack items from top (last added) to bottom (first added) -->
+        @for (int i = stack.count - 1; i >= 0; i--)
+        {
+            <div class="stack-item">@stack.ElementAt(i)</div>
+        }
+    </div>
+
+    <Button class="btn btn-primary" @onclick="(() => buttonVisualize(operation))">Visualize</Button>
+    <input @bind="inputData" type="text" placeholder="Enter item" />
+
+    <div>@resultMessage</div>
+</div>
+
+
+
+<style>
+    #stack-component {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .stack {
+        display: flex;
+        flex-direction: column-reverse; /* Stack items will be displayed from bottom to top */
+        align-items: center;
+    }
+
+    .stack-item {
+        padding: 10px;
+        border: 2px solid black;
+        border-radius: 5px;
+        text-align: center;
+        width: 100%; /* Adjust width as needed */
+        box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    }
+
+    .stack-container {
+        display: flex;
+        flex-direction: column-reverse; /* This will display the last element (top of the stack) first */
+        align-items: center; /* Center-align the stack items */
+        gap: 10px; /* Space between stack items */
+    }
+
+    .stack-base {
+        padding: 5px;
+        text-align: center;
+    }
+
+    .btn-primary {
+        margin-top: 10px;
+    }
+
+</style>
+
+@code {
+    private StackStructure<int> stack = new StackStructure<int>();
+    private int inputData;
+    private string[] operations = { "Peak", "Pop", "Push", "Create"};
+    private string operation;
+    private string resultMessage;
+    Random rand = new Random();
+
+
+    protected override void OnInitialized()
+    {
+        stack = new StackStructure<int>();
+        stack.Push(rand.Next(1, 30));
+        stack.Push(rand.Next(1, 30));
+        stack.Push(rand.Next(1, 30));
+    }
+
+    void buttonVisualize(string operation)
+    {
+        switch (operation)
+        {
+            case "Peak":
+                stack.Peek();
+                resultMessage = $"{inputData} was pushed on the stack";
+                break;
+            case "Pop":
+                stack.Pop();
+                break;
+            case "Push":
+                stack.Push(inputData);
+                resultMessage = $"{inputData} was pushed on the stack";
+                break;
+            case "Create":
+                this.OnInitialized();
+                break;
+        }
+    }
+}

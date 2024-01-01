@@ -1,9 +1,10 @@
 ﻿namespace DataStructuresVisualizer.DataStructures.Stack
 {
-    public class Stack <T>
+    public class StackStructure <T> : IEnumerable<T>
     {
         // Internal linked list to store the elements of the stack.
         private LinkedList<T> list = new LinkedList<T>();
+        public int count => list.Count;
 
         /// <summary>
         /// Adds an item to the top of the stack.
@@ -44,6 +45,23 @@
             }
 
             return list.First.Value;
+        }
+        /// <summary>
+        /// Returns an enumerator that iterates through the stack.
+        /// </summary>
+        /// <returns>An enumerator for the stack.</returns>
+        public IEnumerator<T> GetEnumerator()
+        {
+            return list.GetEnumerator();
+        }
+
+        /// <summary>
+        /// Returns an enumerator that iterates through a collection.
+        /// </summary>
+        /// <returns>An IEnumerator object that can be used to iterate through the collection.</returns>
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return list.GetEnumerator();
         }
     }
 }
