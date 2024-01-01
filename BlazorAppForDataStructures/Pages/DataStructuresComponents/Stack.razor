@@ -1,7 +1,6 @@
 ﻿@inject NavigationManager NavigationManager
 @using DataStructuresVisualizer.DataStructures.Stack;
 
-
 <div id="stack-component">
     <h3>Stack</h3>
 
@@ -16,10 +15,13 @@
 
     <!-- Stack Display -->
     <div class="stack-container">
-        <!-- Use a reversed loop to render stack items from top (last added) to bottom (first added) -->
         @for (int i = stack.count - 1; i >= 0; i--)
         {
             <div class="stack-item">@stack.ElementAt(i)</div>
+            @if (i > 0) // Only add arrows between elements, not after the last element
+            {
+                <div class="stack-arrow">↓</div>
+            }
         }
     </div>
 
@@ -28,7 +30,6 @@
 
     <div>@resultMessage</div>
 </div>
-
 
 
 <style>
@@ -50,20 +51,24 @@
         border: 2px solid black;
         border-radius: 5px;
         text-align: center;
-        width: 100%; /* Adjust width as needed */
-        box-sizing: border-box; /* Include padding and border in the element's total width and height */
+        width: 100%;
+        box-sizing: border-box;
     }
 
     .stack-container {
         display: flex;
-        flex-direction: column-reverse; /* This will display the last element (top of the stack) first */
+        flex-direction: column-reverse; /* Display elements from top to bottom */
         align-items: center; /* Center-align the stack items */
-        gap: 10px; /* Space between stack items */
     }
 
     .stack-base {
         padding: 5px;
         text-align: center;
+    }
+
+    .stack-arrow {
+        color: #666;
+        font-size: 20px;
     }
 
     .btn-primary {
@@ -93,9 +98,8 @@
     {
         switch (operation)
         {
-            case "Peak":
-                stack.Peek();
-                resultMessage = $"{inputData} was pushed on the stack";
+            case "Peak":               
+                resultMessage = $"{stack.Peek()} is the top value";
                 break;
             case "Pop":
                 stack.Pop();

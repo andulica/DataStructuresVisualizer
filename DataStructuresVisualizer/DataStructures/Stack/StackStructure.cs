@@ -4,6 +4,7 @@
     {
         // Internal linked list to store the elements of the stack.
         private LinkedList<T> list = new LinkedList<T>();
+        // Count of nodes in the stack.
         public int count => list.Count;
 
         /// <summary>
