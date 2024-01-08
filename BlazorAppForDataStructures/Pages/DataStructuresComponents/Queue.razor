@@ -1,0 +1,102 @@
+﻿ @using DataStructuresVisualizer.DataStructures.Queue;
+ 
+<h3>SinglyLinkedList</h3>
+
+    <!-- Operation list selection -->
+    <h5>Select Operation</h5>
+    <select @bind="operation">
+        @foreach (var operation in operations)
+        {
+            <option value="@operation">@operation</option>
+        }
+    </select>
+
+    @if (operation == "Dequeue")
+    {
+        <h5>Enter how many nodes you wwant to deque</h5>
+        <select @bind="desiredPosition">
+            @for (int i = 0; i <= queue.Size; i++)
+            {
+                <option value="@i">@i</option>
+            }
+        </select>
+    }
+
+    <!-- Queue List Display -->
+    <h5>Queue</h5>
+    @foreach (var node in queue)
+    {
+        <div class="node">@node._data</div>
+        @if (node.Next != null)
+        {
+            <div class="arrow">→</div>
+        }
+    }
+    <div class="node null-node">null</div>
+
+    <Button class="btn btn-primary" @onclick="(() => buttonVisualize(operation))">Visualize</Button>
+    <input @bind="inputData" type="text" placeholder="Enter node data" />
+
+<div>@resultMessage</div>
+
+
+<style>
+    #linked-list {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .node {
+        padding: 10px;
+        border: 2px solid black;
+        border-radius: 5px;
+        text-align: center;
+    }
+
+    .null-node {
+        background-color: lightgray;
+    }
+
+    .arrow {
+        font-size: 20px;
+    }
+</style>
+@code {
+    private QueueStructure<int> queue = new QueueStructure<int>();
+    private int inputData;
+    private int desiredPosition;
+    private string[] operations = { "Peek", "Enqueue", "Dequeue", "Create" };
+    private string operation;
+    private string resultMessage;
+    Random rand = new Random();
+
+
+    protected override void OnInitialized()
+    {
+        queue = new QueueStructure<int>();
+        queue.Enqueue(rand.Next(1, 30));
+        queue.Enqueue(rand.Next(1, 30));
+        queue.Enqueue(rand.Next(1, 30));
+    }
+
+    void buttonVisualize(string operation)
+    {
+        switch (operation)
+        {
+            case "Queue":
+                queue.Enqueue(inputData);
+                break;
+            case "Dequeue":
+                queue.Dequeue();
+                break;
+            case "Peek":
+                queue.Peek();
+                break;
+            case "Create":
+                this.OnInitialized();
+
+                break;
+        }
+    }
+}

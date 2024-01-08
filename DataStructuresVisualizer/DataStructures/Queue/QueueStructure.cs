@@ -1,6 +1,6 @@
 ﻿namespace DataStructuresVisualizer.DataStructures.Queue;
 
-public class Queue<T>
+public class QueueStructure<T>
 {
     // Internal linked list to store the elements of the queue.
     private LinkedList<T> list = new LinkedList<T>();
@@ -19,7 +19,7 @@ public class Queue<T>
     /// </summary>
     /// <returns>The item at the front of the queue.</returns>
     /// <exception cref="InvalidOperationException">Thrown if the queue is empty.</exception>
-    public T Dequeue()
+    public void Dequeue()
     {
         if (list.Count == 0)
         {
@@ -28,7 +28,6 @@ public class Queue<T>
 
         T value = list.First.Value;
         list.RemoveFirst();
-        return value;
     }
 
     /// <summary>
