@@ -1,47 +1,51 @@
 ﻿ @using DataStructuresVisualizer.DataStructures.Queue;
- 
-<h3>SinglyLinkedList</h3>
 
-    <!-- Operation list selection -->
-    <h5>Select Operation</h5>
-    <select @bind="operation">
-        @foreach (var operation in operations)
+<h3>Queue</h3>
+
+<!-- Operation list selection -->
+<h5>Select Operation</h5>
+<select @bind="operation">
+    @foreach (var operation in operations)
+    {
+        <option value="@operation">@operation</option>
+    }
+</select>
+
+@if (operation == "Dequeue")
+{
+    <h5>Enter how many nodes you want to dequeue</h5>
+    <select @bind="nodesToDequeue">
+        @for (int i = 0; i <= queue.Size(); i++)
         {
-            <option value="@operation">@operation</option>
+            <option value="@i">@i</option>
         }
     </select>
+}
 
-    @if (operation == "Dequeue")
+<!-- Queue List Display -->
+<div id="queue-display">
+    @if (!queue.IsEmpty())
     {
-        <h5>Enter how many nodes you wwant to deque</h5>
-        <select @bind="desiredPosition">
-            @for (int i = 0; i <= queue.Size; i++)
-            {
-                <option value="@i">@i</option>
-            }
-        </select>
-    }
-
-    <!-- Queue List Display -->
-    <h5>Queue</h5>
-    @foreach (var node in queue)
-    {
-        <div class="node">@node._data</div>
-        @if (node.Next != null)
+        var items = queue.ToList();
+        for (int i = 0; i < items.Count; i++)
         {
-            <div class="arrow">→</div>
+            <div class="node">@items[i]</div>
+            if (i < items.Count - 1) // Check if it's not the last item
+            {
+                <div class="arrow">→</div>
+            }
         }
     }
-    <div class="node null-node">null</div>
+</div>
 
-    <Button class="btn btn-primary" @onclick="(() => buttonVisualize(operation))">Visualize</Button>
-    <input @bind="inputData" type="text" placeholder="Enter node data" />
+<Button class="btn btn-primary" @onclick="(() => buttonVisualize(operation))">Visualize</Button>
+<input @bind="inputData" type="text" placeholder="Enter node data" />
 
 <div>@resultMessage</div>
 
 
 <style>
-    #linked-list {
+    #queue-display {
         display: flex;
         align-items: center;
         gap: 10px;
@@ -54,8 +58,9 @@
         text-align: center;
     }
 
-    .null-node {
-        background-color: lightgray;
+    .queue-empty {
+        padding: 10px;
+        font-style: italic;
     }
 
     .arrow {
@@ -65,13 +70,13 @@
 @code {
     private QueueStructure<int> queue = new QueueStructure<int>();
     private int inputData;
-    private int desiredPosition;
+    private int nodesToDequeue;
     private string[] operations = { "Peek", "Enqueue", "Dequeue", "Create" };
     private string operation;
     private string resultMessage;
     Random rand = new Random();
 
-
+    Stack<int> stack = new Stack<int>();
     protected override void OnInitialized()
     {
         queue = new QueueStructure<int>();
@@ -84,11 +89,11 @@
     {
         switch (operation)
         {
-            case "Queue":
+            case "Enqueue":
                 queue.Enqueue(inputData);
                 break;
             case "Dequeue":
-                queue.Dequeue();
+                queue.Dequeue(nodesToDequeue);
                 break;
             case "Peek":
                 queue.Peek();

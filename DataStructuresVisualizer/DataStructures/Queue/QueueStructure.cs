@@ -1,9 +1,16 @@
 ﻿namespace DataStructuresVisualizer.DataStructures.Queue;
 
-public class QueueStructure<T>
+using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+
+public class QueueStructure<T> : IEnumerable<T>
 {
-    // Internal linked list to store the elements of the queue.
-    private LinkedList<T> list = new LinkedList<T>();
+    /// <summary>
+    /// The internal singly linked list to store the elements of the queue.
+    /// </summary>
+    private SinglyLinkedList<T> list = new SinglyLinkedList<T>();
 
     /// <summary>
     /// Adds an item to the end of the queue.
@@ -11,24 +18,32 @@ public class QueueStructure<T>
     /// <param name="value">The item to add to the queue.</param>
     public void Enqueue(T value)
     {
-        list.AddLast(value);
+        list.Append(value);
     }
 
     /// <summary>
-    /// Removes and returns the item at the front of the queue.
+    /// Removes a specified number of items from the front of the queue.
     /// </summary>
-    /// <returns>The item at the front of the queue.</returns>
-    /// <exception cref="InvalidOperationException">Thrown if the queue is empty.</exception>
-    public void Dequeue()
+    /// <param name="count">The number of items to remove.</param>
+    /// <exception cref="InvalidOperationException">Thrown if the queue does not have enough items.</exception>
+    public void Dequeue(int count)
     {
-        if (list.Count == 0)
+        if (count <= 0)
         {
-            throw new InvalidOperationException("The queue is empty.");
+            throw new ArgumentOutOfRangeException(nameof(count), "Count must be greater than 0.");
         }
 
-        T value = list.First.Value;
-        list.RemoveFirst();
+        if (list.Count < count)
+        {
+            throw new InvalidOperationException("The queue does not have enough items.");
+        }
+
+        for (int i = 0; i < count; i++)
+        {
+            list.DeleteHead();
+        }
     }
+
 
     /// <summary>
     /// Returns the item at the front of the queue without removing it.
@@ -42,7 +57,7 @@ public class QueueStructure<T>
             throw new InvalidOperationException("The queue is empty.");
         }
 
-        return list.First.Value;
+        return list.head._data;
     }
 
     /// <summary>
@@ -64,10 +79,26 @@ public class QueueStructure<T>
     }
 
     /// <summary>
-    /// Clears all items from the queue.
+    /// Returns an enumerator that iterates through the queue.
     /// </summary>
-    public void Clear()
+    /// <returns>An IEnumerator of type T.</returns>
+    public IEnumerator<T> GetEnumerator()
     {
-        list.Clear();
+        SinglyLinkedListNode<T> current = list.head;
+        while (current != null)
+        {
+            yield return current._data;
+            current = current.Next;
+        }
+    }
+
+    /// <summary>
+    /// Returns an enumerator that iterates through a collection.
+    /// </summary>
+    /// <returns>An IEnumerator object that can be used to iterate through the collection.</returns>
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return this.GetEnumerator();
     }
 }
+
