@@ -1,0 +1,100 @@
+﻿@using DataStructuresVisualizer.DataStructures.BinarySearchTree;
+@inject IJSRuntime JSRuntime
+
+<h3>Binary Search Tree</h3>
+
+<!-- Input for operations -->
+<div>
+    <input @bind="inputValue" type="number" placeholder="Enter value" />
+    <button @onclick="() => InsertValue()">Insert</button>
+    <button @onclick="() => SearchValue()">Search</button>
+    <button @onclick="() => RemoveValue()">Remove</button>
+</div>
+
+<!-- Traversal operations -->
+<div>
+    @* <button @onclick="() => InOrderTraversal()">In-Order</button> *@
+@*     <button @onclick="() => PreOrderTraversal()">Pre-Order</button>
+    <button @onclick="() => PostOrderTraversal()">Post-Order</button> *@
+</div>
+
+<!-- Display area for the BST -->
+<div id="bst-display">
+    @* Render the tree here *@
+</div>
+
+<!-- Messages -->
+<div>@message</div>
+
+
+@code {
+    private BinarySearchTree<int> bst = new BinarySearchTree<int>();
+    private int inputValue;
+    private string message;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await UpdateDisplay();
+        }
+    }
+
+    private void InsertValue()
+    {
+        bst.Insert(inputValue);
+        UpdateDisplay().ContinueWith(_ => { }); // Handle async call without await
+    }
+
+    private void SearchValue()
+    {
+        var result = bst.Search(inputValue);
+        message = result != null ? $"Value {inputValue} found." : $"Value {inputValue} not found.";
+    }
+
+    private void RemoveValue()
+    {
+        bst.Remove(inputValue);
+        UpdateDisplay().ContinueWith(_ => { }); // Handle async call without await
+    }
+
+    // private void InOrderTraversal()
+    // {
+    //     // Implement traversal logic and update display
+    // }
+
+    private async Task UpdateDisplay()
+    {
+        var bstData = ConvertBSTToD3Format(bst.Root);
+        await JSRuntime.InvokeVoidAsync("drawBST", bstData);
+    }
+
+    private object ConvertBSTToD3Format(TreeNode<int> node)
+    {
+        if (node == null)
+        {
+            return new { name = "Empty", children = new object[0] };
+        }
+
+        var children = new List<object>();
+        if (node.Left != null)
+        {
+            children.Add(ConvertBSTToD3Format(node.Left));
+        }
+        if (node.Right != null)
+        {
+            children.Add(ConvertBSTToD3Format(node.Right));
+        }
+
+        var result = new
+        {
+            name = node.Data.ToString(),
+            // If there are no children, don't include the 'children' property
+            children = children.Count > 0 ? children : new List<object>()
+        };
+
+        return result;
+    }
+
+    // Similar methods for PreOrder and PostOrder
+}
