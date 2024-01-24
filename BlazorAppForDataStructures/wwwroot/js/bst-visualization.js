@@ -19,7 +19,7 @@
             + margin.left + "," + margin.top + ")");
 
     // Create the tree layout
-    const treemap = d3.tree().size([height, width]);
+    const treemap = d3.tree().size([width, height]);
     const root = d3.hierarchy(data);
     treemap(root);
 
@@ -28,7 +28,7 @@
         .data(root.descendants())
         .enter().append("g")
         .attr("class", d => "node" + (d.children ? " node--internal" : " node--leaf"))
-        .attr("transform", d => "translate(" + d.y + "," + d.x + ")")
+        .attr("transform", d => "translate(" + d.x + "," + d.y + ")")
         .append("circle")
         .attr("r", 10);
 
@@ -36,9 +36,9 @@
         .data(root.links())
         .enter().append("path")
         .attr("class", "link")
-        .attr("d", d3.linkHorizontal()
-            .x(d => d.y)
-            .y(d => d.x));
+        .attr("d", d3.linkVertical()
+            .x(d => d.x)
+            .y(d => d.y));
 
     // Add labels to nodes
     svg.selectAll(".node")
