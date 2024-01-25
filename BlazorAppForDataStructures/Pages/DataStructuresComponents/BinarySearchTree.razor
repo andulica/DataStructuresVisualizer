@@ -40,11 +40,14 @@
         }
     }
 
-    private void InsertValue()
+    private async Task InsertValue()
     {
-        bst.Insert(inputValue);
-        UpdateDisplay().ContinueWith(_ => { }); // Handle async call without await
+        bst.Insert(inputValue); 
+        await JSRuntime.InvokeVoidAsync("bstVisualization.addNode", inputValue); // Calls JS function to update visualization
+        await UpdateDisplay(); // Update the display
     }
+
+
 
     private void SearchValue()
     {
@@ -68,6 +71,7 @@
         var bstData = ConvertBSTToD3Format(bst.Root);
         await JSRuntime.InvokeVoidAsync("drawBST", bstData);
     }
+
 
     private object ConvertBSTToD3Format(TreeNode<int> node)
     {
