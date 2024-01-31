@@ -52,7 +52,7 @@ function updateTree(source) {
     // Enter any new modes at the parent's previous position
     let nodeEnter = node.enter().append('g')
         .attr('class', 'node')
-        .attr('transform', d => `translate(${source.y0},${source.x0})`) // source is the parent node
+        .attr('transform', d => `translate(${source.x0},${source.y0})`) // source is the parent node
 
     // Add Circle for the nodes
     nodeEnter.append('circle')
@@ -70,7 +70,7 @@ function updateTree(source) {
     // Transition to the proper position for the node
     nodeUpdate.transition()
         .duration(duration)
-        .attr('transform', d => `translate(${d.y},${d.x})`);
+        .attr('transform', d => `translate(${d.x},${d.y})`);
 
     // Update the node attributes and style
     nodeUpdate.select('circle.node')
@@ -97,7 +97,7 @@ function updateTree(source) {
     linkUpdate.transition()
         .duration(duration)
         .attr('stroke', 'black')
-        .attr('d', d => diagonal(d, d.parent));
+        .attr('d', d => diagonal(d.parent, d));
 
     // Store the old positions for transition
     nodes.forEach(d => {
@@ -107,8 +107,7 @@ function updateTree(source) {
 
     // Creates a curved (diagonal) path from parent to the child nodes
     function diagonal(s, d) {
-        let path = `M ${s.y} ${s.x} L ${d.y} ${d.x} Z`;            
-        return path;
+        return `M ${s.x} ${s.y} L ${d.x} ${d.y}`;
     }
 }
 
