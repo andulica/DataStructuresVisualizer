@@ -3,7 +3,7 @@ window.drawBST = function (data) {
 
     // Set the dimensions and margins of the diagram
     const margin = { top: 20, right: 90, bottom: 30, left: 90 },
-        width = 960 - margin.left - margin.right,
+        width = 1000 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom;
 
     // Remove any existing SVG to avoid overlaps
@@ -40,7 +40,7 @@ function updateTree(source) {
         links = treeData.descendants().slice(1);
 
     // Normalize for fixed-depth
-    nodes.forEach(d => { d.y = d.depth * 180; });
+    nodes.forEach(d => { d.y = d.depth * 50; });
 
     // ****************** Nodes section ***************************
     // Update the nodes...
@@ -51,13 +51,13 @@ function updateTree(source) {
 
     // Enter any new modes at the parent's previous position
     let nodeEnter = node.enter().append('g')
-        .attr('class', 'node')
         .attr('transform', d => `translate(${source.x0},${source.y0})`) // source is the parent node
 
     // Add Circle for the nodes
     nodeEnter.append('circle')
         .attr('class', 'node')
-
+        .attr('r', 20)
+        .style('fill', '#00F1D4');
 
     // Add labels for the nodes
     nodeEnter.append('text')
@@ -71,11 +71,6 @@ function updateTree(source) {
     nodeUpdate.transition()
         .duration(duration)
         .attr('transform', d => `translate(${d.x},${d.y})`);
-
-    // Update the node attributes and style
-    nodeUpdate.select('circle.node')
-        .attr('r', 20)
-        .style('fill', '#00F1D4')
 
     // ****************** Links section ***************************
     // Update the links...
@@ -99,13 +94,7 @@ function updateTree(source) {
         .attr('stroke', 'black')
         .attr('d', d => diagonal(d.parent, d));
 
-    // Store the old positions for transition
-    nodes.forEach(d => {
-        d.x0 = d.x;
-        d.y0 = d.y;
-    });
-
-    // Creates a curved (diagonal) path from parent to the child nodes
+    // Creates a straight diagonal path from parent to the child nodes
     function diagonal(s, d) {
         return `M ${s.x} ${s.y} L ${d.x} ${d.y}`;
     }
