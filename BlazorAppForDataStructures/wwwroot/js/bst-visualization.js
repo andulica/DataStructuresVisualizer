@@ -1,12 +1,13 @@
 ﻿//why I can't import "d3" from "d3"?"
 // setting breakpoints in the d3 .js file is not working
+//import * as d3 from "d3";
 
 let root, svg, treemap, width, height;
 let margin = { top: 20, right: 90, bottom: 30, left: 90 };
 window.drawBST = function (data) {
 
     // Set the dimensions and margins of the diagram
-        margin,
+    margin,
         width = 700 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom;
 
@@ -30,12 +31,13 @@ window.drawBST = function (data) {
     root = d3.hierarchy(data);
     root.x0 = height / 2;  // Center the root node vertically
     root.y0 = 0;           // Start the root node at the left of the screen
-    updateTree(root);      // This will compute the positions and draw the nodes
+    updateTree(root);      // This will compute the positions and draw the nodes#
 }
 
 function updateTree(source) {
 
-    const duration = 750;
+    const nodeDuration = 750;
+    const linkDuration = 750;
     // Assigns the x and y position for the nodes
     let treeData = treemap(root);
 
@@ -46,25 +48,25 @@ function updateTree(source) {
     // Normalize for fixed-depth
     nodes.forEach(d => { d.y = d.depth * 50; });
 
-   
+
     // ****************** Nodes section ***************************
     // Update the nodes...
 
     let i = 0;
     let node = svg.selectAll('g.node')
-        .data(nodes, d => d.id || (d.id = ++i));
+        .data(nodes, d => d.id || (d.id = ++i)); // Assigns a unique id to each node
 
     // Enter any new modes at the parent's previous position
     let nodeEnter = node.enter().append('g')
-        .attr('transform', d => `translate(${source.x0},${source.y0})`) // source is the parent node
+        .attr('transform', `translate(${source.x0},${source.y0})`) // source is the parent node
 
     // Add Circle for the nodes
     nodeEnter.append('circle')
         .attr('class', 'node')
-        .attr('r', 20)
-        .style('fill', '#00F1D4')
+        .attr('r', 20) // Adjust radius as needed
+        .style('fill', d => d.data.visited ? 'red' : '#00F1D4') // Conditional fill based on visited
         .attr('stroke', 'black')
-        .attr('stroke-width', 2.5);
+        .attr('stroke-width', 1.5);
 
     // Add labels for the nodes
     nodeEnter.append('text')
@@ -76,7 +78,7 @@ function updateTree(source) {
 
     // Transition to the proper position for the node
     nodeUpdate.transition()
-        .duration(duration)
+        .duration(nodeDuration)
         .attr('transform', d => `translate(${d.x},${d.y})`);
 
     // ****************** Links section ***************************
@@ -86,7 +88,6 @@ function updateTree(source) {
 
     // Enter any new links at the parent's previous position
     let linkEnter = link.enter().insert('path', 'g')
-        .attr('class', 'link')
         .attr('d', d => {
             let o = { x: source.x0, y: source.y0 };
             return diagonal(o, o);
@@ -95,12 +96,13 @@ function updateTree(source) {
     // UPDATE
     let linkUpdate = linkEnter.merge(link);
 
+    
     // Transition back to the parent element position
     linkUpdate.transition()
-        .duration(duration)
+        .duration(linkDuration)
         .attr('stroke', 'black')
         .attr('stroke-width', 2.5)
-        .attr('d', d => diagonal(d.parent, d));
+        .attr('d', d => diagonal(d.parent, d))
 
     // Creates a straight diagonal path from parent to the child nodes
     function diagonal(s, d) {
@@ -110,59 +112,24 @@ function updateTree(source) {
 
 // preffered way is to have this methods in the backend and call them from the frontend. Look into it on how you may achive this.
 function findParent(node, newValue) {
-    if (newValue < node.name) {
+
+    if (newValue < node.data.name) {
         // Go left
         if (!node.children || node.children.length === 0 || !node.children[0]) {
             return node; // Found parent
         } else {
-            return findParent(node.children[0], newValue); 
+            return findParent(node.children[0], newValue);
         }
     } else {
         // Go right
-        if (!node.children || node.children.length < 2 || !node.children[1]) { 
+        if (!node.children || node.children.length < 2 || !node.children[1]) {
             return node; // Found parent
         } else {
-            return findParent(node.children[1], newValue); // Assuming right child is second
+            return findParent(node.children[1], newValue);
         }
     }
 }
 
-function addNode(newValue) {
-    let parentNode = findParent(root.data, newValue);
-    let newNode = { name: newValue, children: [] };
 
-    if (!parentNode.children) {
-        parentNode.children = [];
-    }
-    parentNode.children.push(newNode);
-
-    // Update the D3 hierarchy with the new structure
-    root = d3.hierarchy(root.data);
-    treemap(root); 
-    updateTree(root); 
-    resizeTree(root.descendants(), root.descendants().slice(1));   
-}
-
-function resizeTree(nodes) {
-    // Calculate the maximum depth of the tree to determine horizontal spacing
-    const maxDepth = d3.max(nodes, d => d.depth);
-
-    // Calculate the width of the tree to determine horizontal spacing
-    const nodeWidth = (width - margin.left - margin.right) / (maxDepth + 1);
-
-    // Calculate the maximum number of nodes at the deepest level to determine vertical spacing
-    const maxNodesInDepth = Math.pow(2, maxDepth); 
-    const nodeHeight = (height - margin.top - margin.bottom) / maxNodesInDepth;
-
-    // Update positions of nodes to fit within the SVG
-    nodes.forEach(d => {
-        d.x = d.depth * nodeWidth + margin.left; 
-        d.y = d.index * nodeHeight + margin.top;
-    });
-}
-
-window.bstVisualization = {
-    addNode: function (newValue) {
-        addNode(newValue);
-    }
-};
+//Need to highlight the nodes and edges that are being traversed
+// Need to add a button to start the traversal preorder, inorder, postorder

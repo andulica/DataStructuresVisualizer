@@ -42,7 +42,10 @@
 
     private void InsertValue()
     {
-        bst.Insert(inputValue);
+        if (!bst.Insert(inputValue))
+        {
+            message = "Value inserted must be less than 100 and greater than 0.";
+        }
         UpdateDisplay().ContinueWith(_ => { }); // Handle async call without await
     }
 
@@ -71,13 +74,14 @@
 
     private object ConvertBSTToD3Format(TreeNode<int> node)
     {
+
         if (node == null)
         {
             return new { name = "Empty", children = new object[0] };
         }
 
         var children = new List<object>();
-        if (node.Left != null)
+        if (node.Left != null) 
         {
             children.Add(ConvertBSTToD3Format(node.Left));
         }
@@ -90,7 +94,8 @@
         {
             name = node.Data.ToString(),
             // If there are no children, don't include the 'children' property
-            children = children.Count > 0 ? children : new List<object>()
+            children = children.Count > 0 ? children : new List<object>(),
+            visited = node.IsVisited
         };
 
         return result;

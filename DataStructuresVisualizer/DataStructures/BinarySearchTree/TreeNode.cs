@@ -10,6 +10,7 @@
         /// Gets or sets the data stored in this node.
         /// </summary>
         public T Data { get; set; }
+        public bool IsVisited { get; set; }
 
         /// <summary>
         /// Gets or sets the left child of this node.

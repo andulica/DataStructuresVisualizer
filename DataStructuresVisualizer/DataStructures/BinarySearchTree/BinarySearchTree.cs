@@ -1,149 +1,165 @@
-﻿namespace DataStructuresVisualizer.DataStructures.BinarySearchTree
+﻿using System.Windows.Markup;
+
+namespace DataStructuresVisualizer.DataStructures.BinarySearchTree
 {
     public class BinarySearchTree<T>
-{
-    // Root node of the binary search tree.
-    public TreeNode<T> Root { get; private set; }
-
-    /// <summary>
-    /// Inserts a new value into the binary search tree.
-    /// </summary>
-    /// <param name="value">The value to be inserted.</param>
-    public void Insert(T value)
     {
-        Root = InsertRecursive(Root, value);
-    }
+        // Root node of the binary search tree.
+        public TreeNode<T> Root { get; private set; }
 
-    /// <summary>
-    /// Helper method for recursively inserting a new value into the tree.
-    /// </summary>
-    /// <param name="node">Current node in the recursion.</param>
-    /// <param name="value">Value to insert.</param>
-    /// <returns>The updated node after insertion.</returns>
-    private TreeNode<T> InsertRecursive(TreeNode<T> node, T value)
-    {
-        // Comparer to handle generic types
-        var comparer = Comparer<T>.Default;
-
-        // Create new node if current node is null
-        if (node == null)
+        /// <summary>
+        /// Inserts a new value into the binary search tree.
+        /// </summary>
+        /// <param name="value">The value to be inserted.</param>
+        public bool Insert(T value)
         {
-            node = new TreeNode<T>(value);
+            if (value is int intValue)
+            {
+                if (intValue <= 0 || intValue > 100)
+                {
+                    return false;
+                }
+            }
+            Root = InsertRecursive(Root, value);
+            return true;
+        }
+
+        /// <summary>
+        /// Helper method for recursively inserting a new value into the tree.
+        /// </summary>
+        /// <param name="node">Current node in the recursion.</param>
+        /// <param name="value">Value to insert.</param>
+        /// <returns>The updated node after insertion.</returns>
+        private TreeNode<T> InsertRecursive(TreeNode<T> node, T value)
+        {
+            // Comparer to handle generic types
+            var comparer = Comparer<T>.Default;
+
+            // Create new node if current node is null
+            if (node == null)
+            {
+                node = new TreeNode<T>(value);
+                return node;
+            }
+
+            // Recursive calls for left or right subtree based on comparison
+            if (comparer.Compare(value, node.Data) < 0)
+            {
+                node.Left = InsertRecursive(node.Left, value);
+                node.Left.IsVisited = true;
+
+            }
+            else if (comparer.Compare(value, node.Data) > 0)
+            {
+                node.Right = InsertRecursive(node.Right, value);
+                node.Right.IsVisited = true;
+
+            }
+
             return node;
         }
 
-        // Recursive calls for left or right subtree based on comparison
-        if (comparer.Compare(value, node.Data) < 0)
+        /// <summary>
+        /// Searches for a value in the binary search tree.
+        /// </summary>
+        /// <param name="value">Value to search for.</param>
+        /// <returns>The node containing the value, if found; otherwise null.</returns>
+        public TreeNode<T> Search(T value)
         {
-            node.Left = InsertRecursive(node.Left, value);
-        }
-        else if (comparer.Compare(value, node.Data) > 0)
-        {
-            node.Right = InsertRecursive(node.Right, value);
-        }
-
-        return node;
-    }
-
-    /// <summary>
-    /// Searches for a value in the binary search tree.
-    /// </summary>
-    /// <param name="value">Value to search for.</param>
-    /// <returns>The node containing the value, if found; otherwise null.</returns>
-    public TreeNode<T> Search(T value)
-    {
-        return SearchRecursive(Root, value);
-    }
-
-    /// <summary>
-    /// Helper method for recursively searching a value in the tree.
-    /// </summary>
-    /// <param name="node">Current node in the recursion.</param>
-    /// <param name="value">Value to search for.</param>
-    /// <returns>The node containing the value, if found; otherwise null.</returns>
-    private TreeNode<T> SearchRecursive(TreeNode<T> node, T value)
-    {
-        // Comparer to handle generic types
-        var comparer = Comparer<T>.Default;
-
-        // Return node if found or if reached end of branch
-        if (node == null || EqualityComparer<T>.Default.Equals(node.Data, value))
-        {
-            return node;
+            return SearchRecursive(Root, value);
         }
 
-        // Recursive calls for left or right subtree based on comparison
-        if (comparer.Compare(value, node.Data) < 0)
+        /// <summary>
+        /// Helper method for recursively searching a value in the tree.
+        /// </summary>
+        /// <param name="node">Current node in the recursion.</param>
+        /// <param name="value">Value to search for.</param>
+        /// <returns>The node containing the value, if found; otherwise null.</returns>
+        private TreeNode<T> SearchRecursive(TreeNode<T> node, T value)
         {
-            return SearchRecursive(node.Left, value);
+            // Comparer to handle generic types
+            var comparer = Comparer<T>.Default;
+
+            // Return node if found or if reached end of branch
+            if (node == null || EqualityComparer<T>.Default.Equals(node.Data, value))
+            {
+                return node;
+            }
+
+            // Recursive calls for left or right subtree based on comparison
+            if (comparer.Compare(value, node.Data) < 0)
+            {
+                node.IsVisited = true;
+                return SearchRecursive(node.Left, value);
+            }
+
+            node.IsVisited = true;
+            return SearchRecursive(node.Right, value);
         }
 
-        return SearchRecursive(node.Right, value);
-    }
-
-    /// <summary>
-    /// Searches for the minimum value in the binary search tree.
-    /// </summary>
-    /// <returns>The node containing the minimum value.</returns>
-    public TreeNode<T> SearchMin()
-    {
-        TreeNode<T> current = Root;
-        while (current.Left != null)
+        /// <summary>
+        /// Searches for the minimum value in the binary search tree.
+        /// </summary>
+        /// <returns>The node containing the minimum value.</returns>
+        public TreeNode<T> SearchMin()
         {
-            current = current.Left;
+            TreeNode<T> current = Root;
+            while (current.Left != null)
+            {
+                current = current.Left;
+            }
+            return current;
         }
-        return current;
-    }
 
-    /// <summary>
-    /// Searches for the maximum value in the binary search tree.
-    /// </summary>
-    /// <returns>The node containing the maximum value.</returns>
-    public TreeNode<T> SearchMax()
-    {
-        TreeNode<T> current = Root;
-        while (current.Right != null)
+        /// <summary>
+        /// Searches for the maximum value in the binary search tree.
+        /// </summary>
+        /// <returns>The node containing the maximum value.</returns>
+        public TreeNode<T> SearchMax()
         {
-            current = current.Right;
+            TreeNode<T> current = Root;
+            while (current.Right != null)
+            {
+                current = current.Right;
+            }
+            return current;
         }
-        return current;
-    }
 
-    /// <summary>
-    /// Removes a value from the binary search tree.
-    /// </summary>
-    /// <param name="value">Value to be removed.</param>
-    public void Remove(T value)
-    {
-        Root = RemoveRecursive(Root, value);
-    }
-
-    /// <summary>
-    /// Helper method for recursively removing a value from the tree.
-    /// </summary>
-    /// <param name="node">Current node in the recursion.</param>
-    /// <param name="value">Value to remove.</param>
-    /// <returns>The updated node after removal.</returns>
-    private TreeNode<T> RemoveRecursive(TreeNode<T> node, T value)
-    {
-        // Comparer to handle generic types
-        var comparer = Comparer<T>.Default;
-
-        if (node == null) return null;
-
-        // Navigate to the node to be removed
-        if (comparer.Compare(value, node.Data) < 0)
+        /// <summary>
+        /// Removes a value from the binary search tree.
+        /// </summary>
+        /// <param name="value">Value to be removed.</param>
+        public void Remove(T value)
         {
-            node.Left = RemoveRecursive(node.Left, value);
+            Root = RemoveRecursive(Root, value);
         }
-        else if (comparer.Compare(value, node.Data) > 0)
+
+        /// <summary>
+        /// Helper method for recursively removing a value from the tree.
+        /// </summary>
+        /// <param name="node">Current node in the recursion.</param>
+        /// <param name="value">Value to remove.</param>
+        /// <returns>The updated node after removal.</returns>
+        private TreeNode<T> RemoveRecursive(TreeNode<T> node, T value)
         {
-            node.Right = RemoveRecursive(node.Right, value);
-        }
-        else
-        {
-            // Handle nodes with only one child or no child
-            if (node.Left == null)
+            // Comparer to handle generic types
+            var comparer = Comparer<T>.Default;
+
+            if (node == null) return null;
+
+            // Navigate to the node to be removed
+            if (comparer.Compare(value, node.Data) < 0)
+            {
+                node.Left = RemoveRecursive(node.Left, value);
+            }
+            else if (comparer.Compare(value, node.Data) > 0)
+            {
+                node.Right = RemoveRecursive(node.Right, value);
+            }
+            else
+            {
+                // Handle nodes with only one child or no child
+                if (node.Left == null)
                     return node.Right;
                 if (node.Right == null)
                     return node.Left;
