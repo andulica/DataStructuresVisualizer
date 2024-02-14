@@ -26,12 +26,15 @@
         /// Constructor that initializes the TreeNode with the specified data.
         /// </summary>
         /// <param name="data">The data to store in the node.</param>
+        /// 
+        public Guid Id { get; set; } // Unique identifier
         public TreeNode(T data)
         {
             this.Data = data;
             // Initialize left and right children as null
             Left = null;
             Right = null;
+            Id = Guid.NewGuid(); // Generate a unique identifier
         }
     }
 }

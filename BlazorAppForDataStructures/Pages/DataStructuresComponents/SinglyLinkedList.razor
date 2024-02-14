@@ -1,135 +1,181 @@
-﻿@inject NavigationManager NavigationManager
-@using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
+﻿   @*  @using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
+    @inject IJSRuntime JSRuntime
 
-<div id="linked-list">
-    <h3>SinglyLinkedList</h3>
+    <div id="linked-list">
+        <h3>SinglyLinkedList</h3>
 
-    <!-- Operation list selection -->
-    <h5>Select Operation</h5>
-    <select @bind="operation">
-        @foreach (var operation in operations)
-        {
-            <option value="@operation">@operation</option>
-        }
-    </select>
-
-    @if (operation == "Insert at")
-    {
-        <h5>Choose Position</h5>
-        <select @bind="desiredPosition">
-            @for (int i = 0; i <= linkedList.Count; i++)
+        <!-- Operation list selection -->
+        <h5>Select Operation</h5>
+        <select @bind="operation">
+            @foreach (var operation in operations)
             {
-                <option value="@i">@i</option>
+                <option value="@operation">@operation</option>
             }
         </select>
-    }
 
-    @if (operation == "Delete at")
-    {
-        <h5>Choose Position</h5>
-        <select @bind="desiredPosition">
-            @for (int i = 0; i <= linkedList.Count; i++)
+        @if (operation == "Insert at")
+        {
+            <h5>Choose Position</h5>
+            <select @bind="desiredPosition">
+                @for (int i = 0; i <= linkedList.Count; i++)
+                {
+                    <option value="@i">@i</option>
+                }
+            </select>
+        }
+
+        @if (operation == "Delete at")
+        {
+            <h5>Choose Position</h5>
+            <select @bind="desiredPosition">
+                @for (int i = 0; i <= linkedList.Count; i++)
+                {
+                    <option value="@i">@i</option>
+                }
+            </select>
+        }
+        <!-- Linked List Display -->
+        <h5>Linked List</h5>
+        @foreach (var node in linkedList)
+        {
+            <div class="node">@node._data</div>
+            @if (node.Next != null)
             {
-                <option value="@i">@i</option>
+                <div class="arrow">→</div>
             }
-        </select>
-    }
-    <!-- Linked List Display -->
-    <h5>Linked List</h5>
-    @foreach (var node in linkedList)
-    {
-        <div class="node">@node._data</div>
-        @if (node.Next != null)
-        {
-            <div class="arrow">→</div>
         }
-    }
-    <div class="node null-node">null</div>
+        <div class="node null-node">null</div>
 
-    <Button class="btn btn-primary" @onclick="(() => buttonVisualize(operation))">Visualize</Button>
-    <input @bind="inputData" type="text" placeholder="Enter node data" />
+        <Button class="btn btn-primary" @onclick="(() => buttonVisualize(operation))">Visualize</Button>
+        <input @bind="inputData" type="text" placeholder="Enter node data" />
 
-    <div>@resultMessage</div>
-</div>
-
-
-<style>
-    #linked-list {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .node {
-        padding: 10px;
-        border: 2px solid black;
-        border-radius: 5px;
-        text-align: center;
-    }
-
-    .null-node {
-        background-color: lightgray;
-    }
-
-    .arrow {
-        font-size: 20px;
-    }
-</style>
+        <div>@resultMessage</div>
+    </div>
 
 
-@code {
-    private SinglyLinkedList<int> linkedList = new SinglyLinkedList<int>();
-    private int inputData;
-    private int desiredPosition;
-    private string[] operations = { "Insert at","Append","Prepend","Delete at", "Delete", "Search", "Create" };
-    private string operation;
-    private string resultMessage;
-    Random rand = new Random();
-
-
-    protected override void OnInitialized()
-    {
-        linkedList = new SinglyLinkedList<int>();
-        linkedList.Append(rand.Next(1, 30));
-        linkedList.Append(rand.Next(1, 30));
-        linkedList.Append(rand.Next(1, 30));
-    }
-
-    void buttonVisualize(string operation)
-    {
-        switch (operation)
-        {
-            case "Append":
-                linkedList.Append(inputData);
-                break;
-            case "Prepend":
-                linkedList.Prepend(inputData);
-                break;
-            case "Insert at":
-                linkedList.InsertAt(desiredPosition, inputData);
-                break;
-            case "Delete":
-                linkedList.Delete(inputData);
-                break;
-            case "Delete at":
-                linkedList.DeleteAt(desiredPosition);
-                break;
-            case "Search":
-                var position = linkedList.FindIndexOf(inputData);
-                if (position != -1)
-                {
-                    resultMessage = $"The node with value {inputData} was found at position {position}.";
-                }
-                else
-                {
-                    resultMessage = "The node was not found.";
-                }
-                break;
-
-            case "Create":
-                this.OnInitialized();
-
-                break;
+    <style>
+        #linked-list {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-    }
-}
+
+        .node {
+            padding: 10px;
+            border: 2px solid black;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .null-node {
+            background-color: lightgray;
+        }
+
+        .arrow {
+            font-size: 20px;
+        }
+    </style>
+
+
+    @code {
+        private SinglyLinkedList<int> linkedList = new SinglyLinkedList<int>();
+        private int inputData;
+        private int desiredPosition;
+        private string[] operations = { "Insert at","Append","Prepend","Delete at", "Delete", "Search", "Create" };
+        private string operation;
+        private string resultMessage;
+        Random rand = new Random();
+
+
+        protected override void OnInitialized()
+        {
+            linkedList = new SinglyLinkedList<int>();
+            linkedList.Append(rand.Next(1, 30));
+            linkedList.Append(rand.Next(1, 30));
+            linkedList.Append(rand.Next(1, 30));
+        }
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender)
+            {
+                await UpdateDisplay();
+            }
+        }
+
+        private void InsertValue()
+        {
+            linkedList.AddLast(inputData); // Insert at the end of the linked list
+            UpdateDisplay().ContinueWith(_ => { }); // Update display with the new node
+        }
+
+        private void SearchValue()
+        {
+            bool result = linkedList.Contains(inputData);
+            resultMessage = result ? $"Value {inputData} found." : $"Value {inputData} not found.";
+        }
+
+        private void RemoveValue()
+        {
+            linkedList.Remove(inputData); // Remove the specified value from the linked list
+            UpdateDisplay().ContinueWith(_ => { }); // Handle async call without await
+        }
+
+        private async Task UpdateDisplay()
+        {
+            var linkedListData = ConvertNodeToD3Format(inputData);
+            await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData);
+        }
+
+        private object ConvertNodeToD3Format(SinglyLinkedListNode<int> node)
+        {
+            if (node == null)
+            {
+                return null;
+            }
+
+            return new
+            {
+                value = node._data,
+                // Add other properties as needed for visualization, such as position
+            };
+        }
+
+
+        void buttonVisualize(string operation)
+        {
+            switch (operation)
+            {
+                case "Append":
+                    linkedList.Append(inputData);
+                    break;
+                case "Prepend":
+                    linkedList.Prepend(inputData);
+                    break;
+                case "Insert at":
+                    linkedList.InsertAt(desiredPosition, inputData);
+                    break;
+                case "Delete":
+                    linkedList.Delete(inputData);
+                    break;
+                case "Delete at":
+                    linkedList.DeleteAt(desiredPosition);
+                    break;
+                case "Search":
+                    var position = linkedList.FindIndexOf(inputData);
+                    if (position != -1)
+                    {
+                        resultMessage = $"The node with value {inputData} was found at position {position}.";
+                    }
+                    else
+                    {
+                        resultMessage = "The node was not found.";
+                    }
+                    break;
+
+                case "Create":
+                    this.OnInitialized();
+
+                    break;
+            }
+        }
+    } *@

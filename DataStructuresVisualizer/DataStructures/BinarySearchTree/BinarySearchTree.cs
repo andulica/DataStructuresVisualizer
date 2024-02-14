@@ -87,7 +87,7 @@ namespace DataStructuresVisualizer.DataStructures.BinarySearchTree
             }
 
             // Recursive calls for left or right subtree based on comparison
-            if (comparer.Compare(value, node.Data) < 0)
+            if (comparer.Compare(value, node.Data) < 0) 
             {
                 node.IsVisited = true;
                 return SearchRecursive(node.Left, value);

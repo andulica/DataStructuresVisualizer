@@ -1,7 +1,3 @@
-﻿//why I can't import "d3" from "d3"?"
-// setting breakpoints in the d3 .js file is not working
-//import * as d3 from "d3";
-
 let root, svg, treemap, width, height;
 let margin = { top: 20, right: 90, bottom: 30, left: 90 };
 window.drawBST = function (data) {
@@ -13,8 +9,7 @@ window.drawBST = function (data) {
 
     // Remove any existing SVG to avoid overlaps
     d3.select("#bst-display").select("svg").remove();
-
-    // Append the svg object to the body of the page
+    // Append the rwerwersvg object to the body of the page
     // Appends a 'group' element to 'svg'
     // Moves the 'group' element to the top left margin
     svg = d3.select("#bst-display").append("svg")
@@ -32,6 +27,12 @@ window.drawBST = function (data) {
     root.x0 = height / 2;  // Center the root node vertically
     root.y0 = 0;           // Start the root node at the left of the screen
     updateTree(root);      // This will compute the positions and draw the nodes#
+
+    console.log(data);
+    window.searchValue = function (value) {
+
+        searchRecursive(data, value);
+    };
 }
 
 function updateTree(source) {
@@ -39,7 +40,7 @@ function updateTree(source) {
     const nodeDuration = 750;
     const linkDuration = 750;
     // Assigns the x and y position for the nodes
-    let treeData = treemap(root);
+    let treeData = treemap(root); 
 
     // Compute the new tree layout
     let nodes = treeData.descendants(),
@@ -52,19 +53,19 @@ function updateTree(source) {
     // ****************** Nodes section ***************************
     // Update the nodes...
 
-    let i = 0;
     let node = svg.selectAll('g.node')
-        .data(nodes, d => d.id || (d.id = ++i)); // Assigns a unique id to each node
+        .data(nodes, d => d.data.id); // Use the global ID from the backend
 
     // Enter any new modes at the parent's previous position
     let nodeEnter = node.enter().append('g')
-        .attr('transform', `translate(${source.x0},${source.y0})`) // source is the parent node
+        .attr('id', d => `node-${d.data.id}`) // Set element ID using global ID
+        .attr('transform', `translate(${source.x0},${source.y0})`); // source is the parent node
 
     // Add Circle for the nodes
     nodeEnter.append('circle')
         .attr('class', 'node')
         .attr('r', 20) // Adjust radius as needed
-        .style('fill', d => d.data.visited ? 'red' : '#00F1D4') // Conditional fill based on visited
+        .style('fill', '#00F1D4') 
         .attr('stroke', 'black')
         .attr('stroke-width', 1.5);
 
@@ -110,26 +111,43 @@ function updateTree(source) {
     }
 }
 
-// preffered way is to have this methods in the backend and call them from the frontend. Look into it on how you may achive this.
-function findParent(node, newValue) {
+function searchRecursive(node, value) {
+    console.log("searchRecursive called with node:", node, "and value:", value);
+    if (!node) return null;
 
-    if (newValue < node.data.name) {
-        // Go left
-        if (!node.children || node.children.length === 0 || !node.children[0]) {
-            return node; // Found parent
-        } else {
-            return findParent(node.children[0], newValue);
+    const nodeElement = document.querySelector(`#node-${node.id}`);
+    if (nodeElement) {
+        nodeElement.style.transition = 'fill 0.5s'; // Smooth transition for color change
+        nodeElement.style.fill = 'lightblue'; // Temp highlight color
+    }
+
+    // Assuming node.name is a string, parse it to an integer for comparison
+    const nodeValue = parseInt(node.name, 10); 
+    if (nodeValue === value) {
+        if (nodeElement) {
+            console.log("setting color to red")
+            nodeElement.style.fill = 'red'; // Found node highlight
         }
-    } else {
-        // Go right
-        if (!node.children || node.children.length < 2 || !node.children[1]) {
-            return node; // Found parent
-        } else {
-            return findParent(node.children[1], newValue);
+        return node;
+    }
+
+    // Since we're dealing with a binary search tree, even in D3 format,
+    // we assume the first child is the left node and the second child is the right node.
+    // This assumes children[0] is "left" and children[1] is "right" if they exist.
+    if (node.children) {
+        for (let child of node.children) {
+            // Assuming child.name is a string that needs to be compared as an integer
+            const childValue = parseInt(child.name, 10);
+            if (value < nodeValue && node.children[0]) {
+                // Search in the left subtree
+                return searchRecursive(node.children[0], value);
+            } else if (value > nodeValue && node.children[1]) {
+                // Search in the right subtree
+                return searchRecursive(node.children[1], value);
+            }
         }
     }
+
+    console.log("end of search");
 }
 
-
-//Need to highlight the nodes and edges that are being traversed
-// Need to add a button to start the traversal preorder, inorder, postorder
