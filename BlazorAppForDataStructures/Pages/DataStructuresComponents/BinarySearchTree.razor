@@ -9,6 +9,7 @@
     <button @onclick="() => InsertValue()">Insert</button>
     <button @onclick="() => SearchValue()">Search</button>
     <button @onclick="() => RemoveValue()">Remove</button>
+    <button @onclick="() => CreateTree()">Create</button>
 </div>
 
 <!-- Traversal operations -->
@@ -28,27 +29,26 @@
 
 
 @code {
-    private BinarySearchTree<int> bst = new BinarySearchTree<int>();
+    private BinarySearchTree<int> bst = new BinarySearchTree<int>(5);
     private int inputValue;
     private string message;
+    private Random rand = new Random();
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    private void CreateTree()
     {
-        if (firstRender)
-        {
-            await UpdateDisplay();
-        }
+        bst = new BinarySearchTree<int>(5);
+        UpdateDisplay(bst).ContinueWith(_ => { }); // Handle async call without await
     }
 
     private void InsertValue()
     {
-        if (!bst.Insert(inputValue))
+        if (!this.bst.Insert(inputValue))
         {
             message = "Value inserted must be less than 100 and greater than 0.";
         }
         else
         {
-            UpdateDisplay().ContinueWith(_ => { }); // Handle async call without await
+            UpdateDisplay(this.bst).ContinueWith(_ => { }); // Handle async call without await
         }
     }
 
@@ -61,7 +61,7 @@
     private void RemoveValue()
     {
         bst.Remove(inputValue);
-        UpdateDisplay().ContinueWith(_ => { }); // Handle async call without await
+        UpdateDisplay(this.bst).ContinueWith(_ => { }); // Handle async call without await
     }
 
     // private void InOrderTraversal()
@@ -69,7 +69,7 @@
     //     // Implement traversal logic and update display
     // }
 
-    private async Task UpdateDisplay()
+    private async Task UpdateDisplay(BinarySearchTree<int> bst)
     {
         var bstData = ConvertBSTToD3Format(bst.Root);
         await JSRuntime.InvokeVoidAsync("drawBST", bstData);
@@ -79,30 +79,27 @@
     {
         if (node == null)
         {
-            return new { name = "Empty", children = new object[0] };
+            return null; // Return null for nodes that don't exist
         }
 
-        var children = new List<object>();
-        if (node.Left != null)
-        {
-            children.Add(ConvertBSTToD3Format(node.Left));
-        }
-        if (node.Right != null)
-        {
-            children.Add(ConvertBSTToD3Format(node.Right));
-        }
+        // Convert left and right children recursively.
+        // If a child is null, it remains null in the JSON, making it easier to understand the tree structure.
+        var leftChild = node.Left != null ? ConvertBSTToD3Format(node.Left) : null;
+        var rightChild = node.Right != null ? ConvertBSTToD3Format(node.Right) : null;
 
-        // Include the unique ID in the result
+        // Construct the result object. Include 'left' and 'right' only if they exist.
         var result = new
         {
             id = node.Id.ToString(), // Convert Guid to string for JavaScript compatibility
             name = node.Data.ToString(),
-            children = children.Count > 0 ? children : null, // Optionally set to null if no children
+            left = leftChild, // Directly assign the left child (can be null)
+            right = rightChild, // Directly assign the right child (can be null)
             visited = node.IsVisited
         };
 
         return result;
     }
+
 
 
     // Similar methods for PreOrder and PostOrder

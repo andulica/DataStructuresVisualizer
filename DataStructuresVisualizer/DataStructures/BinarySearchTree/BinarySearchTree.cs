@@ -6,13 +6,23 @@ namespace DataStructuresVisualizer.DataStructures.BinarySearchTree
     {
         // Root node of the binary search tree.
         public TreeNode<T> Root { get; private set; }
+        private Random random = new Random();
 
+
+        public BinarySearchTree(int numberOfNodes)
+        {
+            for (int i = 0; i < numberOfNodes; i++)
+            {
+                Insert((T)Convert.ChangeType(random.Next(1, 100), typeof(T)));
+            }
+        }
         /// <summary>
         /// Inserts a new value into the binary search tree.
         /// </summary>
         /// <param name="value">The value to be inserted.</param>
         public bool Insert(T value)
         {
+            Console.WriteLine("Inserting: " + value);
             if (value is int intValue)
             {
                 if (intValue <= 0 || intValue > 100)

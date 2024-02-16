@@ -9,27 +9,7 @@ namespace DataStructuresVisualizer
         static void Main(string[] args)
         {
 
-            BinarySearchTree<int> tree = new BinarySearchTree<int>();
-
-            tree.Insert(2);
-            tree.Insert(5);
-            tree.Insert(1);
-
-            tree.PrintTraverse();
-            tree.PrintSearchMax();
-
-            
-            HashMap<int, int> map = new HashMap<int, int>(2);
-
-            map.Add(2, 3);
-            Console.WriteLine(map.ToString());
-            Console.WriteLine(map.GetValue(2));
-            
-
-            LinkedList<int> list = new LinkedList<int>();
-            Dictionary<int, int> mappp = new Dictionary<int, int>();
-            
-             
+           
                 
             
 
