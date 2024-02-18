@@ -1,9 +1,7 @@
-let root, svg, treemap, width, height;
-let margin = { top: 20, right: 90, bottom: 30, left: 90 };
-window.drawBST = function (data) {
-
-    console.log("Received data in drawBST:", data);
-
+let root, svg, treemap, width, height, currentTreeNode; // Declare global variables
+let margin = { top: 20, right: 90, bottom: 30, left: 90 }; // Set the margins for the tree diagram
+window.drawBST = function (treeRootNode) {
+    
     // Set the dimensions and margins of the diagram
     margin,
         width = 700 - margin.left - margin.right,
@@ -24,8 +22,9 @@ window.drawBST = function (data) {
             + margin.left + "," + margin.top + ")");
     // Create the tree layout
     treemap = d3.tree().size([height, width]);
-    // Initialize the global root variable and update the tree
-     root = d3.hierarchy(data, function (d) {
+
+    // Assigns parent, children, height, depth
+     root = d3.hierarchy(treeRootNode, function (d) {
         let children = [];
         if (d.left) children.push(d.left);
         if (d.right) children.push(d.right);
@@ -34,16 +33,19 @@ window.drawBST = function (data) {
     root.x0 = height / 2;  // Center the root node vertically
     root.y0 = 0;           // Start the root node at the left of the screen
     updateTree(root);      // This will compute the positions and draw the nodes#
-    window.searchValue = function (value) {
-
-        searchRecursive(data, value);
-    };
+    currentTreeNode = treeRootNode; // Store the current tree data
 }
+
+window.searchValue = function (value) {
+
+    searchRecursive(currentTreeNode, value, null); 
+};
 
 function updateTree(source) {
 
     const nodeDuration = 750;
     const linkDuration = 750;
+
     // Assigns the x and y position for the nodes
     let treeData = treemap(root); 
 
@@ -61,7 +63,7 @@ function updateTree(source) {
     let node = svg.selectAll('g.node') 
         .data(nodes, d => d.data.id); // Use the global ID from the backend
         
-    // Enter any new modes at the parent's previous position
+    // Enter any new nodes at the parent's previous position
     let nodeEnter = node.enter().append('g')
         .attr('id', d => `node-${d.data.id}`) // Set element ID using global ID
         .attr('transform', `translate(${source.x0},${source.y0})`); // source is the parent node
@@ -93,7 +95,9 @@ function updateTree(source) {
         .data(links, d => d.id);
 
     // Enter any new links at the parent's previous position
-    let linkEnter = link.enter().insert('path', 'g')
+    let linkEnter = link.enter().insert('path', "g")
+        .attr("class", "link")
+        .attr("id", d => `link-${d.parent.data.id}-to-${d.data.id}`)
         .attr('d', d => {
             let o = { x: source.x0, y: source.y0 };
             return diagonal(o, o);
@@ -116,31 +120,38 @@ function updateTree(source) {
     }
 }
 
-function searchRecursive(node, value) {
-    if (!node) return null;
+function searchRecursive(currentNode, valueToBeSearched, parentId) {
+    if (!currentNode) return null;
 
-    // Select the circle within the node group
-    const circleElement = document.querySelector(`#node-${node.id} circle`);
+    // Highlight the current node
+    const circleElement = document.querySelector(`#node-${currentNode.id} circle`); // Get the circle element by ID
     if (circleElement) {
-        circleElement.style.transition = 'fill 0.5s';
+        circleElement.style.transition = 'fill 1s'; // Add a transition effect
         circleElement.style.fill = 'yellow'; // Highlight the current node as being searched
     }
 
-    const nodeValue = parseInt(node.name, 10);
-    if (nodeValue === value) {
-        if (circleElement) {
+    if (parentId !== null) {
+        const linkElement = document.querySelector(`#link-${parentId}-to-${currentNode.id}`); // Get the link element by ID
+        if (linkElement) {
+            linkElement.style.stroke = 'yellow'; 
+            circleElement.style.transition = 'fill 1s';
+            linkElement.style.strokeWidth = '2'; 
+        }
+    }
+    
+    const nodeValue = parseInt(currentNode.name, 10); // Convert the node value to an integer
+    if (nodeValue === valueToBeSearched) { 
+        if (circleElement) { 
             circleElement.style.fill = 'red'; // Highlight the found node
         }
-        return node;
+        return currentNode; 
     }
 
     // Traverse to the left or right child based on the comparison
-    if (value < nodeValue && node.left) {
-        return searchRecursive(node.left, value);
-    } else if (value > nodeValue && node.right) {
-        return searchRecursive(node.right, value);
+    console.log("value to be searched is: " + valueToBeSearched + "and nodeValue is" + nodeValue + " and currentNode.left is " + currentNode.left + " and currentNode.right is" + currentNode.right);
+    if (valueToBeSearched < nodeValue && currentNode.left) {
+        return searchRecursive(currentNode.left, valueToBeSearched, currentNode.id);
+    } else if (valueToBeSearched > nodeValue && currentNode.right) {
+        return searchRecursive(currentNode.right, valueToBeSearched, currentNode.id);
     }
 }
-
-
-
