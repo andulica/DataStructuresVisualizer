@@ -120,38 +120,43 @@ function updateTree(source) {
     }
 }
 
-function searchRecursive(currentNode, valueToBeSearched, parentId) {
-    if (!currentNode) return null;
+function searchRecursive(node, value, parentId, depth = 0) {
+    if (!node) return null;
 
-    // Highlight the current node
-    const circleElement = document.querySelector(`#node-${currentNode.id} circle`); // Get the circle element by ID
-    if (circleElement) {
-        circleElement.style.transition = 'fill 1s'; // Add a transition effect
-        circleElement.style.fill = 'yellow'; // Highlight the current node as being searched
-    }
+    let delay = depth * 500; // 0.5 second per depth level
 
-    if (parentId !== null) {
-        const linkElement = document.querySelector(`#link-${parentId}-to-${currentNode.id}`); // Get the link element by ID
-        if (linkElement) {
-            linkElement.style.stroke = 'yellow'; 
+    // Highlight the current node as being searched
+    setTimeout(() => {
+        const circleElement = document.querySelector(`#node-${node.id} circle`);
+        if (circleElement) {
             circleElement.style.transition = 'fill 1s';
-            linkElement.style.strokeWidth = '2'; 
+            circleElement.style.fill = 'yellow';
         }
-    }
-    
-    const nodeValue = parseInt(currentNode.name, 10); // Convert the node value to an integer
-    if (nodeValue === valueToBeSearched) { 
-        if (circleElement) { 
-            circleElement.style.fill = 'red'; // Highlight the found node
-        }
-        return currentNode; 
-    }
+    }, delay);
 
-    // Traverse to the left or right child based on the comparison
-    console.log("value to be searched is: " + valueToBeSearched + "and nodeValue is" + nodeValue + " and currentNode.left is " + currentNode.left + " and currentNode.right is" + currentNode.right);
-    if (valueToBeSearched < nodeValue && currentNode.left) {
-        return searchRecursive(currentNode.left, valueToBeSearched, currentNode.id);
-    } else if (valueToBeSearched > nodeValue && currentNode.right) {
-        return searchRecursive(currentNode.right, valueToBeSearched, currentNode.id);
-    }
+    const nodeValue = parseInt(node.name, 10);
+
+    // Delay the search logic to visually follow the color change
+    setTimeout(() => {
+        if (nodeValue === value) {
+            // If the node is found, ensure this color change is the last one scheduled for this node
+            setTimeout(() => {
+                const foundCircleElement = document.querySelector(`#node-${node.id} circle`);
+                if (foundCircleElement) {
+                    foundCircleElement.style.fill = 'red';
+                }
+            }, 100); // A slight additional delay ensures this executes after the yellow highlight
+            return node;
+        }
+
+        // Increment the depth for child nodes
+        depth++;
+
+        // Recursively search left or right child
+        if (value < nodeValue && node.left) {
+            return searchRecursive(node.left, value, node.id, depth);
+        } else if (value > nodeValue && node.right) {
+            return searchRecursive(node.right, value, node.id, depth);
+        }
+    }, delay + 100); // Adjust timing slightly if needed
 }
