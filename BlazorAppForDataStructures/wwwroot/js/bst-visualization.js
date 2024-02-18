@@ -132,6 +132,16 @@ function searchRecursive(node, value, parentId, depth = 0) {
             circleElement.style.transition = 'fill 1s';
             circleElement.style.fill = 'yellow';
         }
+
+        // Highlight the link to the parent node, if applicable
+        if (parentId !== null) {
+            const linkElement = document.querySelector(`#link-${parentId}-to-${node.id}`);
+            if (linkElement) {
+                linkElement.style.stroke = 'orange';
+                linkElement.style.transition = 'fill 1s';
+                linkElement.style.strokeWidth = '2';
+            }
+        }
     }, delay);
 
     const nodeValue = parseInt(node.name, 10);
