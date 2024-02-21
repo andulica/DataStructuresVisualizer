@@ -1,181 +1,93 @@
-﻿   @*  @using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
-    @inject IJSRuntime JSRuntime
+﻿       @using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
+       @inject IJSRuntime JSRuntime
 
-    <div id="linked-list">
-        <h3>SinglyLinkedList</h3>
+<div id="linked-list">
+    <h3>SinglyLinkedList</h3>
 
-        <!-- Operation list selection -->
-        <h5>Select Operation</h5>
-        <select @bind="operation">
-            @foreach (var operation in operations)
-            {
-                <option value="@operation">@operation</option>
-            }
-        </select>
-
-        @if (operation == "Insert at")
-        {
-            <h5>Choose Position</h5>
-            <select @bind="desiredPosition">
-                @for (int i = 0; i <= linkedList.Count; i++)
-                {
-                    <option value="@i">@i</option>
-                }
-            </select>
-        }
-
-        @if (operation == "Delete at")
-        {
-            <h5>Choose Position</h5>
-            <select @bind="desiredPosition">
-                @for (int i = 0; i <= linkedList.Count; i++)
-                {
-                    <option value="@i">@i</option>
-                }
-            </select>
-        }
-        <!-- Linked List Display -->
-        <h5>Linked List</h5>
-        @foreach (var node in linkedList)
-        {
-            <div class="node">@node._data</div>
-            @if (node.Next != null)
-            {
-                <div class="arrow">→</div>
-            }
-        }
-        <div class="node null-node">null</div>
-
-        <Button class="btn btn-primary" @onclick="(() => buttonVisualize(operation))">Visualize</Button>
-        <input @bind="inputData" type="text" placeholder="Enter node data" />
-
-        <div>@resultMessage</div>
+    <!-- Operation list selection -->
+    <h5>Insert value</h5>
+    <div>
+        <input @bind="inputValue" type="number" placeholder="Enter value" />
+        <button @onclick="() => InsertValue()">Insert</button>
+        <button @onclick="() => SearchValue()">Search</button>
+        <button @onclick="() => RemoveValue()">Remove</button>
+        <button @onclick="() => CreateSinglyLinkedList()">Create</button>
     </div>
 
 
-    <style>
-        #linked-list {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .node {
-            padding: 10px;
-            border: 2px solid black;
-            border-radius: 5px;
-            text-align: center;
-        }
-
-        .null-node {
-            background-color: lightgray;
-        }
-
-        .arrow {
-            font-size: 20px;
-        }
-    </style>
+    <div id="sll-display">
+        @* Render the tree here *@
+    </div>
+   
+</div>
 
 
-    @code {
-        private SinglyLinkedList<int> linkedList = new SinglyLinkedList<int>();
-        private int inputData;
-        private int desiredPosition;
-        private string[] operations = { "Insert at","Append","Prepend","Delete at", "Delete", "Search", "Create" };
-        private string operation;
-        private string resultMessage;
-        Random rand = new Random();
+@code {
+    private SinglyLinkedList<int> linkedList = new SinglyLinkedList<int>();
+    private int inputValue;
+    private string resultMessage;
+    Random rand = new Random();
 
 
-        protected override void OnInitialized()
+    protected override void OnInitialized()
+    {
+        linkedList = new SinglyLinkedList<int>();
+        linkedList.Append(rand.Next(1, 30));
+        linkedList.Append(rand.Next(1, 30));
+        linkedList.Append(rand.Next(1, 30));
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
         {
-            linkedList = new SinglyLinkedList<int>();
-            linkedList.Append(rand.Next(1, 30));
-            linkedList.Append(rand.Next(1, 30));
-            linkedList.Append(rand.Next(1, 30));
+            await UpdateDisplay(linkedList);
         }
-        protected override async Task OnAfterRenderAsync(bool firstRender)
+    }
+
+    private void InsertValue()
+    {
+        linkedList.AddLast(inputValue); // Insert at the end of the linked list
+        UpdateDisplay(linkedList).ContinueWith(_ => { }); // Update display with the new node
+    }
+
+    private void SearchValue()
+    {
+        bool result = linkedList.Contains(inputValue);
+        resultMessage = result ? $"Value {inputValue} found." : $"Value {inputValue} not found.";
+    }
+
+    private void RemoveValue()
+    {
+        linkedList.Remove(inputValue); // Remove the specified value from the linked list
+        UpdateDisplay(linkedList).ContinueWith(_ => { }); // Handle async call without await
+    }
+
+    private void CreateSinglyLinkedList()     {
+        linkedList = new SinglyLinkedList<int>();
+        linkedList.Append(rand.Next(1, 30));
+        linkedList.Append(rand.Next(1, 30));
+        linkedList.Append(rand.Next(1, 30));
+        UpdateDisplay(linkedList).ContinueWith(_ => { }); // Handle async call without await
+    }
+
+    private async Task UpdateDisplay(SinglyLinkedList<int> list)
+    {
+        var linkedListData = ConvertNodeToD3Format(list.head);
+        await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData);
+    }
+
+    private object ConvertNodeToD3Format(SinglyLinkedListNode<int> node)
+    {
+        if (node == null)
         {
-            if (firstRender)
-            {
-                await UpdateDisplay();
-            }
+            return null;
         }
 
-        private void InsertValue()
+        return new
         {
-            linkedList.AddLast(inputData); // Insert at the end of the linked list
-            UpdateDisplay().ContinueWith(_ => { }); // Update display with the new node
-        }
+            value = node._data,
+            // Add other properties as needed for visualization, such as position
+        };
+    }
+}
 
-        private void SearchValue()
-        {
-            bool result = linkedList.Contains(inputData);
-            resultMessage = result ? $"Value {inputData} found." : $"Value {inputData} not found.";
-        }
-
-        private void RemoveValue()
-        {
-            linkedList.Remove(inputData); // Remove the specified value from the linked list
-            UpdateDisplay().ContinueWith(_ => { }); // Handle async call without await
-        }
-
-        private async Task UpdateDisplay()
-        {
-            var linkedListData = ConvertNodeToD3Format(inputData);
-            await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData);
-        }
-
-        private object ConvertNodeToD3Format(SinglyLinkedListNode<int> node)
-        {
-            if (node == null)
-            {
-                return null;
-            }
-
-            return new
-            {
-                value = node._data,
-                // Add other properties as needed for visualization, such as position
-            };
-        }
-
-
-        void buttonVisualize(string operation)
-        {
-            switch (operation)
-            {
-                case "Append":
-                    linkedList.Append(inputData);
-                    break;
-                case "Prepend":
-                    linkedList.Prepend(inputData);
-                    break;
-                case "Insert at":
-                    linkedList.InsertAt(desiredPosition, inputData);
-                    break;
-                case "Delete":
-                    linkedList.Delete(inputData);
-                    break;
-                case "Delete at":
-                    linkedList.DeleteAt(desiredPosition);
-                    break;
-                case "Search":
-                    var position = linkedList.FindIndexOf(inputData);
-                    if (position != -1)
-                    {
-                        resultMessage = $"The node with value {inputData} was found at position {position}.";
-                    }
-                    else
-                    {
-                        resultMessage = "The node was not found.";
-                    }
-                    break;
-
-                case "Create":
-                    this.OnInitialized();
-
-                    break;
-            }
-        }
-    } *@
