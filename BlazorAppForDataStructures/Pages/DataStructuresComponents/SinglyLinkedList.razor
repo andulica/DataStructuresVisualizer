@@ -16,7 +16,6 @@
 
 
     <div id="sll-display">
-        @* Render the tree here *@
     </div>
    
 </div>
@@ -46,8 +45,8 @@
 
     private void InsertValue()
     {
-        linkedList.AddLast(inputValue); // Insert at the end of the linked list
-        UpdateDisplay(linkedList).ContinueWith(_ => { }); // Update display with the new node
+        linkedList.AddLast(inputValue);
+        UpdateDisplay(linkedList).ContinueWith(_ => { });
     }
 
     private void SearchValue()
@@ -58,8 +57,8 @@
 
     private void RemoveValue()
     {
-        linkedList.Remove(inputValue); // Remove the specified value from the linked list
-        UpdateDisplay(linkedList).ContinueWith(_ => { }); // Handle async call without await
+        linkedList.Remove(inputValue);
+        UpdateDisplay(linkedList).ContinueWith(_ => { });
     }
 
     private void CreateSinglyLinkedList()     {
@@ -67,27 +66,26 @@
         linkedList.Append(rand.Next(1, 30));
         linkedList.Append(rand.Next(1, 30));
         linkedList.Append(rand.Next(1, 30));
-        UpdateDisplay(linkedList).ContinueWith(_ => { }); // Handle async call without await
+        UpdateDisplay(linkedList).ContinueWith(_ => { });
     }
 
     private async Task UpdateDisplay(SinglyLinkedList<int> list)
     {
-        var linkedListData = ConvertNodeToD3Format(list.head);
+        var linkedListData = ConvertListToJavaScriptFormat(list);
         await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData);
     }
 
-    private object ConvertNodeToD3Format(SinglyLinkedListNode<int> node)
+    private List<object> ConvertListToJavaScriptFormat(SinglyLinkedList<int> list)
     {
-        if (node == null)
+        var nodes = new List<object>();
+        var currentNode = list.head;
+        while (currentNode != null)
         {
-            return null;
+            nodes.Add(new { value = currentNode._data, next = currentNode.Next });
+            currentNode = currentNode.Next;
         }
-
-        return new
-        {
-            value = node._data,
-            // Add other properties as needed for visualization, such as position
-        };
+        return nodes;
     }
+
 }
 

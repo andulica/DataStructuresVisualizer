@@ -11,8 +11,7 @@
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    // Assume singlyLinkedList is an array of nodes { value: ..., next: ... }
-    // You'll need to adjust based on actual structure
+    
     let nodes = singlyLinkedList.map((d, i) => ({ ...d, x: i * 100 + 50, y: height / 2 }));
 
     // Draw lines for links
