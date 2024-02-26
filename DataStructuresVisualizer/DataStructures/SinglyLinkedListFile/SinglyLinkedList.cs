@@ -316,14 +316,11 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         current.Next = new SinglyLinkedListNode<T>(value);
     }
 
-    /// <summary>
-    /// Removes the first occurrence of a node with the specified value from the list.
-    /// </summary>
-    /// <param name="value">The value of the node to remove.</param>
     public void Remove(T value)
     {
         if (head == null) return;
 
+        // If the node to remove is the head
         if (EqualityComparer<T>.Default.Equals(head._data, value))
         {
             head = head.Next;
@@ -332,17 +329,20 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
 
         SinglyLinkedListNode<T> current = head;
         SinglyLinkedListNode<T> prev = null;
-        while (current != null && !EqualityComparer<T>.Default.Equals(head._data, value))
+        // Corrected to compare the current node's data with the value
+        while (current != null && !EqualityComparer<T>.Default.Equals(current._data, value))
         {
             prev = current;
             current = current.Next;
         }
 
+        // If the node to remove was found (not at the end of the list)
         if (current != null)
         {
             prev.Next = current.Next;
         }
     }
+
 
     /// <summary>
     /// Returns an enumerator that iterates through the linked list.
