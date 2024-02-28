@@ -12,7 +12,7 @@
         .append("g")
         .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-    // Define arrowhead marker
+    // Create arrowhead marker
     svg.append('defs').append('marker')
         .attr('id', 'arrowhead')
         .attr('viewBox', '-0 -5 10 10')
@@ -50,19 +50,11 @@
             .style("fill", "black");
     });
 
-    // Draw lines for links with adjusted endpoints
+    // Draw lines between nodes
     nodes.forEach((node, i) => {
-        if (i < nodes.length - 1) { // Don't draw for the last node
+        if (i < nodes.length - 1) { // Avoid drawing for the last node
             let nextNode = nodes[i + 1];
-            let adjustedPoints = adjustLineEndpoints(node.x, node.y, nextNode.x, nextNode.y, 20); // 20 is the radius of the node
-
-            svg.append('line')
-                .attr('x1', adjustedPoints.startX)
-                .attr('y1', adjustedPoints.startY)
-                .attr('x2', adjustedPoints.endX)
-                .attr('y2', adjustedPoints.endY)
-                .attr('stroke', '#000')
-                .attr('marker-end', 'url(#arrowhead)');
+            drawLineWithArrow(node.x, node.y, nextNode.x, nextNode.y, 20); // Assuming 20 is the node radius
         }
     });
 
@@ -76,5 +68,17 @@
             endY: y2 - Math.sin(angle) * r
         };
     }
-};
 
+    // Draw line with arrowhead
+    function drawLineWithArrow(startX, startY, endX, endY, radius) {
+        const adjustedPoints = adjustLineEndpoints(startX, startY, endX, endY, radius);
+
+        svg.append('line')
+            .attr('x1', adjustedPoints.startX)
+            .attr('y1', adjustedPoints.startY)
+            .attr('x2', adjustedPoints.endX)
+            .attr('y2', adjustedPoints.endY)
+            .attr('stroke', '#000')
+            .attr('marker-end', 'url(#arrowhead)');
+    }
+};
