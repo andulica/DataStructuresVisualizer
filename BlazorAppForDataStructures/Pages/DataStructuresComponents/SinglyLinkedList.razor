@@ -1,5 +1,5 @@
-﻿       @using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
-       @inject IJSRuntime JSRuntime
+﻿@using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
+@inject IJSRuntime JSRuntime
 
 <div id="linked-list">
     <h3>SinglyLinkedList</h3>
@@ -9,6 +9,8 @@
     <div>
         <input @bind="inputValue" type="number" placeholder="Enter value" />
         <button @onclick="() => InsertValue()">Insert</button>
+        <button @onclick="() => PrependValue()">Prepend</button>
+        <button @onclick="() => AppendValue()">Append</button>
         <button @onclick="() => SearchValue()">Search</button>
         <button @onclick="() => RemoveValue()">Remove</button>
         <button @onclick="() => CreateSinglyLinkedList()">Create</button>
@@ -39,6 +41,18 @@
         {
             await UpdateDisplay(linkedList);
         }
+    }
+
+    private void PrependValue()
+    {
+        linkedList.Prepend(inputValue);
+        UpdateDisplay(linkedList).ContinueWith(_ => { });
+    }
+
+    private void AppendValue()
+    {
+        linkedList.Append(inputValue);
+        UpdateDisplay(linkedList).ContinueWith(_ => { });
     }
 
     private void InsertValue()
