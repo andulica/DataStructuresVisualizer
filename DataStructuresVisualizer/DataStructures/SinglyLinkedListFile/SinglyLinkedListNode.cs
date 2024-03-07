@@ -5,6 +5,9 @@ public class SinglyLinkedListNode<T>
     // The data contained in the node.
     public T _data { get; set; }
 
+    // Unique identifier
+    public Guid Id { get; set; }
+
     /// <summary>
     /// Gets or sets the next node in the singly linked list.
     /// </summary>
@@ -18,5 +21,6 @@ public class SinglyLinkedListNode<T>
     {
         _data = data; // Set the data of the node.
         Next = null;  // Initially, the next node is null.
+        Id = Guid.NewGuid(); // Generate a unique identifier
     }
 }

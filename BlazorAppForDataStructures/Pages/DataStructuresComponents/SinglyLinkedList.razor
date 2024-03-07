@@ -17,16 +17,12 @@
 
     <div id="sll-display">
     </div>
-   
-
-    <div>@resultMessage</div>
 </div>
 
 
 @code {
     private SinglyLinkedList<int> linkedList = new SinglyLinkedList<int>();
     private int inputValue;
-    private string resultMessage;
     Random rand = new Random();
 
 
@@ -51,10 +47,9 @@
         UpdateDisplay(linkedList).ContinueWith(_ => { });
     }
 
-    private void SearchValue()
+    private async Task SearchValue()
     {
-        bool result = linkedList.Contains(inputValue);
-        resultMessage = result ? $"Value {inputValue} found." : $"Value {inputValue} not found.";
+        await JSRuntime.InvokeVoidAsync("searchValueInSLL", inputValue);
     }
 
     private void RemoveValue()
@@ -83,7 +78,12 @@
         var currentNode = list.head;
         while (currentNode != null)
         {
-            nodes.Add(new { value = currentNode._data, next = currentNode.Next });
+            nodes.Add(new 
+                { 
+                    value = currentNode._data, 
+                    next = currentNode.Next, 
+                    id = currentNode.Id
+                });
             currentNode = currentNode.Next;
         }
         return nodes;

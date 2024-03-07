@@ -36,7 +36,7 @@ window.drawBST = function (treeRootNode) {
     currentTreeNode = treeRootNode; // Store the current tree data
 }
 
-window.searchValue = function (value) {
+window.searchValueInBST = function (value) {
 
     searchRecursive(currentTreeNode, value, null); 
 };
