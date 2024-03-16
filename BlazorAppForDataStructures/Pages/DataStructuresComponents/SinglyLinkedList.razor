@@ -16,8 +16,21 @@
         <button @onclick="() => CreateSinglyLinkedList()">Create</button>
     </div>
 
+    <select @onchange="OnSelectionChange">
+        <option value="none">Select an Action</option>
+        <option value="insertion">Insertion</option>
+    </select>
 
+    @if (showInsertionFields)
+    {
+        <div>
+            <input type="number" @bind="insertValue" placeholder="Enter Value" />
+            <input type="number" @bind="insertPosition" placeholder="Enter Position" />
+            <button @onclick="PerformInsertion">Insert</button>
+        </div>
+    }
     <div id="sll-display">
+        @* Render the linked list here *@
     </div>
 </div>
 
@@ -26,6 +39,10 @@
     private SinglyLinkedList<int> linkedList = new SinglyLinkedList<int>();
     private int inputValue;
     Random rand = new Random();
+    private string selectedAction = "none";
+    private int? insertValue;
+    private int? insertPosition;
+    private bool showInsertionFields = false;
 
 
     protected override void OnInitialized()
@@ -63,7 +80,7 @@
 
     private async Task SearchValue()
     {
-        await JSRuntime.InvokeVoidAsync("searchValueInSLL", inputValue);
+        await JSRuntime.InvokeVoidAsync("searchValueInSLL", insertValue, insertPosition);
     }
 
     private void RemoveValue()
@@ -72,7 +89,8 @@
         UpdateDisplay(linkedList).ContinueWith(_ => { });
     }
 
-    private void CreateSinglyLinkedList()     {
+    private void CreateSinglyLinkedList()
+    {
         linkedList = new SinglyLinkedList<int>();
         linkedList.Append(rand.Next(1, 30));
         linkedList.Append(rand.Next(1, 30));
@@ -92,16 +110,25 @@
         var currentNode = list.head;
         while (currentNode != null)
         {
-            nodes.Add(new 
-                { 
-                    value = currentNode._data, 
-                    next = currentNode.Next, 
-                    id = currentNode.Id
-                });
+            nodes.Add(new
+            {
+                value = currentNode._data,
+                next = currentNode.Next,
+                id = currentNode.Id
+            });
             currentNode = currentNode.Next;
         }
         return nodes;
     }
+    private void OnSelectionChange(ChangeEventArgs e)
+    {
+        selectedAction = e.Value.ToString();
+        showInsertionFields = selectedAction == "insertion";
+    }
 
+    private async Task PerformInsertion()
+    {
+        await JSRuntime.InvokeVoidAsync("searchValueInSLL", insertValue, insertPosition);
+    }
 }
 

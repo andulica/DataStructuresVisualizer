@@ -1,11 +1,41 @@
-﻿(function () { // Wrap in IIFE to prevent global exposure
+﻿
+(function () {
     let svg, nodes;
-    let margin = { top: 20, right: 30, bottom: 40, left: 50 }
+    let margin = { top: 20, right: 30, bottom: 40, left: 50 };
+
+    // Helper function to adjust line endpoints to fit the arrowhead
+    function adjustLineEndpoints(x1, y1, x2, y2, radius, strokeWidth) {
+        const angle = Math.atan2(y2 - y1, x2 - x1);
+        const effectiveRadius = radius + strokeWidth;
+        return {
+            startX: x1 + Math.cos(angle) * effectiveRadius,
+            startY: y1 + Math.sin(angle) * effectiveRadius,
+            endX: x2 - Math.cos(angle) * effectiveRadius,
+            endY: y2 - Math.sin(angle) * effectiveRadius
+        };
+    }
+
+    // Draw line with arrowhead
+    function drawLineWithArrow(startX, startY, endX, endY, radius, strokeWidth) {
+        const adjustedPoints = adjustLineEndpoints(startX, startY, endX, endY, radius, strokeWidth);
+        svg.append('line')
+            .attr('class', 'link')
+            .attr('x1', adjustedPoints.startX)
+            .attr('y1', adjustedPoints.startY)
+            .attr('x2', adjustedPoints.endX)
+            .attr('y2', adjustedPoints.endY)
+            .attr('stroke', '#000')
+            .attr('marker-end', 'url(#arrowhead)')
+            .attr('stroke-dasharray', '1000')
+            .attr('stroke-dashoffset', '1000')
+            .transition()
+            .duration(1000)
+            .attr('stroke-dashoffset', 0);
+    }
+
     window.drawLinkedList = function (singlyLinkedList) {
         // Setup SVG dimensions
-        margin,
-            width = 700 - margin.left - margin.right,
-            height = 400 - margin.top - margin.bottom;
+        margin, width = 700 - margin.left - margin.right, height = 400 - margin.top - margin.bottom;
 
         // Clear previous SVG and create a new one
         d3.select("#sll-display").select("svg").remove();
@@ -65,91 +95,112 @@
                 // Assign an ID to the link based on the current node and the next node's IDs
                 svg.select(`line:last-child`).attr('id', `link-${node.id}-${nextNode.id}`);
             }
-        });
-
-        // Helper function to adjust line endpoints to fit the arrowhead
-        function adjustLineEndpoints(x1, y1, x2, y2, radius, strokeWidth) {
-            const angle = Math.atan2(y2 - y1, x2 - x1);
-            // Increase the effective radius by the stroke width
-            const effectiveRadius = radius + strokeWidth;
-
-            return {
-                startX: x1 + Math.cos(angle) * effectiveRadius,
-                startY: y1 + Math.sin(angle) * effectiveRadius,
-                endX: x2 - Math.cos(angle) * effectiveRadius,
-                endY: y2 - Math.sin(angle) * effectiveRadius
-            };
-        }
-
-        // Draw line with arrowhead
-        function drawLineWithArrow(startX, startY, endX, endY, radius, strokeWidth) {
-            const adjustedPoints = adjustLineEndpoints(startX, startY, endX, endY, radius, strokeWidth);
-            let line = svg.append('line')
-                .attr('class', 'link')
-                .attr('x1', adjustedPoints.startX)
-                .attr('y1', adjustedPoints.startY)
-                .attr('x2', adjustedPoints.endX)
-                .attr('y2', adjustedPoints.endY)
-                .attr('stroke', '#000')
-                .attr('marker-end', 'url(#arrowhead)')
-                .attr('stroke-dasharray', '1000')
-                .attr('stroke-dashoffset', '1000');
-
-            // Transition to "draw" the line
-            line.transition()
-                .duration(1000)  // Adjust to control "drawing" speed
-                .attr('stroke-dashoffset', 0);
-        }
+        });        
     };
 
-    function searchValue(value) {
-        
-        svg.selectAll('.node').style('fill', 'skyblue');
-        svg.selectAll('.link').style('stroke', '#000');
+    function highlightNodes(condition) {
+        return new Promise((resolve) => {
+            let timeouts = []; // Store timeout IDs for potential clearing
 
-        let found = false;
-        let timeouts = []; // Array to store timeout IDs
-
-        nodes.forEach((node, index) => {
-            let timeoutId = setTimeout(() => {
-                // Skip this part if the node has already been found
-                if (!found) {
+            nodes.forEach((node, index) => {
+                let timeoutId = setTimeout(() => {
                     // Highlight the current node
-                    svg.select(`#node-${node.id}`)
-                        .transition()
-                        .duration(500) // Slow down the highlighting effect
-                        .style('fill', 'orange');
+                    svg.select(`#node-${node.id}`).transition().duration(500).style('fill', 'orange');
 
-                    // Highlight the link leading to the current node
+                    // Highlight the link from the previous node
                     if (index > 0) {
-                        let prevNode = nodes[index - 1];
-                        svg.select(`#link-${prevNode.id}-${node.id}`)
-                            .transition()
-                            .duration(500) // Slow down the highlighting effect
-                            .style('stroke', 'orange');
+                        svg.select(`#link-${nodes[index - 1].id}-${node.id}`).transition().duration(500).style('stroke', 'orange');
                     }
-                }
 
-                // If the node is found, update its color to green
-                if (node.value === value && !found) {
-                    svg.select(`#node-${node.id}`)
-                        .transition()
-                        .duration(500)
-                        .style('fill', 'green');
-                    found = true;
+                    // Check the stopping condition
+                    if (condition(index, node)) {
+                        clearTimeouts(timeouts);
+                        resolve(); // Resolve the promise once the condition is met
+                    }
+                }, 1000 * index);
 
-                    // Clear all scheduled timeouts to stop further color changes
-                    timeouts.forEach(id => clearTimeout(id));
-                }
-            }, 1000 * index); // Delay based on index to visualize the search step by step
-
-            // Store the timeout ID
-            timeouts.push(timeoutId);
+                timeouts.push(timeoutId);
+            });
         });
     }
 
-    window.searchValueInSLL = function (value) {
-        console.log("searchValue called with value: " + value);
-        searchValue(value);
+    function clearTimeouts(timeouts) {
+        timeouts.forEach((timeoutId) => clearTimeout(timeoutId));
+    }
+
+    function createNewNode(value, position) {
+        let targetX = nodes[position].x;
+        let targetY = nodes[position].y - 50;
+
+        // Create the new node circle
+        let newNode = svg.append("circle")
+            .attr("cx", targetX)
+            .attr("cy", targetY)
+            .attr("r", 20)
+            .style("fill", "green")
+            .attr("id", `node-${value}`)
+            .style("stroke", "black")
+            .style("stroke-width", 2);
+
+        // Add the value text
+        svg.append("text")
+            .attr("x", targetX)
+            .attr("y", targetY + 5)
+            .text(value)
+            .attr("text-anchor", "middle")
+            .style("fill", "black");
+
+        // Return the new node object with necessary properties
+        return {
+            id: `node-${value}`, // Adjust ID generation as needed
+            x: targetX,
+            y: targetY,
+            value: value
+        };
+    }
+
+
+    function adjustLinks(newNode, position) {
+        if (position < 0 || position >= nodes.length) {
+            console.error("Position out of bounds");
+            return;
+        }
+
+        let originalNode = nodes[position];
+
+        // Insert the new node in the nodes array at the correct position
+        nodes.splice(position, 0, newNode);
+
+        let prevNode = position > 0 ? nodes[position - 1] : null;
+
+        // Redirect the link from the previous node to the new node, if there's a previous node
+        if (prevNode) {
+            // Remove the old link if it exists
+            svg.select(`#link-${prevNode.id}-${originalNode.id}`).remove();
+
+            // Draw a new link with an arrow from the previous node to the new node
+            drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2);
+        }
+
+        // Draw a new link with an arrow from the new node to the original node
+        if (newNode && originalNode) {
+            drawLineWithArrow(newNode.x, newNode.y, originalNode.x, originalNode.y, 20, 2);
+        }
+    }
+
+
+
+    async function insertNode(value, position) {
+        await highlightNodes((index) => index === position); // Highlight nodes up to the position
+
+        // Delay the creation of the new node after the target position is found
+        setTimeout(() => {
+            let newNode = createNewNode(value, position);
+            adjustLinks(newNode, position); 
+        }, 1000);
+    }
+
+    window.searchValueInSLL = function (value, selectedIndex) {
+        insertNode(value, selectedIndex);
     };
 })();
