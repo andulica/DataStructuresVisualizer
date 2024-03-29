@@ -1,5 +1,4 @@
-﻿
-(function () {
+﻿(function () {
     let svg, nodes;
     let margin = { top: 20, right: 30, bottom: 40, left: 50 };
 
@@ -98,7 +97,7 @@
         });        
     };
 
-    function highlightNodes(condition) {
+    function highlightNodesForInsertion(condition) {
         return new Promise((resolve) => {
             let timeouts = []; // Store timeout IDs for potential clearing
 
@@ -124,6 +123,37 @@
         });
     }
 
+    function highlightNodes(value) {
+        let timeouts = [];  // Initialize the timeouts array
+
+        nodes.forEach((node, index) => {
+            // Create a closure to capture the current node and its index
+            (function (idx, currentNode) {
+                let timeout = setTimeout(() => {
+                    // Highlight the current node
+                    svg.select(`#node-${currentNode.id}`).transition().duration(500).style('fill', 'orange');
+
+                    // Highlight the link from the previous node
+                    if (idx > 0) {
+                        svg.select(`#link-${nodes[idx - 1].id}-${currentNode.id}`).transition().duration(500).style('stroke', 'orange');
+                    }
+
+                    // Check if the current node's value matches the specified value
+                    if (currentNode.value === value) {
+                        svg.select(`#node-${currentNode.id}`).transition().duration(500).style('fill', 'green');
+
+                        // Clear all future timeouts
+                        for (let j = idx + 1; j < nodes.length; j++) {
+                            clearTimeout(timeouts[j]);
+                        }
+                    }
+                }, 1000 * idx);
+
+                timeouts.push(timeout);  // Store the timeout so it can be cleared later
+            })(index, node);
+        });
+    }
+
     function clearTimeouts(timeouts) {
         timeouts.forEach((timeoutId) => clearTimeout(timeoutId));
     }
@@ -133,7 +163,7 @@
         let targetY = nodes[position].y - 50;
 
         // Create the new node circle
-        let newNode = svg.append("circle")
+        svg.append("circle")
             .attr("cx", targetX)
             .attr("cy", targetY)
             .attr("r", 20)
@@ -158,7 +188,6 @@
             value: value
         };
     }
-
 
     function adjustLinks(newNode, position) {
         if (position < 0 || position >= nodes.length) {
@@ -188,10 +217,8 @@
         }
     }
 
-
-
     async function insertNode(value, position) {
-        await highlightNodes((index) => index === position); // Highlight nodes up to the position
+        await highlightNodesForInsertion((index) => index === position); // Highlight nodes up to the position
 
         // Delay the creation of the new node after the target position is found
         setTimeout(() => {
@@ -200,7 +227,11 @@
         }, 1000);
     }
 
-    window.searchValueInSLL = function (value, selectedIndex) {
+    window.searchValueInSLL = function (value) {
+        highlightNodes(value)
+    };
+
+    window.insertAtInSLL = function (value, selectedIndex) {
         insertNode(value, selectedIndex);
     };
 })();

@@ -80,7 +80,7 @@
 
     private async Task SearchValue()
     {
-        await JSRuntime.InvokeVoidAsync("searchValueInSLL", insertValue, insertPosition);
+        await JSRuntime.InvokeVoidAsync("searchValueInSLL", inputValue);
     }
 
     private void RemoveValue()
@@ -128,7 +128,7 @@
 
     private async Task PerformInsertion()
     {
-        await JSRuntime.InvokeVoidAsync("searchValueInSLL", insertValue, insertPosition);
+        await JSRuntime.InvokeVoidAsync("insertAtInSLL", insertValue, insertPosition);
     }
 }
 
