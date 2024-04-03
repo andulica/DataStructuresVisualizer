@@ -14,22 +14,23 @@
         };
     }
 
-    // Draw line with arrowhead
-    function drawLineWithArrow(startX, startY, endX, endY, radius, strokeWidth) {
+    // Draw line with arrow and assign an ID immediately
+    function drawLineWithArrow(startX, startY, endX, endY, radius, strokeWidth, id) {
         const adjustedPoints = adjustLineEndpoints(startX, startY, endX, endY, radius, strokeWidth);
-        svg.append('line')
-            .attr('class', 'link')
+        const line = svg.append('line')
             .attr('x1', adjustedPoints.startX)
             .attr('y1', adjustedPoints.startY)
             .attr('x2', adjustedPoints.endX)
             .attr('y2', adjustedPoints.endY)
             .attr('stroke', '#000')
             .attr('marker-end', 'url(#arrowhead)')
-            .attr('stroke-dasharray', '1000')
-            .attr('stroke-dashoffset', '1000')
-            .transition()
-            .duration(1000)
-            .attr('stroke-dashoffset', 0);
+            .attr('stroke-width', strokeWidth);
+
+        if (id) {
+            line.attr('id', id);
+        }
+
+        return line;
     }
 
     window.drawLinkedList = function (singlyLinkedList) {
@@ -58,6 +59,19 @@
             .attr('d', 'M 0,-5 L 10 ,0 L 0,5')
             .attr('fill', '#000');
 
+        svg.append('defs').append('marker')
+            .attr('id', 'highlighted-arrowhead')
+            .attr('viewBox', '-0 -5 10 10')
+            .attr('refX', 5)
+            .attr('refY', 0)
+            .attr('orient', 'auto')
+            .attr('markerWidth', 6)
+            .attr('markerHeight', 6)
+            .attr('xoverflow', 'visible')
+            .append('svg:path')
+            .attr('d', 'M 0,-5 L 10 ,0 L 0,5')
+            .attr('fill', 'orange');
+
         // Prepare node data with positions
         nodes = singlyLinkedList.map((d, i) => ({
             ...d,
@@ -78,6 +92,8 @@
                 .style("stroke-width", 2);
 
             svg.append("text")
+                .attr("id", `textId-${node.id}`)
+                .attr("class", "text")
                 .attr("x", node.x)
                 .attr("y", node.y + 5) // Adjust for alignment
                 .text(node.value)
@@ -89,10 +105,7 @@
         nodes.forEach((node, i) => {
             if (i < nodes.length - 1) {
                 let nextNode = nodes[i + 1];
-                drawLineWithArrow(node.x, node.y, nextNode.x, nextNode.y, 20, 2);
-
-                // Assign an ID to the link based on the current node and the next node's IDs
-                svg.select(`line:last-child`).attr('id', `link-${node.id}-${nextNode.id}`);
+                drawLineWithArrow(node.x, node.y, nextNode.x, nextNode.y, 20, 2, `link-${node.id}-${nextNode.id}`);
             }
         });        
     };
@@ -106,9 +119,13 @@
                     // Highlight the current node
                     svg.select(`#node-${node.id}`).transition().duration(500).style('fill', 'orange');
 
-                    // Highlight the link from the previous node
+                    // Highlight the link and the arrowhead from the previous node
                     if (index > 0) {
-                        svg.select(`#link-${nodes[index - 1].id}-${node.id}`).transition().duration(500).style('stroke', 'orange');
+                        let linkId = `#link-${nodes[index - 1].id}-${node.id}`;
+                        svg.select(linkId)
+                            .transition().duration(500)
+                            .style('stroke', 'orange')
+                            .attr('marker-end', 'url(#highlighted-arrowhead)');
                     }
 
                     // Check the stopping condition
@@ -135,7 +152,12 @@
 
                     // Highlight the link from the previous node
                     if (idx > 0) {
-                        svg.select(`#link-${nodes[idx - 1].id}-${currentNode.id}`).transition().duration(500).style('stroke', 'orange');
+                        let linkId = `#link-${nodes[idx - 1].id}-${currentNode.id}`;
+                        svg.select(linkId)
+                            .transition()
+                            .duration(500)
+                            .style('stroke', 'orange')
+                            .attr('marker-end', 'url(#highlighted-arrowhead)'); // Switch to highlighted arrowhead
                     }
 
                     // Check if the current node's value matches the specified value
@@ -158,63 +180,36 @@
         timeouts.forEach((timeoutId) => clearTimeout(timeoutId));
     }
 
-    function createNewNode(value, position) {
+    function createNewNode(node, position) {
         let targetX = nodes[position].x;
         let targetY = nodes[position].y - 50;
 
         // Create the new node circle
         svg.append("circle")
+            .attr("id", `node-${node.id}`)
+            .attr("class", "node")
             .attr("cx", targetX)
             .attr("cy", targetY)
             .attr("r", 20)
             .style("fill", "green")
-            .attr("id", `node-${value}`)
             .style("stroke", "black")
             .style("stroke-width", 2);
 
         // Add the value text
         svg.append("text")
+            .attr("id", `textId-${node.id}`)
             .attr("x", targetX)
             .attr("y", targetY + 5)
-            .text(value)
+            .text(node.value)
             .attr("text-anchor", "middle")
             .style("fill", "black");
 
-        // Return the new node object with necessary properties
         return {
-            id: `node-${value}`, // Adjust ID generation as needed
+            id: node.id,
             x: targetX,
             y: targetY,
-            value: value
+            value: node.value
         };
-    }
-
-    function adjustLinks(newNode, position) {
-        if (position < 0 || position >= nodes.length) {
-            console.error("Position out of bounds");
-            return;
-        }
-
-        let originalNode = nodes[position];
-
-        // Insert the new node in the nodes array at the correct position
-        nodes.splice(position, 0, newNode);
-
-        let prevNode = position > 0 ? nodes[position - 1] : null;
-
-        // Redirect the link from the previous node to the new node, if there's a previous node
-        if (prevNode) {
-            // Remove the old link if it exists
-            svg.select(`#link-${prevNode.id}-${originalNode.id}`).remove();
-
-            // Draw a new link with an arrow from the previous node to the new node
-            drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2);
-        }
-
-        // Draw a new link with an arrow from the new node to the original node
-        if (newNode && originalNode) {
-            drawLineWithArrow(newNode.x, newNode.y, originalNode.x, originalNode.y, 20, 2);
-        }
     }
 
     async function insertNode(value, position) {
@@ -223,8 +218,73 @@
         // Delay the creation of the new node after the target position is found
         setTimeout(() => {
             let newNode = createNewNode(value, position);
-            adjustLinks(newNode, position); 
+            nodes.splice(position, 0, newNode);
+            let prevNode = position > 0 ? nodes[position - 1] : null;
+            let nextNode = position > 0 ? nodes[position + 1] : null;
+
+            // Inside insertNode function
+            let link1Id = `link-${prevNode.id}-${newNode.id}`;
+            let link2Id = `link-${newNode.id}-${nextNode.id }`;
+
+            drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, link1Id);
+            drawLineWithArrow(newNode.x, newNode.y, nextNode.x, nextNode.y, 20, 2, link2Id);
+
+            setTimeout(() => {
+                svg.select(`#${link1Id}`).remove();
+                svg.select(`#${link2Id}`).remove();
+                repositionNodes();
+                repositionText();
+                setTimeout(() => {
+                    resetNodeColors();
+                }, 1300);
+            }, 1200);
         }, 1000);
+    }
+
+    function repositionNodes() {
+        const nodeSpacing = 100; 
+
+        svg.selectAll('line').remove();
+
+
+        nodes.forEach((node, index) => {
+            node.x = Math.round(index * nodeSpacing + 50);
+            node.y = Math.round(height / 2);
+
+            // Update the circle's position
+            svg.select(`#node-${node.id}`)
+                .transition()
+                .duration(500)
+                .attr("cx", node.x)
+                .attr("cy", node.y);
+        });
+
+        // Update the links
+        nodes.forEach((node, i) => {
+            if (i < nodes.length - 1) {
+                let nextNode = nodes[i + 1];
+                drawLineWithArrow(node.x, node.y, nextNode.x, nextNode.y, 20, 2, `link-${node.id}-${nextNode.id}`);
+            }
+        });
+    }
+
+    function repositionText() {
+        nodes.forEach(node => {
+            svg.select(`#textId-${node.id}`)
+                .transition()
+                .duration(500)
+                .attr("x", node.x)
+                .attr("y", node.y + 5);
+        });
+    }
+
+    function resetNodeColors() {
+        nodes.forEach(node => {
+            svg.select(`#node-${node.id}`)
+                .transition()
+                .duration(500)
+                .style('fill', 'skyblue');
+        });
     }
 
     window.searchValueInSLL = function (value) {

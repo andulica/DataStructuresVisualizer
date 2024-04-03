@@ -62,14 +62,15 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// <param name="index">The index at which to insert the node.</param>
     /// <param name="data">The data to insert into the list.</param>
     /// <exception cref="IndexOutOfRangeException">Thrown if the index is out of range.</exception>
-    public void InsertAt(int index, T data)
+    public SinglyLinkedListNode<T> InsertAt(int index, T data)
     {
         SinglyLinkedListNode<T> newNode = new SinglyLinkedListNode<T>(data);
         if (index == 0)
         {
             newNode.Next = head;
             head = newNode;
-            return;
+            count++;
+            return head;
         }
 
         SinglyLinkedListNode<T> current = head;
@@ -88,6 +89,8 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
 
         newNode.Next = current.Next;
         current.Next = newNode;
+        count++;
+        return newNode;
     }
 
     /// <summary>

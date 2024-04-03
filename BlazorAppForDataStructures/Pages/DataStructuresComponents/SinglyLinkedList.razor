@@ -32,6 +32,18 @@
     <div id="sll-display">
         @* Render the linked list here *@
     </div>
+
+     @foreach (var node in linkedList)
+     {
+         <div class="node-with-arrows">
+            
+             <div class="node">@node._data</div>
+             @if (node.Next != null)
+             {
+                 <div class="arrow down">→</div>
+             }
+         </div>
+     }
 </div>
 
 
@@ -40,8 +52,8 @@
     private int inputValue;
     Random rand = new Random();
     private string selectedAction = "none";
-    private int? insertValue;
-    private int? insertPosition;
+    private int insertValue;
+    private int insertPosition;
     private bool showInsertionFields = false;
 
 
@@ -120,6 +132,17 @@
         }
         return nodes;
     }
+
+    private object ConvertNodeToJavaScriptFormat(SinglyLinkedListNode<int> node)
+    {
+        return new
+        {
+            value = node._data,
+            next = node.Next != null ? node.Next.Id : (Guid?)null,
+            id = node.Id
+        };
+    }
+
     private void OnSelectionChange(ChangeEventArgs e)
     {
         selectedAction = e.Value.ToString();
@@ -128,7 +151,7 @@
 
     private async Task PerformInsertion()
     {
-        await JSRuntime.InvokeVoidAsync("insertAtInSLL", insertValue, insertPosition);
+        var insertedValue = ConvertNodeToJavaScriptFormat(linkedList.InsertAt(insertPosition, insertValue));
+        await JSRuntime.InvokeVoidAsync("insertAtInSLL", insertedValue, insertPosition);
     }
-}
-
+}               
