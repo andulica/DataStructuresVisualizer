@@ -148,21 +148,28 @@
             (function (idx, currentNode) {
                 let timeout = setTimeout(() => {
                     // Highlight the current node
-                    svg.select(`#node-${currentNode.id}`).transition().duration(500).style('fill', 'orange');
+                    svg.select(`#node-${currentNode.id}`)
+                        .transition().duration(500)
+                        .style('fill', 'orange');
 
-                    // Highlight the link from the previous node
+                    // Fade out, change the arrowhead, and fade in the link
                     if (idx > 0) {
-                        let linkId = `#link-${nodes[idx - 1].id}-${currentNode.id}`;
-                        svg.select(linkId)
-                            .transition()
-                            .duration(500)
-                            .style('stroke', 'orange')
-                            .attr('marker-end', 'url(#highlighted-arrowhead)'); // Switch to highlighted arrowhead
+                        let link = svg.select(`#link-${nodes[idx - 1].id}-${currentNode.id}`);
+                        link.transition().duration(230)
+                            .style('opacity', 0)
+                            .on('end', () => {
+                                link.attr('marker-end', 'url(#highlighted-arrowhead)') // Switch to highlighted arrowhead
+                                    .transition().duration(230)
+                                    .style('stroke', 'orange')
+                                    .style('opacity', 1);
+                            });
                     }
 
                     // Check if the current node's value matches the specified value
                     if (currentNode.value === value) {
-                        svg.select(`#node-${currentNode.id}`).transition().duration(500).style('fill', 'green');
+                        svg.select(`#node-${currentNode.id}`)
+                            .transition().duration(500)
+                            .style('fill', 'green');
 
                         // Clear all future timeouts
                         for (let j = idx + 1; j < nodes.length; j++) {
@@ -175,6 +182,7 @@
             })(index, node);
         });
     }
+
 
     function clearTimeouts(timeouts) {
         timeouts.forEach((timeoutId) => clearTimeout(timeoutId));
