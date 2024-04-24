@@ -95,11 +95,19 @@
         await JSRuntime.InvokeVoidAsync("searchValueInSLL", inputValue);
     }
 
-    private void RemoveValue()
+    private async Task RemoveValue()
     {
-        linkedList.Remove(inputValue);
-        UpdateDisplay(linkedList).ContinueWith(_ => { });
+        var nodeToRemove = linkedList.Search(inputValue);
+        if (nodeToRemove != null)
+        {
+            var nodeInfo = ConvertNodeToJavaScriptFormat(nodeToRemove);
+
+            linkedList.Delete(inputValue);
+
+            await JSRuntime.InvokeVoidAsync("removeValueInSll", nodeInfo);
+        }
     }
+
 
     private void CreateSinglyLinkedList()
     {

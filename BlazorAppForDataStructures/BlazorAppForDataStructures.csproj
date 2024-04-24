@@ -4,7 +4,13 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>303e4c86-1882-49d3-b2d0-69400a0c23e4</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.6" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\DataStructuresVisualizer\DataStructuresVisualizer.csproj" />

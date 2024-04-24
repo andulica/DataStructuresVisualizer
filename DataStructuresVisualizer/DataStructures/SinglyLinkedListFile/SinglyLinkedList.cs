@@ -105,22 +105,25 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         if (EqualityComparer<T>.Default.Equals(head._data, data))
         {
             head = head.Next; // Delete the head node
+            count--;
             return;
         }
 
         SinglyLinkedListNode<T> current = head;
         while (current.Next != null && !EqualityComparer<T>.Default.Equals(current.Next._data, data))
         {
-            current = current.Next; // Traverse the list
+            current = current.Next; // Traverse the list to find the node before the target node
         }
 
         // If the node after the current node needs to be deleted
         if (current.Next != null)
         {
             current.Next = current.Next.Next; // Delete the node
+            count--;
         }
-        count--;
     }
+
+
     /// <summary>
     /// Deletes a node at the specified index from the singly linked list.
     /// </summary>
@@ -224,20 +227,19 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// Searches for a node with the specified data and returns it.
     /// </summary>
     /// <param name="data">The data to search for in the list.</param>
-    /// <returns>The data if found in the list.</returns>
-    /// <exception cref="KeyNotFoundException">Thrown if the value is not found in the list.</exception>
-    public T Search(T data)
+    /// <returns>The node containing the data if found in the list; otherwise, null.</returns>
+    public SinglyLinkedListNode<T> Search(T data)
     {
         SinglyLinkedListNode<T> current = head;
         while (current != null)
         {
             if (EqualityComparer<T>.Default.Equals(current._data, data))
             {
-                return data;
+                return current;  // Return the node itself, not just the data
             }
             current = current.Next;
         }
-        throw new KeyNotFoundException("Value not found in the list.");
+        return null;
     }
 
     /// <summary>
@@ -318,34 +320,6 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         }
         current.Next = new SinglyLinkedListNode<T>(value);
     }
-
-    public void Remove(T value)
-    {
-        if (head == null) return;
-
-        // If the node to remove is the head
-        if (EqualityComparer<T>.Default.Equals(head._data, value))
-        {
-            head = head.Next;
-            return;
-        }
-
-        SinglyLinkedListNode<T> current = head;
-        SinglyLinkedListNode<T> prev = null;
-        // Corrected to compare the current node's data with the value
-        while (current != null && !EqualityComparer<T>.Default.Equals(current._data, value))
-        {
-            prev = current;
-            current = current.Next;
-        }
-
-        // If the node to remove was found (not at the end of the list)
-        if (current != null)
-        {
-            prev.Next = current.Next;
-        }
-    }
-
 
     /// <summary>
     /// Returns an enumerator that iterates through the linked list.

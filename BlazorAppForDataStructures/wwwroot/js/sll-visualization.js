@@ -121,11 +121,7 @@
 
                     // Highlight the link and the arrowhead from the previous node
                     if (index > 0) {
-                        let linkId = `#link-${nodes[index - 1].id}-${node.id}`;
-                        svg.select(linkId)
-                            .transition().duration(500)
-                            .style('stroke', 'orange')
-                            .attr('marker-end', 'url(#highlighted-arrowhead)');
+                        highlightLinkAndArrowhead(nodes[index - 1].id, node.id);
                     }
 
                     // Check the stopping condition
@@ -140,49 +136,48 @@
         });
     }
 
-    function highlightNodes(value) {
-        let timeouts = [];  // Initialize the timeouts array
+    function highlightLinkAndArrowhead(sourceNodeId, targetNodeId) {
+        let linkId = `#link-${sourceNodeId}-${targetNodeId}`;
+        svg.select(linkId)
+            .transition().duration(500)
+            .style('stroke', 'orange')
+            .attr('marker-end', 'url(#highlighted-arrowhead)');
+    }
 
-        nodes.forEach((node, index) => {
-            // Create a closure to capture the current node and its index
-            (function (idx, currentNode) {
+
+    function highlightNodes(value) {
+        return new Promise((resolve) => {
+            let timeouts = [];
+            let nodesProcessed = 0;
+
+            nodes.forEach((node, index) => {
                 let timeout = setTimeout(() => {
-                    // Highlight the current node
-                    svg.select(`#node-${currentNode.id}`)
+                    console.log(`Processing node with id: ${node.id} and value: ${node.value}`);
+                    svg.select(`#node-${node.id}`)
                         .transition().duration(500)
                         .style('fill', 'orange');
 
-                    // Fade out, change the arrowhead, and fade in the link
-                    if (idx > 0) {
-                        let link = svg.select(`#link-${nodes[idx - 1].id}-${currentNode.id}`);
-                        link.transition().duration(230)
-                            .style('opacity', 0)
-                            .on('end', () => {
-                                link.attr('marker-end', 'url(#highlighted-arrowhead)') // Switch to highlighted arrowhead
-                                    .transition().duration(230)
-                                    .style('stroke', 'orange')
-                                    .style('opacity', 1);
-                            });
+                    if (index > 0) {
+                        highlightLinkAndArrowhead(nodes[index - 1].id, node.id);
                     }
 
-                    // Check if the current node's value matches the specified value
-                    if (currentNode.value === value) {
-                        svg.select(`#node-${currentNode.id}`)
+                    if (node.value === value) {
+                        console.log(`Value match found for node id: ${node.id}`);
+                        svg.select(`#node-${node.id}`)
                             .transition().duration(500)
                             .style('fill', 'green');
-
-                        // Clear all future timeouts
-                        for (let j = idx + 1; j < nodes.length; j++) {
-                            clearTimeout(timeouts[j]);
-                        }
                     }
-                }, 1000 * idx);
 
-                timeouts.push(timeout);  // Store the timeout so it can be cleared later
-            })(index, node);
+                    nodesProcessed++;
+                    if (nodesProcessed === nodes.length) {
+                        resolve();
+                    }
+                }, 1000 * index);
+
+                timeouts.push(timeout);
+            });
         });
     }
-
 
     function clearTimeouts(timeouts) {
         timeouts.forEach((timeoutId) => clearTimeout(timeoutId));
@@ -295,11 +290,53 @@
         });
     }
 
+    function removeNodeInSll(nodeToBeRemoved) {
+        highlightNodes(nodeToBeRemoved.value).then(() => {
+            // Remove the node's visual elements
+            svg.select(`#node-${nodeToBeRemoved.id}`).remove();
+            svg.select(`#text-${nodeToBeRemoved.id}`).remove();
+
+            // Update links if necessary
+            updateLinksAfterRemoval(nodeToBeRemoved);
+
+            // Optionally reset or update the entire visualization here
+        });
+    }
+
+    function updateLinksAfterRemoval(nodeToBeRemoved) {
+        let nodeIndex = nodes.findIndex(node => node.id === nodeToBeRemoved.id);
+        nodes = nodes.filter(node => node.id !== nodeToBeRemoved.id); // Update the nodes array
+
+        if (nodeIndex > 0 && nodeIndex < nodes.length) {
+            // Update the previous link to point to the next node if not removing the last node
+            let prevNode = nodes[nodeIndex - 1];
+            let nextNode = nodes[nodeIndex]; // This now refers to the node after the removed node
+            svg.select(`#link-${prevNode.id}-${nodeToBeRemoved.id}`).attr('x2', nextNode.x).attr('y2', nextNode.y);
+        } else if (nodeIndex > 0) {
+            // Removing the last node
+            svg.select(`#link-${nodes[nodeIndex - 1].id}-${nodeToBeRemoved.id}`).remove();
+        } else if (nodes.length) {
+            // Removing the first node when there are other nodes
+            svg.select(`#link-${nodeToBeRemoved.id}-${nodes[0].id}`).remove();
+        }
+    }
+
+
     window.searchValueInSLL = function (value) {
-        highlightNodes(value)
+        // Reset node colors first
+        resetNodeColors();
+
+        // Then highlight nodes based on the value
+        highlightNodes(value);
     };
+
+
 
     window.insertAtInSLL = function (value, selectedIndex) {
         insertNode(value, selectedIndex);
+    };
+
+    window.removeValueInSll = function (nodeToBeRemoved) {
+        removeNodeInSll(nodeToBeRemoved);
     };
 })();
