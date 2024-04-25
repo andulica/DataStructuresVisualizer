@@ -144,15 +144,18 @@
             .attr('marker-end', 'url(#highlighted-arrowhead)');
     }
 
-
     function highlightNodes(value) {
         return new Promise((resolve) => {
-            let timeouts = [];
-            let nodesProcessed = 0;
+            let timeouts = []; // Array to store timeout IDs for potential clearing
+            let found = false;
 
             nodes.forEach((node, index) => {
                 let timeout = setTimeout(() => {
-                    console.log(`Processing node with id: ${node.id} and value: ${node.value}`);
+                    if (found) {
+                        clearTimeout(timeout); // Prevent this timeout's actions if already found
+                        return;
+                    }
+
                     svg.select(`#node-${node.id}`)
                         .transition().duration(500)
                         .style('fill', 'orange');
@@ -162,21 +165,28 @@
                     }
 
                     if (node.value === value) {
-                        console.log(`Value match found for node id: ${node.id}`);
                         svg.select(`#node-${node.id}`)
                             .transition().duration(500)
                             .style('fill', 'green');
-                    }
-
-                    nodesProcessed++;
-                    if (nodesProcessed === nodes.length) {
+                        found = true;
+                        clearTimeouts(timeouts); // Clear all remaining timeouts
                         resolve();
                     }
                 }, 1000 * index);
 
                 timeouts.push(timeout);
             });
+
+            // Ensure we resolve the promise if no node matches
+            let finalTimeout = setTimeout(() => {
+                if (!found) resolve();
+            }, 1000 * nodes.length);
+            timeouts.push(finalTimeout);
         });
+    }
+
+    function clearTimeouts(timeouts) {
+        timeouts.forEach(timeout => clearTimeout(timeout));
     }
 
     function clearTimeouts(timeouts) {
@@ -291,6 +301,7 @@
     }
 
     function removeNodeInSll(nodeToBeRemoved) {
+
         highlightNodes(nodeToBeRemoved.value).then(() => {
             // Remove the node's visual elements
             svg.select(`#node-${nodeToBeRemoved.id}`).remove();
@@ -321,7 +332,6 @@
         }
     }
 
-
     window.searchValueInSLL = function (value) {
         // Reset node colors first
         resetNodeColors();
@@ -329,8 +339,6 @@
         // Then highlight nodes based on the value
         highlightNodes(value);
     };
-
-
 
     window.insertAtInSLL = function (value, selectedIndex) {
         insertNode(value, selectedIndex);
