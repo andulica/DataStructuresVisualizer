@@ -18,6 +18,7 @@
     function drawLineWithArrow(startX, startY, endX, endY, radius, strokeWidth, id) {
         const adjustedPoints = adjustLineEndpoints(startX, startY, endX, endY, radius, strokeWidth);
         const line = svg.append('line')
+            .attr('class', 'link')
             .attr('x1', adjustedPoints.startX)
             .attr('y1', adjustedPoints.startY)
             .attr('x2', adjustedPoints.endX)
@@ -300,17 +301,38 @@
         });
     }
 
+    function resetLinkColors() {
+        // Select all links and reset their styles
+        svg.selectAll(".link")
+            .transition().duration(500)
+            .style('stroke', '#000') // Default stroke color
+            .attr('marker-end', 'url(#arrowhead)'); // Default arrowhead, not the highlighted one
+    }
+
     function removeNodeInSll(nodeToBeRemoved) {
+        return new Promise((resolve) => {
+            highlightNodes(nodeToBeRemoved.value).then(() => {
+                // Transition and then remove the node's visual elements
+                svg.select(`#node-${nodeToBeRemoved.id}`)
+                    .transition().duration(500)
+                    .style('opacity', 0) // Fade out effect
+                    .on('end', () => {
+                        // Once the transition is complete, remove the element
+                        svg.select(`#node-${nodeToBeRemoved.id}`).remove();
+                    });
 
-        highlightNodes(nodeToBeRemoved.value).then(() => {
-            // Remove the node's visual elements
-            svg.select(`#node-${nodeToBeRemoved.id}`).remove();
-            svg.select(`#text-${nodeToBeRemoved.id}`).remove();
+                svg.select(`#textId-${nodeToBeRemoved.id}`)
+                    .transition().duration(500)
+                    .style('opacity', 0) // Fade out effect for text
+                    .on('end', () => {
+                        // Once the text fades out, remove it
+                        svg.select(`#textId-${nodeToBeRemoved.id}`).remove();
+                    });
 
-            // Update links if necessary
-            updateLinksAfterRemoval(nodeToBeRemoved);
-
-            // Optionally reset or update the entire visualization here
+                // Update links if necessary and resolve when complete
+                updateLinksAfterRemoval(nodeToBeRemoved);
+                setTimeout(() => resolve(), 1000);
+            });
         });
     }
 
@@ -333,10 +355,8 @@
     }
 
     window.searchValueInSLL = function (value) {
-        // Reset node colors first
         resetNodeColors();
-
-        // Then highlight nodes based on the value
+        resetLinkColors();
         highlightNodes(value);
     };
 
@@ -344,7 +364,9 @@
         insertNode(value, selectedIndex);
     };
 
-    window.removeValueInSll = function (nodeToBeRemoved) {
-        removeNodeInSll(nodeToBeRemoved);
+    window.removeValueInSll = async function (nodeToBeRemoved) {
+        await removeNodeInSll(nodeToBeRemoved);  // Wait for the removal process to complete
+        resetNodeColors();
+        resetLinkColors();
     };
 })();
