@@ -232,17 +232,30 @@
         // Delay the creation of the new node after the target position is found
         setTimeout(() => {
             let newNode = createNewNode(value, position);
-            nodes.splice(position, 0, newNode);
-            let prevNode = position > 0 ? nodes[position - 1] : null;
-            let nextNode = position > 0 ? nodes[position + 1] : null;
+            nodes.splice(position, 0, newNode); // Insert the new node into the array at the specified position
 
-            // Inside insertNode function
-            let link1Id = `link-${prevNode.id}-${newNode.id}`;
-            let link2Id = `link-${newNode.id}-${nextNode.id }`;
+            let prevNode;
+            let nextNode;
 
-            drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, link1Id);
-            drawLineWithArrow(newNode.x, newNode.y, nextNode.x, nextNode.y, 20, 2, link2Id);
+            let link1Id;
+            let link2Id;
 
+            if (position === 0) {
+                if (nodes.length > 1) { // Check if there is a node to link to
+                    drawLineWithArrow(newNode.x, newNode.y, nodes[1].x, nodes[1].y, 20, 2, `link-${newNode.id}-${nodes[1].id}`);
+                }
+            } else {
+                prevNode = nodes[position - 1];
+                nextNode = nodes[position + 1];
+
+                link1Id = `link-${prevNode.id}-${newNode.id}`;
+                link2Id = `link-${newNode.id}-${nextNode.id}`;
+
+                drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, `link-${prevNode.id}-${newNode.id}`);
+                if (nextNode) {
+                    drawLineWithArrow(newNode.x, newNode.y, nextNode.x, nextNode.y, 20, 2, `link-${newNode.id}-${nextNode.id}`);
+                }
+            }
             setTimeout(() => {
                 svg.select(`#${link1Id}`).remove();
                 svg.select(`#${link2Id}`).remove();
@@ -261,7 +274,6 @@
         nodes.forEach((node, index) => {
             node.x = Math.round(index * nodeSpacing + 50);
             node.y = Math.round(height / 2);
-
             svg.select(`#node-${node.id}`)
                 .transition()
                 .duration(500)
@@ -371,6 +383,8 @@
     };
 
     window.insertAtInSLL = function (value, selectedIndex) {
+        resetNodeColors();
+        resetLinkColors();
         insertNode(value, selectedIndex);
     };
 
