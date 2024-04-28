@@ -312,26 +312,28 @@
     function removeNodeInSll(nodeToBeRemoved) {
         return new Promise((resolve) => {
             highlightNodes(nodeToBeRemoved.value).then(() => {
-                // Transition and then remove the node's visual elements
-                svg.select(`#node-${nodeToBeRemoved.id}`)
-                    .transition().duration(500)
-                    .style('opacity', 0) // Fade out effect
-                    .on('end', () => {
-                        // Once the transition is complete, remove the element
-                        svg.select(`#node-${nodeToBeRemoved.id}`).remove();
-                    });
+                setTimeout(() => {
+                    // Transition and then remove the node's visual elements
+                    svg.select(`#node-${nodeToBeRemoved.id}`)
+                        .transition().duration(500)
+                        .style('opacity', 0) // Fade out effect
+                        .on('end', () => {
+                            // Once the transition is complete, remove the element
+                            svg.select(`#node-${nodeToBeRemoved.id}`).remove();
+                        });
 
-                svg.select(`#textId-${nodeToBeRemoved.id}`)
-                    .transition().duration(500)
-                    .style('opacity', 0) // Fade out effect for text
-                    .on('end', () => {
-                        // Once the text fades out, remove it
-                        svg.select(`#textId-${nodeToBeRemoved.id}`).remove();
-                    });
+                    svg.select(`#textId-${nodeToBeRemoved.id}`)
+                        .transition().duration(500)
+                        .style('opacity', 0) // Fade out effect for text
+                        .on('end', () => {
+                            // Once the text fades out, remove it
+                            svg.select(`#textId-${nodeToBeRemoved.id}`).remove();
+                        });
 
-                // Update links if necessary and resolve when complete
-                updateLinksAfterRemoval(nodeToBeRemoved);
-                setTimeout(() => resolve(), 1000);
+                    // Update links if necessary and resolve when complete
+                    updateLinksAfterRemoval(nodeToBeRemoved);
+                    setTimeout(() => resolve(), 500); // Ensure all transitions have time to complete
+                }, 1000); // Delay of 1000 milliseconds (1 second) before removing the node
             });
         });
     }
@@ -365,8 +367,8 @@
     };
 
     window.removeValueInSll = async function (nodeToBeRemoved) {
-        await removeNodeInSll(nodeToBeRemoved);  // Wait for the removal process to complete
         resetNodeColors();
         resetLinkColors();
+        removeNodeInSll(nodeToBeRemoved);
     };
 })();
