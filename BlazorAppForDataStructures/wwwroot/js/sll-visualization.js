@@ -246,7 +246,8 @@
             setTimeout(() => {
                 svg.select(`#${link1Id}`).remove();
                 svg.select(`#${link2Id}`).remove();
-                repositionNodes();
+                updateNodePositions();
+                redrawLinks();
                 repositionText();
                 setTimeout(() => {
                     resetNodeColors();
@@ -255,32 +256,31 @@
         }, 1000);
     }
 
-    function repositionNodes() {
-        const nodeSpacing = 100; 
-
-        svg.selectAll('line').remove();
-
-
+    function updateNodePositions() {
+        const nodeSpacing = 100;
         nodes.forEach((node, index) => {
             node.x = Math.round(index * nodeSpacing + 50);
             node.y = Math.round(height / 2);
 
-            // Update the circle's position
             svg.select(`#node-${node.id}`)
                 .transition()
                 .duration(500)
                 .attr("cx", node.x)
                 .attr("cy", node.y);
         });
+    }
 
-        // Update the links
-        nodes.forEach((node, i) => {
-            if (i < nodes.length - 1) {
-                let nextNode = nodes[i + 1];
+    function redrawLinks() {
+        svg.selectAll('line').remove();
+        nodes.forEach((node, index) => {
+            if (index < nodes.length - 1) {
+                let nextNode = nodes[index + 1];
                 drawLineWithArrow(node.x, node.y, nextNode.x, nextNode.y, 20, 2, `link-${node.id}-${nextNode.id}`);
             }
         });
     }
+
+
 
     function repositionText() {
         nodes.forEach(node => {
@@ -318,22 +318,26 @@
                         .transition().duration(500)
                         .style('opacity', 0) // Fade out effect
                         .on('end', () => {
-                            // Once the transition is complete, remove the element
                             svg.select(`#node-${nodeToBeRemoved.id}`).remove();
-                        });
+                            // Proceed with text removal after node is removed
+                            svg.select(`#textId-${nodeToBeRemoved.id}`)
+                                .transition().duration(500)
+                                .style('opacity', 0) // Fade out effect for text
+                                .on('end', () => {
+                                    svg.select(`#textId-${nodeToBeRemoved.id}`).remove();
 
-                    svg.select(`#textId-${nodeToBeRemoved.id}`)
-                        .transition().duration(500)
-                        .style('opacity', 0) // Fade out effect for text
-                        .on('end', () => {
-                            // Once the text fades out, remove it
-                            svg.select(`#textId-${nodeToBeRemoved.id}`).remove();
-                        });
+                                    // Update links if necessary and resolve when complete
+                                    updateLinksAfterRemoval(nodeToBeRemoved);
 
-                    // Update links if necessary and resolve when complete
-                    updateLinksAfterRemoval(nodeToBeRemoved);
-                    setTimeout(() => resolve(), 500); // Ensure all transitions have time to complete
-                }, 1000); // Delay of 1000 milliseconds (1 second) before removing the node
+                                    // Once links are updated, reposition nodes, text and redraw links
+                                    updateNodePositions();
+                                    redrawLinks();
+                                    repositionText();
+
+                                    resolve(); // Ensure all transitions have time to complete
+                                });
+                        });
+                }, 1000); // Delay before removing the node to allow for highlighting
             });
         });
     }
