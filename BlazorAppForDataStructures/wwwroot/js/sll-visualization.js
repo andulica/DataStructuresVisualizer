@@ -340,18 +340,22 @@
 
     function updateLinksAfterRemoval(nodeToBeRemoved) {
         let nodeIndex = nodes.findIndex(node => node.id === nodeToBeRemoved.id);
-        nodes = nodes.filter(node => node.id !== nodeToBeRemoved.id); // Update the nodes array
+        nodes = nodes.filter(node => node.id !== nodeToBeRemoved.id); // Remove the node from the nodes array
 
         if (nodeIndex > 0 && nodeIndex < nodes.length) {
-            // Update the previous link to point to the next node if not removing the last node
+            // Node is in the middle of the list
             let prevNode = nodes[nodeIndex - 1];
-            let nextNode = nodes[nodeIndex]; // This now refers to the node after the removed node
-            svg.select(`#link-${prevNode.id}-${nodeToBeRemoved.id}`).attr('x2', nextNode.x).attr('y2', nextNode.y);
+            let nextNode = nodes[nodeIndex]; // Now refers to the next node after the removed one
+
+            // Remove the old link from the previous node to the removed node
+            svg.select(`#link-${prevNode.id}-${nodeToBeRemoved.id}`).remove();
+
+            drawLineWithArrow(prevNode.x, prevNode.y, nextNode.x, nextNode.y, 20, 2, `link-${prevNode.id}-${nextNode.id}`);
         } else if (nodeIndex > 0) {
             // Removing the last node
             svg.select(`#link-${nodes[nodeIndex - 1].id}-${nodeToBeRemoved.id}`).remove();
         } else if (nodes.length) {
-            // Removing the first node when there are other nodes
+            // Removing the first node and there are other nodes
             svg.select(`#link-${nodeToBeRemoved.id}-${nodes[0].id}`).remove();
         }
     }
@@ -366,7 +370,7 @@
         insertNode(value, selectedIndex);
     };
 
-    window.removeValueInSll = async function (nodeToBeRemoved) {
+    window.removeValueInSll = function (nodeToBeRemoved) {
         resetNodeColors();
         resetLinkColors();
         removeNodeInSll(nodeToBeRemoved);
