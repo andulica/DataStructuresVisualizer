@@ -58,35 +58,33 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
 
     /// <summary>
     /// Inserts a new node with the specified data at the specified index.
+    /// If the index is beyond the last position, the node is added at the end.
     /// </summary>
     /// <param name="index">The index at which to insert the node.</param>
     /// <param name="data">The data to insert into the list.</param>
-    /// <exception cref="IndexOutOfRangeException">Thrown if the index is out of range.</exception>
     public SinglyLinkedListNode<T> InsertAt(int index, T data)
     {
         SinglyLinkedListNode<T> newNode = new SinglyLinkedListNode<T>(data);
-        if (index == 0)
+
+        if (head == null || index == 0)
         {
             newNode.Next = head;
             head = newNode;
             count++;
-            return head;
+            return newNode;
         }
 
         SinglyLinkedListNode<T> current = head;
         int currentIndex = 0;
-        while (current != null && currentIndex < index - 1)
+
+        // Traverse until the end of the list or the specified index
+        while (current.Next != null && currentIndex < index - 1)
         {
             current = current.Next;
             currentIndex++;
-            count++;
         }
 
-        if (current == null)
-        {
-            throw new IndexOutOfRangeException("Index out of range for the linked list.");
-        }
-
+        // Insert the new node
         newNode.Next = current.Next;
         current.Next = newNode;
         count++;

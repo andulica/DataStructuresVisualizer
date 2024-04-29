@@ -227,46 +227,58 @@
     }
 
     async function insertNode(value, position) {
-        await highlightNodesForInsertion((index) => index === position); // Highlight nodes up to the position
 
+        await highlightNodesForInsertion((index) => index === position - 1); // Highlight nodes up to the position
+        console.log("highlight");
         // Delay the creation of the new node after the target position is found
         setTimeout(() => {
-            let newNode = createNewNode(value, position);
+
+            let newNode = createNewNode(value, position - 1);
             nodes.splice(position, 0, newNode); // Insert the new node into the array at the specified position
 
-            let prevNode;
-            let nextNode;
+            let prevNode, nextNode, link1Id, link2Id;
 
-            let link1Id;
-            let link2Id;
-
-            if (position === 0) {
-                if (nodes.length > 1) { // Check if there is a node to link to
-                    drawLineWithArrow(newNode.x, newNode.y, nodes[1].x, nodes[1].y, 20, 2, `link-${newNode.id}-${nodes[1].id}`);
-                }
-            } else {
+            if (position === 0 && nodes.length > 1) {
+                drawLineWithArrow(newNode.x, newNode.y, nodes[1].x, nodes[1].y, 20, 2, `link-${newNode.id}-${nodes[1].id}`);
+            } if (position === nodes.length) {
+                console.log("this is exec");
+                createTailNode(value);
+            } else if (position > 0) {
                 prevNode = nodes[position - 1];
                 nextNode = nodes[position + 1];
 
                 link1Id = `link-${prevNode.id}-${newNode.id}`;
-                link2Id = `link-${newNode.id}-${nextNode.id}`;
+                link2Id = nextNode ? `link-${newNode.id}-${nextNode.id}` : null;
 
-                drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, `link-${prevNode.id}-${newNode.id}`);
+                drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, link1Id);
                 if (nextNode) {
-                    drawLineWithArrow(newNode.x, newNode.y, nextNode.x, nextNode.y, 20, 2, `link-${newNode.id}-${nextNode.id}`);
+                    drawLineWithArrow(newNode.x, newNode.y, nextNode.x, nextNode.y, 20, 2, link2Id);
                 }
             }
+
             setTimeout(() => {
-                svg.select(`#${link1Id}`).remove();
-                svg.select(`#${link2Id}`).remove();
+                // Remove the temporary links if they exist
+                if (link1Id) svg.select(`#${link1Id}`).remove();
+                if (link2Id) svg.select(`#${link2Id}`).remove();
+
                 updateNodePositions();
                 redrawLinks();
                 repositionText();
+
                 setTimeout(() => {
                     resetNodeColors();
                 }, 1300);
             }, 1200);
         }, 1000);
+    }
+
+    function createTailNode(value) {
+        let newNode = createNewNode(value, nodes.length);
+
+        if (nodes.length > 1) {
+            let prevNode = nodes[nodes.length - 2];
+            drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, `link-${prevNode.id}-${newNode.id}`);
+        }
     }
 
     function updateNodePositions() {
@@ -291,8 +303,6 @@
             }
         });
     }
-
-
 
     function repositionText() {
         nodes.forEach(node => {
