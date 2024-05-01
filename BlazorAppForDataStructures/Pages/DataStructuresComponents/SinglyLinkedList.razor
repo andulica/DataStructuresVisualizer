@@ -161,7 +161,7 @@
     private async Task PerformInsertion()
     {
         var insertedValue = ConvertNodeToJavaScriptFormat(linkedList.InsertAt(insertPosition, insertValue));
-        if (insertPosition >= linkedList.Count)
+        if (insertPosition > linkedList.Count)
         {
             insertPosition = linkedList.Count;
         }

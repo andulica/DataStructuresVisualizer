@@ -229,7 +229,6 @@
     async function insertNode(value, position) {
 
         await highlightNodesForInsertion((index) => index === position - 1); // Highlight nodes up to the position
-        console.log("highlight");
         // Delay the creation of the new node after the target position is found
         setTimeout(() => {
 
@@ -241,7 +240,6 @@
             if (position === 0 && nodes.length > 1) {
                 drawLineWithArrow(newNode.x, newNode.y, nodes[1].x, nodes[1].y, 20, 2, `link-${newNode.id}-${nodes[1].id}`);
             } if (position === nodes.length) {
-                console.log("this is exec");
                 createTailNode(value);
             } else if (position > 0) {
                 prevNode = nodes[position - 1];
