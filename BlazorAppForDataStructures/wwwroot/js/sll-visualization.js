@@ -226,32 +226,76 @@
         };
     }
 
+    function createTailNode(node) {
+        let lastNode = nodes[nodes.length - 1];
+        let targetX = lastNode.x + 100;
+        let targetY = lastNode.y;
+
+        // Create the new node circle
+        svg.append("circle")
+            .attr("id", `node-${node.id}`)
+            .attr("class", "node")
+            .attr("cx", targetX)
+            .attr("cy", targetY)
+            .attr("r", 20)
+            .style("fill", "green")
+            .style("stroke", "black")
+            .style("stroke-width", 2);
+
+        // Add the value text
+        svg.append("text")
+            .attr("id", `textId-${node.id}`)
+            .attr("x", targetX)
+            .attr("y", targetY + 5)
+            .text(node.value)
+            .attr("text-anchor", "middle")
+            .style("fill", "black");
+
+        //drawLineWithArrow(lastNode.x, lastNode.y, targetX, targetY, 20, 2, `link-${lastNode.id}-${node.id}`);
+
+        return {
+            id: node.id,
+            x: targetX,
+            y: targetY,
+            value: node.value
+        };
+    }
+
     async function insertNode(value, position) {
+        await highlightNodesForInsertion((index) => index === position); // Highlight nodes up to the position
 
-        await highlightNodesForInsertion((index) => index === position - 1); // Highlight nodes up to the position
-        // Delay the creation of the new node after the target position is found
         setTimeout(() => {
-
-            let newNode = createNewNode(value, position - 1);
-            nodes.splice(position, 0, newNode); // Insert the new node into the array at the specified position
+            let newNode;
+            if (position === nodes.length - 1) {
+                // Handle insertion at the tail
+                newNode = createTailNode(value);
+                nodes.push(newNode);
+            } else {
+                // Handle insertion at the specified position
+                newNode = createNewNode(value, position);
+                nodes.splice(position, 0, newNode);
+            }
 
             let prevNode, nextNode, link1Id, link2Id;
 
             if (position === 0 && nodes.length > 1) {
+                // Inserting at the head when there are multiple nodes
                 drawLineWithArrow(newNode.x, newNode.y, nodes[1].x, nodes[1].y, 20, 2, `link-${newNode.id}-${nodes[1].id}`);
-            } if (position === nodes.length) {
-                createTailNode(value);
-            } else if (position > 0) {
+            } else if (position > 0 && position < nodes.length - 2) {
+                // Inserting in the middle
                 prevNode = nodes[position - 1];
                 nextNode = nodes[position + 1];
 
                 link1Id = `link-${prevNode.id}-${newNode.id}`;
-                link2Id = nextNode ? `link-${newNode.id}-${nextNode.id}` : null;
+                link2Id = `link-${newNode.id}-${nextNode.id}`;
 
                 drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, link1Id);
-                if (nextNode) {
-                    drawLineWithArrow(newNode.x, newNode.y, nextNode.x, nextNode.y, 20, 2, link2Id);
-                }
+                drawLineWithArrow(newNode.x, newNode.y, nextNode.x, nextNode.y, 20, 2, link2Id);
+                            
+            } else if (position === nodes.length - 1 && nodes.length > 1) {
+                // Inserting at the tail
+                prevNode = nodes[position];
+                drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, `link-${prevNode.id}-${newNode.id}`);
             }
 
             setTimeout(() => {
@@ -268,15 +312,6 @@
                 }, 1300);
             }, 1200);
         }, 1000);
-    }
-
-    function createTailNode(value) {
-        let newNode = createNewNode(value, nodes.length);
-
-        if (nodes.length > 1) {
-            let prevNode = nodes[nodes.length - 2];
-            drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, `link-${prevNode.id}-${newNode.id}`);
-        }
     }
 
     function updateNodePositions() {
