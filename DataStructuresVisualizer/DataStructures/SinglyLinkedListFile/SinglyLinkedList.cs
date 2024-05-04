@@ -5,12 +5,29 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
 {
     // The head node of the singly linked list.
     public SinglyLinkedListNode<T> head { get; set; }
-    
+
     // Count of nodes in the singly linked list.
     private int count;
 
+    // Maximum capacity of the singly linked list.
+    private int maxCapacity;
+
     // Public property to access the count.
     public int Count => count;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SinglyLinkedList{T}"/> class with a specified maximum capacity.
+    /// </summary>
+    /// <param name="capacity">
+    /// The maximum number of nodes that can be added to the linked list. 
+    /// The default value is 6.
+    /// </param>
+    public SinglyLinkedList(int capacity = 6)
+    {
+        maxCapacity = capacity;
+        count = 0;
+        head = null;
+    }
 
     /// <summary>
     /// Appends a new node with the specified data to the end of the list.
@@ -18,22 +35,27 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// <param name="data">The data to append to the list.</param>
     public void Append(T data)
     {
-        SinglyLinkedListNode<T> newNode = new SinglyLinkedListNode<T>(data);
+        if (count >= maxCapacity)
+        {
+            return;
+        }
+
+            SinglyLinkedListNode<T> newNode = new SinglyLinkedListNode<T>(data);
 
         if (head == null)
         {
             head = newNode;
-            return;
         }
-
-        SinglyLinkedListNode<T> current = head;
-        while (current.Next != null)
+        else
         {
-            current = current.Next;
+            SinglyLinkedListNode<T> current = head;
+            while (current.Next != null)
+            {
+                current = current.Next;
+            }
+            current.Next = newNode;
         }
         count++;
-
-        current.Next = newNode;
     }
 
     /// <summary>
@@ -42,17 +64,15 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// <param name="data">The data to prepend to the list.</param>
     public void Prepend(T data)
     {
+        if (count >= maxCapacity)
+        {
+            return;
+        }
+
         SinglyLinkedListNode<T> newNode = new SinglyLinkedListNode<T>(data);
 
-        if (head == null)
-        {
-            head = newNode;
-        }
-        else
-        {
-            newNode.Next = head;
-            head = newNode;
-        }
+        newNode.Next = head;
+        head = newNode;
         count++;
     }
 
@@ -62,8 +82,17 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// </summary>
     /// <param name="index">The index at which to insert the node.</param>
     /// <param name="data">The data to insert into the list.</param>
+    /// <returns>The newly inserted node.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown if the list has reached its maximum capacity.
+    /// </exception>
     public SinglyLinkedListNode<T> InsertAt(int index, T data)
     {
+        if (count >= maxCapacity)
+        {
+            return null;
+        }
+
         SinglyLinkedListNode<T> newNode = new SinglyLinkedListNode<T>(data);
 
         if (head == null || index == 0)
@@ -121,7 +150,6 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         }
     }
 
-
     /// <summary>
     /// Deletes a node at the specified index from the singly linked list.
     /// </summary>
@@ -154,13 +182,14 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         }
 
         SinglyLinkedListNode<T> current = head;
-        for (int i = 0; i < index; i++)
+        for (int i = 0; i < index - 1; i++)
         {
             current = current.Next;
         }
+
+        current.Next = current.Next?.Next;
         count--;
     }
-
 
     /// <summary>
     /// Deletes the head node of the list and returns its data. Used for stack-like operations.
@@ -243,7 +272,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// <summary>
     /// Searches for the first occurrence of the specified value within the linked list and returns its index.
     /// </summary>
-    /// <param name="data">The value to search for in the list.</param>
+    /// <param="data">The value to search for in the list.</param>
     /// <returns>The zero-based index of the first occurrence of the value in the list, if found.</returns>
     /// <exception cref="KeyNotFoundException">Thrown when the value is not present in the list.</exception>
     public int FindIndexOf(T data)
@@ -255,14 +284,13 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         {
             if (EqualityComparer<T>.Default.Equals(current._data, data))
             {
-                return index += 1;
+                return index;
             }
             current = current.Next;
             index++;
         }
         return -1;
     }
-
 
     /// <summary>
     /// Returns a string representation of the linked list.
@@ -297,26 +325,6 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
             current = current.Next;
         }
         return false;
-    }
-
-    /// <summary>
-    /// Adds a new node with the specified value to the end of the list.
-    /// </summary>
-    /// <param name="value">The value to add to the list.</param>
-    public void AddLast(T value)
-    {
-        if (head == null)
-        {
-            head = new SinglyLinkedListNode<T>(value);
-            return;
-        }
-
-        SinglyLinkedListNode<T> current = head;
-        while (current.Next != null)
-        {
-            current = current.Next;
-        }
-        current.Next = new SinglyLinkedListNode<T>(value);
     }
 
     /// <summary>

@@ -44,6 +44,7 @@
              }
          </div>
      }
+    <div>@messageOutput</div>
 </div>
 
 
@@ -54,6 +55,7 @@
     private string selectedAction = "none";
     private int insertValue;
     private int insertPosition;
+    private string messageOutput = "";
     private bool showInsertionFields = false;
 
 
@@ -86,7 +88,7 @@
 
     private void InsertValue()
     {
-        linkedList.AddLast(inputValue);
+        linkedList.Append(inputValue);
         UpdateDisplay(linkedList).ContinueWith(_ => { });
     }
 
@@ -144,6 +146,12 @@
 
     private object ConvertNodeToJavaScriptFormat(SinglyLinkedListNode<int> node)
     {
+        if (node == null)
+        {
+            messageOutput = "List is full";
+            return null;
+        }
+
         return new
         {
             value = node._data,
