@@ -1,63 +1,95 @@
 ﻿@using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
 @inject IJSRuntime JSRuntime
 
-<div id="linked-list">
-    <h3>SinglyLinkedList</h3>
+<head>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
 
-    <!-- Operation list selection -->
-    <h5>Insert value</h5>
-    <div>
-        <input @bind="inputValue" type="number" placeholder="Enter value" />
-        <button @onclick="() => InsertValue()">Insert</button>
-        <button @onclick="() => PrependValue()">Prepend</button>
-        <button @onclick="() => AppendValue()">Append</button>
-        <button @onclick="() => SearchValue()">Search</button>
-        <button @onclick="() => RemoveValue()">Remove</button>
-        <button @onclick="() => CreateSinglyLinkedList()">Create</button>
+
+<div id="linked-list" class="container">
+    <h3>Singly Linked List Operations</h3>
+
+    <div class="operation-selection">
+        <select @bind="selectedAction">
+            <option value="insertAtPosition">InsertAtPosition</option>
+            <option value="prepend">Prepend</option>
+            <option value="append">Append</option>
+            <option value="search">Search</option>
+            <option value="remove">Remove</option>
+            <option value="create">Create</option>
+        </select>
+        @switch (selectedAction)
+        {
+            case "insertAtPosition":
+                <div class="insertion-fields">
+                    <input type="number" @bind="inputValue" placeholder="Enter Value" />
+                    <input type="number" @bind="insertPosition" placeholder="Enter Position" />
+                    <button class="custom-button" @onclick="PerformInsertion">Insert</button>
+                </div>
+                break;
+            case "prepend":
+                <div class="insertion-fields">
+                    <input type="number" @bind="inputValue" placeholder="Enter Value" />
+                    <button class="custom-button" @onclick="PrependValue">Prepend</button>
+                </div>
+                break;
+            case "append":
+                <div class="insertion-fields">
+                    <input type="number" @bind="inputValue" placeholder="Enter Value" />
+                    <button class="custom-button" @onclick="AppendValue">Append</button>
+                </div>
+                break;
+            case "search":
+                <div class="insertion-fields">
+                    <input type="number" @bind="inputValue" placeholder="Enter Value" />
+                    <button class="custom-button" @onclick="SearchValue">Search</button>
+                </div>
+                break;
+            case "remove":
+                <div class="insertion-fields">
+                    <input type="number" @bind="inputValue" placeholder="Enter Value" />
+                    <button class="custom-button" @onclick="RemoveValue">Remove</button>
+                </div>
+                break;
+            case "create":
+                <div class="create-fields">
+                    <input type="number" @bind="inputValue" placeholder="Enter Value" />
+                    <button class="custom-button" @onclick="CreateSinglyLinkedList">Create List</button>
+                </div>
+                break;
+            default:
+                break;
+        }
     </div>
 
-    <select @onchange="OnSelectionChange">
-        <option value="none">Select an Action</option>
-        <option value="insertion">Insertion</option>
-    </select>
-
-    @if (showInsertionFields)
-    {
-        <div>
-            <input type="number" @bind="insertValue" placeholder="Enter Value" />
-            <input type="number" @bind="insertPosition" placeholder="Enter Position" />
-            <button @onclick="PerformInsertion">Insert</button>
-        </div>
-    }
     <div id="sll-display">
         @* Render the linked list here *@
     </div>
 
-     @foreach (var node in linkedList)
-     {
-         <div class="node-with-arrows">
-            
-             <div class="node">@node._data</div>
-             @if (node.Next != null)
-             {
-                 <div class="arrow down">→</div>
-             }
-         </div>
-     }
+    <div>@messageOutput</div>
+
+    @foreach (var node in linkedList)
+    {
+        <div class="node-with-arrows">
+
+            <div class="node">@node._data</div>
+            @if (node.Next != null)
+            {
+                <div class="arrow down">→</div>
+            }
+        </div>
+    }
     <div>@messageOutput</div>
 </div>
 
 
 @code {
     private SinglyLinkedList<int> linkedList = new SinglyLinkedList<int>();
-    private int inputValue;
     Random rand = new Random();
     private string selectedAction = "none";
-    private int insertValue;
     private int insertPosition;
+    private int inputValue;
     private string messageOutput = "";
-    private bool showInsertionFields = false;
-
 
     protected override void OnInitialized()
     {
@@ -108,16 +140,15 @@
 
             await JSRuntime.InvokeVoidAsync("removeValueInSll", nodeInfo);
         }
-
-
     }
 
     private void CreateSinglyLinkedList()
     {
         linkedList = new SinglyLinkedList<int>();
-        linkedList.Append(rand.Next(1, 30));
-        linkedList.Append(rand.Next(1, 30));
-        linkedList.Append(rand.Next(1, 30));
+        for (int i = 0; i < inputValue; i++)
+        {
+            linkedList.Append(rand.Next(1, 30));
+        }
         UpdateDisplay(linkedList).ContinueWith(_ => { });
     }
 
@@ -160,15 +191,9 @@
         };
     }
 
-    private void OnSelectionChange(ChangeEventArgs e)
-    {
-        selectedAction = e.Value.ToString();
-        showInsertionFields = selectedAction == "insertion";
-    }
-
     private async Task PerformInsertion()
     {
-        var insertedValue = ConvertNodeToJavaScriptFormat(linkedList.InsertAt(insertPosition, insertValue));
+        var insertedValue = ConvertNodeToJavaScriptFormat(linkedList.InsertAt(insertPosition, inputValue));
         if (insertPosition > linkedList.Count - 1)
         {
             insertPosition = linkedList.Count - 1;

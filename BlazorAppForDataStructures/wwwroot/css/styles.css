@@ -1,0 +1,31 @@
+﻿.container {
+    padding: 20px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    margin: 20px auto;
+    max-width: 800px;
+}
+
+.operation-selection {
+    margin-bottom: 20px;
+}
+
+.insertion-fields {
+    margin-top: 10px;
+}
+
+.custom-button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+    .custom-button:hover {
+        background-color: #0056b3;
+    }
+
+
