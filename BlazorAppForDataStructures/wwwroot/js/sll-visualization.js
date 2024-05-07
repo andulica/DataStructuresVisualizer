@@ -436,4 +436,9 @@
         resetLinkColors();
         removeNodeInSll(nodeToBeRemoved);
     };
+
+    window.resetSllColours = function () {
+        resetNodeColors();
+        resetLinkColors();
+    }
 })();
