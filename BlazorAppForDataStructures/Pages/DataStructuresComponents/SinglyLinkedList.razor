@@ -106,16 +106,20 @@
         }
     }
 
-    private void PrependValue()
+    private async Task PrependValue()
     {
         linkedList.Prepend(inputValue);
-        UpdateDisplay(linkedList).ContinueWith(_ => { });
+        var headToInsert = ConvertNodeToJavaScriptFormat(linkedList.Head);
+
+        await JSRuntime.InvokeVoidAsync("insertAtInSLL", headToInsert, linkedList.GetHeadIndex());
     }
 
-    private void AppendValue()
+    private async Task AppendValue()
     {
         linkedList.Append(inputValue);
-        UpdateDisplay(linkedList).ContinueWith(_ => { });
+        var tailToInsert = ConvertNodeToJavaScriptFormat(linkedList.Tail);
+
+        await JSRuntime.InvokeVoidAsync("insertAtInSLL", tailToInsert, linkedList.GetTailIndex() - 1);
     }
 
     private async Task SearchValue()
@@ -157,7 +161,7 @@
     private List<object> ConvertListToJavaScriptFormat(SinglyLinkedList<int> list)
     {
         var nodes = new List<object>();
-        var currentNode = list.head;
+        var currentNode = list.Head;
         while (currentNode != null)
         {
             nodes.Add(new
@@ -192,7 +196,7 @@
         var insertedValue = ConvertNodeToJavaScriptFormat(linkedList.InsertAt(insertPosition, inputValue));
         if (insertPosition > linkedList.Count - 1)
         {
-            insertPosition = linkedList.Count - 1;
+            insertPosition = linkedList.Count - 2;
         }
         await JSRuntime.InvokeVoidAsync("insertAtInSLL", insertedValue, insertPosition);
     }

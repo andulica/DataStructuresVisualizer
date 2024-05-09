@@ -49,7 +49,7 @@ namespace DataStructuresVisualizer.DataStructures.HashMap
             var bucket = _buckets[index];
 
             // Iterate through the nodes in the bucket to see if the key exists
-            SinglyLinkedListNode<Entry<TKey, TValue>> current = bucket.head;
+            SinglyLinkedListNode<Entry<TKey, TValue>> current = bucket.Head;
             while (current != null)
             {
                 if (EqualityComparer<TKey>.Default.Equals(current._data.Key, key))
@@ -74,7 +74,7 @@ namespace DataStructuresVisualizer.DataStructures.HashMap
         public TValue GetValue(TKey key)
         {
             var bucket = _buckets[Hash(key)];
-            SinglyLinkedListNode<Entry<TKey, TValue>> current = bucket.head;
+            SinglyLinkedListNode<Entry<TKey, TValue>> current = bucket.Head;
             while (current != null)
             {
                 if (EqualityComparer<TKey>.Default.Equals(current._data.Key, key))
@@ -94,15 +94,15 @@ namespace DataStructuresVisualizer.DataStructures.HashMap
         public bool Remove(TKey key)
         {
             var bucket = _buckets[Hash(key)];
-            if (bucket.head == null) return false;
+            if (bucket.Head == null) return false;
 
-            if (EqualityComparer<TKey>.Default.Equals(bucket.head._data.Key, key))
+            if (EqualityComparer<TKey>.Default.Equals(bucket.Head._data.Key, key))
             {
-                bucket.head = bucket.head.Next;
+                bucket.Head = bucket.Head.Next;
                 return true;
             }
 
-            SinglyLinkedListNode<Entry<TKey, TValue>> current = bucket.head;
+            SinglyLinkedListNode<Entry<TKey, TValue>> current = bucket.Head;
             while (current.Next != null)
             {
                 if (EqualityComparer<TKey>.Default.Equals(current.Next._data.Key, key))
@@ -127,7 +127,7 @@ namespace DataStructuresVisualizer.DataStructures.HashMap
             for (int i = 0; i < _buckets.Length; i++)
             {
                 stringBuilder.Append($"Bucket {i}: ");
-                var current = _buckets[i].head;
+                var current = _buckets[i].Head;
                 if (current == null)
                 {
                     stringBuilder.AppendLine("Empty");

@@ -1,10 +1,34 @@
 ﻿using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
 using System.Collections;
+using System.Threading;
 
 public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
 {
     // The head node of the singly linked list.
-    public SinglyLinkedListNode<T> head { get; set; }
+    private SinglyLinkedListNode<T> _head { get; set; }
+    public SinglyLinkedListNode<T> Head
+    {
+        get { return _head; }
+        set { _head = value; }
+    }
+
+    public SinglyLinkedListNode<T> Tail
+    {
+        get
+        {
+            if (_head == null)
+            {
+                return null;
+            }
+
+            SinglyLinkedListNode<T> current = _head;
+            while (current.Next != null)
+            {
+                current = current.Next;
+            }
+            return current;
+        }
+    }
 
     // Count of nodes in the singly linked list.
     private int count;
@@ -26,7 +50,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     {
         maxCapacity = capacity;
         count = 0;
-        head = null;
+        _head = null;
     }
 
     /// <summary>
@@ -42,13 +66,13 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
 
             SinglyLinkedListNode<T> newNode = new SinglyLinkedListNode<T>(data);
 
-        if (head == null)
+        if (_head == null)
         {
-            head = newNode;
+            _head = newNode;
         }
         else
         {
-            SinglyLinkedListNode<T> current = head;
+            SinglyLinkedListNode<T> current = _head;
             while (current.Next != null)
             {
                 current = current.Next;
@@ -71,8 +95,8 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
 
         SinglyLinkedListNode<T> newNode = new SinglyLinkedListNode<T>(data);
 
-        newNode.Next = head;
-        head = newNode;
+        newNode.Next = _head;
+        _head = newNode;
         count++;
     }
 
@@ -95,15 +119,15 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
 
         SinglyLinkedListNode<T> newNode = new SinglyLinkedListNode<T>(data);
 
-        if (head == null || index == 0)
+        if (_head == null || index == 0)
         {
-            newNode.Next = head;
-            head = newNode;
+            newNode.Next = _head;
+            _head = newNode;
             count++;
             return newNode;
         }
 
-        SinglyLinkedListNode<T> current = head;
+        SinglyLinkedListNode<T> current = _head;
         int currentIndex = 0;
 
         // Traverse until the end of the list or the specified index
@@ -126,17 +150,17 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// <param name="data">The data of the node to delete.</param>
     public void Delete(T data)
     {
-        if (head == null) return; // Check if the list is empty
+        if (_head == null) return; // Check if the list is empty
 
         // Check if the head contains the data to be deleted
-        if (EqualityComparer<T>.Default.Equals(head._data, data))
+        if (EqualityComparer<T>.Default.Equals(_head._data, data))
         {
-            head = head.Next; // Delete the head node
+            _head = _head.Next; // Delete the head node
             count--;
             return;
         }
 
-        SinglyLinkedListNode<T> current = head;
+        SinglyLinkedListNode<T> current = _head;
         while (current.Next != null && !EqualityComparer<T>.Default.Equals(current.Next._data, data))
         {
             current = current.Next; // Traverse the list to find the node before the target node
@@ -181,7 +205,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
             return;
         }
 
-        SinglyLinkedListNode<T> current = head;
+        SinglyLinkedListNode<T> current = _head;
         for (int i = 0; i < index - 1; i++)
         {
             current = current.Next;
@@ -198,13 +222,13 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// <exception cref="InvalidOperationException">Thrown if the list is empty.</exception>
     public T DeleteHeadForStack()
     {
-        if (head == null)
+        if (_head == null)
         {
             throw new InvalidOperationException("The list is empty.");
         }
 
-        T value = head._data;
-        head = head.Next;
+        T value = _head._data;
+        _head = _head.Next;
         count--;
         return value;
     }
@@ -215,11 +239,11 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// <exception cref="InvalidOperationException">Thrown if the list is empty.</exception>
     public void DeleteHead()
     {
-        if (head == null)
+        if (_head == null)
         {
             throw new InvalidOperationException("List is empty.");
         }
-        head = head.Next;
+        _head = _head.Next;
         count--;
     }
 
@@ -229,19 +253,19 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// <exception cref="InvalidOperationException">Thrown if the list is empty.</exception>
     public void DeleteTail()
     {
-        if (head == null)
+        if (_head == null)
         {
             throw new InvalidOperationException("List is empty.");
         }
 
-        if (head.Next == null)
+        if (_head.Next == null)
         {
-            head = null;
+            _head = null;
             count--;
             return;
         }
 
-        SinglyLinkedListNode<T> current = head;
+        SinglyLinkedListNode<T> current = _head;
         while (current.Next.Next != null)
         {
             current = current.Next;
@@ -257,7 +281,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// <returns>The node containing the data if found in the list; otherwise, null.</returns>
     public SinglyLinkedListNode<T> Search(T data)
     {
-        SinglyLinkedListNode<T> current = head;
+        SinglyLinkedListNode<T> current = _head;
         while (current != null)
         {
             if (EqualityComparer<T>.Default.Equals(current._data, data))
@@ -277,7 +301,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// <exception cref="KeyNotFoundException">Thrown when the value is not present in the list.</exception>
     public int FindIndexOf(T data)
     {
-        SinglyLinkedListNode<T> current = head;
+        SinglyLinkedListNode<T> current = _head;
         int index = 0;
 
         while (current != null)
@@ -299,7 +323,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     public override string ToString()
     {
         string result = "";
-        SinglyLinkedListNode<T> current = head;
+        SinglyLinkedListNode<T> current = _head;
         while (current != null)
         {
             result += current._data + " -> ";
@@ -315,7 +339,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// <returns>True if the value is found; otherwise, false.</returns>
     public bool Contains(T value)
     {
-        SinglyLinkedListNode<T> current = head;
+        SinglyLinkedListNode<T> current = _head;
         while (current != null)
         {
             if (EqualityComparer<T>.Default.Equals(current._data, value))
@@ -328,12 +352,58 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     }
 
     /// <summary>
+    /// Returns the index of the head node in the linked list.
+    /// </summary>
+    /// <returns>The index of the head node, or -1 if the list is empty.</returns>
+    public int GetHeadIndex()
+    {
+        if (_head == null)
+        {
+            return -1;
+        }
+
+        int index = 0;
+        SinglyLinkedListNode<T> current = _head;
+        while (current != null)
+        {
+            if (current == _head)
+            {
+                return index;
+            }
+            current = current.Next;
+            index++;
+        }
+        return -1; // Head not found (should not happen in a valid list)
+    }
+
+    /// <summary>
+    /// Returns the index of the tail node in the linked list.
+    /// </summary>
+    /// <returns>The index of the tail node, or -1 if the list is empty.</returns>
+    public int GetTailIndex()
+    {
+        if (_head == null)
+        {
+            return -1;
+        }
+
+        int index = 0;
+        SinglyLinkedListNode<T> current = _head;
+        while (current.Next != null)
+        {
+            current = current.Next;
+            index++;
+        }
+        return index;
+    }
+
+    /// <summary>
     /// Returns an enumerator that iterates through the linked list.
     /// </summary>
     /// <returns>An IEnumerator for the linked list.</returns>
     public IEnumerator<SinglyLinkedListNode<T>> GetEnumerator()
     {
-        SinglyLinkedListNode<T> current = head;
+        SinglyLinkedListNode<T> current = _head;
         while (current != null)
         {
             yield return current;

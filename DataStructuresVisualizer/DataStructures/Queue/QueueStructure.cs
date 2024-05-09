@@ -57,7 +57,7 @@ public class QueueStructure<T> : IEnumerable<T>
             throw new InvalidOperationException("The queue is empty.");
         }
 
-        return list.head._data;
+        return list.Head._data;
     }
 
     /// <summary>
@@ -84,7 +84,7 @@ public class QueueStructure<T> : IEnumerable<T>
     /// <returns>An IEnumerator of type T.</returns>
     public IEnumerator<T> GetEnumerator()
     {
-        SinglyLinkedListNode<T> current = list.head;
+        SinglyLinkedListNode<T> current = list.Head;
         while (current != null)
         {
             yield return current._data;
