@@ -118,12 +118,6 @@
         UpdateDisplay(linkedList).ContinueWith(_ => { });
     }
 
-    private void InsertValue()
-    {
-        linkedList.Append(inputValue);
-        UpdateDisplay(linkedList).ContinueWith(_ => { });
-    }
-
     private async Task SearchValue()
     {
         await JSRuntime.InvokeVoidAsync("searchValueInSLL", inputValue);
