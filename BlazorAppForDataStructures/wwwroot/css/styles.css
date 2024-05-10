@@ -24,8 +24,34 @@
     cursor: pointer;
 }
 
-    .custom-button:hover {
+.custom-button:hover {
         background-color: #0056b3;
-    }
+}
+
+.notification-container {
+    position: fixed;
+    top: 60%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #f44336;
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 9999;
+}
+
+.notification-message {
+    flex-grow: 1;
+}
+
+.notification-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: #555;
+}
+
 
 

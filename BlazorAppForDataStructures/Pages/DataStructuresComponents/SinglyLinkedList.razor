@@ -79,7 +79,15 @@
             }
         </div>
     }
-    <div>@messageOutput</div>
+
+    @if (!string.IsNullOrEmpty(messageOutput))
+    {
+        <div class="notification-container">
+                <span class="notification-message">@messageOutput</span>
+                <button class="notification-close" @onclick="ClearMessage">✖</button>
+            
+        </div>
+    }
 </div>
 
 
@@ -108,18 +116,32 @@
 
     private async Task PrependValue()
     {
-        linkedList.Prepend(inputValue);
-        var headToInsert = ConvertNodeToJavaScriptFormat(linkedList.Head);
+        try
+        {
+            linkedList.Prepend(inputValue);
+            var headToInsert = ConvertNodeToJavaScriptFormat(linkedList.Head);
 
-        await JSRuntime.InvokeVoidAsync("insertAtInSLL", headToInsert, linkedList.GetHeadIndex());
+            await JSRuntime.InvokeVoidAsync("insertAtInSLL", headToInsert, linkedList.GetHeadIndex());
+        }
+        catch (InvalidOperationException ex)
+        {
+            messageOutput = ex.Message;
+        }
     }
 
     private async Task AppendValue()
     {
-        linkedList.Append(inputValue);
-        var tailToInsert = ConvertNodeToJavaScriptFormat(linkedList.Tail);
+        try
+        {
+            linkedList.Append(inputValue);
+            var tailToInsert = ConvertNodeToJavaScriptFormat(linkedList.Tail);
 
-        await JSRuntime.InvokeVoidAsync("insertAtInSLL", tailToInsert, linkedList.GetTailIndex() - 1);
+            await JSRuntime.InvokeVoidAsync("insertAtInSLL", tailToInsert, linkedList.GetTailIndex() - 1);
+        }
+        catch (InvalidOperationException ex)
+        {
+            messageOutput = ex.Message;
+        }
     }
 
     private async Task SearchValue()
@@ -193,11 +215,23 @@
 
     private async Task PerformInsertion()
     {
-        var insertedValue = ConvertNodeToJavaScriptFormat(linkedList.InsertAt(insertPosition, inputValue));
-        if (insertPosition > linkedList.Count - 1)
+        try
         {
-            insertPosition = linkedList.Count - 2;
+            var insertedValue = ConvertNodeToJavaScriptFormat(linkedList.InsertAt(insertPosition, inputValue));
+            if (insertPosition > linkedList.Count - 1)
+            {
+                insertPosition = linkedList.Count - 2;
+            }
+            await JSRuntime.InvokeVoidAsync("insertAtInSLL", insertedValue, insertPosition);
         }
-        await JSRuntime.InvokeVoidAsync("insertAtInSLL", insertedValue, insertPosition);
+        catch (InvalidOperationException ex)
+        {
+            messageOutput = ex.Message;
+        }
+    }
+
+    private void ClearMessage()
+    {
+        messageOutput = "";
     }
 }               

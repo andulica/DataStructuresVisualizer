@@ -1,6 +1,5 @@
 ﻿using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
 using System.Collections;
-using System.Threading;
 
 public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
 {
@@ -61,10 +60,10 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     {
         if (count >= maxCapacity)
         {
-            return;
+            throw new InvalidOperationException("List is full.");
         }
 
-            SinglyLinkedListNode<T> newNode = new SinglyLinkedListNode<T>(data);
+        SinglyLinkedListNode<T> newNode = new SinglyLinkedListNode<T>(data);
 
         if (_head == null)
         {
@@ -90,7 +89,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     {
         if (count >= maxCapacity)
         {
-            return;
+            throw new InvalidOperationException("List is full.");
         }
 
         SinglyLinkedListNode<T> newNode = new SinglyLinkedListNode<T>(data);
@@ -114,7 +113,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     {
         if (count >= maxCapacity)
         {
-            return null;
+            throw new InvalidOperationException("List is full.");
         }
 
         SinglyLinkedListNode<T> newNode = new SinglyLinkedListNode<T>(data);
