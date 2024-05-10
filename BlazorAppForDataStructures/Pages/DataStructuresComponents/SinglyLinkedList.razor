@@ -160,6 +160,10 @@
 
             await JSRuntime.InvokeVoidAsync("removeValueInSll", nodeInfo);
         }
+        else
+        {
+            HighlightAllNodesOrDisplayMessage();
+        }
 
         await JSRuntime.InvokeVoidAsync("resetSllColours");
     }
@@ -228,6 +232,11 @@
         {
             messageOutput = ex.Message;
         }
+    }
+
+    private void HighlightAllNodesOrDisplayMessage()
+    {
+        messageOutput = "The entered number is not in the singly linked list.";
     }
 
     private void ClearMessage()
