@@ -5,7 +5,6 @@
     <link rel="stylesheet" href="/css/styles.css" />
 </head>
 
-
 <div id="linked-list" class="container">
     <h3>Singly Linked List Operations</h3>
 
@@ -66,6 +65,9 @@
         @* Render the linked list here *@
     </div>
 
+    <CodeDisplay @ref="CodeDisplay" CodeLines="@currentCode" OnHighlightRequest="HandleHighlightRequest" />
+
+
     <div>@messageOutput</div>
 
     @foreach (var node in linkedList)
@@ -91,13 +93,54 @@
 </div>
 
 
+
 @code {
+
+    private CodeDisplay CodeDisplay;
+
+
     private SinglyLinkedList<int> linkedList = new SinglyLinkedList<int>();
     Random rand = new Random();
     private string selectedAction = "none";
     private int insertPosition;
     private int inputValue;
     private string messageOutput = "";
+
+    private IEnumerable<string> currentCode;
+    private string currentOperation = "Search";
+
+    protected override void OnParametersSet()
+    {
+        currentCode = GetCodeByOperation(currentOperation);
+    }
+
+    private IEnumerable<string> GetCodeByOperation(string operation)
+    {
+        // Define code snippets for each operation
+        switch (operation)
+        {
+            case "Search":
+                return new List<string>
+                {
+                    "if empty, return NOT_FOUND",
+                    "index = 0, tmp = head",
+                    "while (tmp.item != v)",
+                    "  index++, tmp = tmp.next",
+                    "  if tmp == null",
+                    "    return NOT_FOUND",
+                    "return index"
+                };
+            default:
+                return new List<string> { "Select an operation to view the code." };
+        }
+    }
+
+    private async Task HandleHighlightRequest(int lineIndex)
+    {
+        // JavaScript call to highlight line
+        await JSRuntime.InvokeVoidAsync("highlightLine", lineIndex);
+    }
+
 
     protected override void OnInitialized()
     {
@@ -110,9 +153,11 @@
     {
         if (firstRender)
         {
-            await UpdateDisplay(linkedList);
+            // Safe to call methods on CodeDisplay here
+            await CodeDisplay.HighlightLine(0);
         }
     }
+
 
     private async Task PrependValue()
     {
@@ -147,7 +192,50 @@
     private async Task SearchValue()
     {
         await JSRuntime.InvokeVoidAsync("searchValueInSLL", inputValue);
+
+        if (linkedList.Head == null)
+        {
+            await CodeDisplay.HighlightLine(0); // Highlight "if empty, return NOT_FOUND"
+            await Task.Delay(1000); // Wait for 1 second
+            return;
+        }
+
+        int index = 0;
+        SinglyLinkedListNode<int> current = linkedList.Head;
+
+        await CodeDisplay.HighlightLine(1); // Highlight "index = 0, tmp = head"
+        await Task.Delay(1000); // Wait for 1 second after highlighting
+
+        while (current != null)
+        {
+            if (current._data.Equals(inputValue))
+            {
+                await CodeDisplay.HighlightLine(6); // Highlight "return index"
+                await Task.Delay(1000); // Pause after highlighting before breaking
+                break;
+            }
+
+            await CodeDisplay.HighlightLine(2); // Highlight "while (tmp.item != v)"
+            await Task.Delay(1000); // Pause to see the condition check
+
+            current = current.Next;
+            index++;
+
+            if (current == null)
+            {
+                await CodeDisplay.HighlightLine(4); // Highlight "if tmp == null"
+                await Task.Delay(500); // Shorter delay for conditional checks
+                await CodeDisplay.HighlightLine(5); // Highlight "return NOT_FOUND"
+                await Task.Delay(1000); // Pause before exiting
+            }
+            else
+            {
+                await CodeDisplay.HighlightLine(3); // Highlight "index++, tmp = tmp.next"
+                await Task.Delay(1000); // Pause to view the operation
+            }
+        }
     }
+
 
     private async Task RemoveValue()
     {

@@ -1,0 +1,33 @@
+﻿@code {
+    [Parameter] public IEnumerable<string> CodeLines { get; set; }
+    [Parameter] public EventCallback<int> OnHighlightRequest { get; set; }
+
+    public async Task HighlightLine(int lineNumber)
+    {
+        if (OnHighlightRequest.HasDelegate)
+        {
+            await OnHighlightRequest.InvokeAsync(lineNumber);
+        }
+    }
+}
+
+@if (CodeLines != null)
+{
+    <div id="code-container">
+        @foreach (var line in CodeLines)
+        {
+            <pre><code class="code-line">@line</code></pre>
+        }
+    </div>
+}
+
+<style>
+    .code-line {
+        font-family: 'Consolas', 'Courier New', monospace;
+        white-space: pre;
+    }
+
+    .highlight {
+        background-color: yellow;
+    }
+</style>

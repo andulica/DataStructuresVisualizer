@@ -419,6 +419,21 @@
         }
     }
 
+    function highlightLine(lineNumber) {
+        const lines = document.querySelectorAll('.code-line');
+        lines.forEach((line, index) => {
+            line.classList.remove('highlight');
+            if (index === lineNumber) {
+                line.classList.add('highlight');
+            }
+        });
+    }
+
+
+    window.highlightLine = function(lineNumber) {
+        highlightLine(lineNumber);
+    };
+
     window.searchValueInSLL = function (value) {
         resetNodeColors();
         resetLinkColors();
