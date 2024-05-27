@@ -67,7 +67,6 @@
 
     <CodeDisplay @ref="CodeDisplay" CodeLines="@currentCode" OnHighlightRequest="HandleHighlightRequest" />
 
-
     <div>@messageOutput</div>
 
     @foreach (var node in linkedList)
@@ -92,35 +91,38 @@
     }
 </div>
 
-
-
 @code {
 
-    private CodeDisplay CodeDisplay;
+        private CodeDisplay? CodeDisplay;
+        private SinglyLinkedList<int> linkedList = new SinglyLinkedList<int>();
+        private Random rand = new Random();
+        private string selectedAction = "none";
+        private int insertPosition;
+        private int inputValue;
+        private string messageOutput = "";
+        private IEnumerable<string>? currentCode;
+        private string currentOperation = "Search";
 
-
-    private SinglyLinkedList<int> linkedList = new SinglyLinkedList<int>();
-    Random rand = new Random();
-    private string selectedAction = "none";
-    private int insertPosition;
-    private int inputValue;
-    private string messageOutput = "";
-
-    private IEnumerable<string> currentCode;
-    private string currentOperation = "Search";
-
-    protected override void OnParametersSet()
-    {
-        currentCode = GetCodeByOperation(currentOperation);
-    }
-
-    private IEnumerable<string> GetCodeByOperation(string operation)
-    {
-        // Define code snippets for each operation
-        switch (operation)
+        protected override void OnInitialized()
         {
-            case "Search":
-                return new List<string>
+            linkedList = new SinglyLinkedList<int>();
+            linkedList.Append(rand.Next(1, 30));
+            linkedList.Append(rand.Next(1, 30));
+            linkedList.Append(rand.Next(1, 30));
+        }
+
+        protected override void OnParametersSet()
+        {
+            currentCode = GetCodeByOperation(currentOperation);
+        }
+
+        private IEnumerable<string> GetCodeByOperation(string operation)
+        {
+        // Define code snippets for each operation
+            switch (operation)
+            {
+                case "Search":
+                    return new List<string>
                 {
                     "if empty, return NOT_FOUND",
                     "index = 0, tmp = head",
@@ -130,205 +132,186 @@
                     "    return NOT_FOUND",
                     "return index"
                 };
-            default:
-                return new List<string> { "Select an operation to view the code." };
-        }
-    }
-
-    private async Task HandleHighlightRequest(int lineIndex)
-    {
-        // JavaScript call to highlight line
-        await JSRuntime.InvokeVoidAsync("highlightLine", lineIndex);
-    }
-
-
-    protected override void OnInitialized()
-    {
-        linkedList = new SinglyLinkedList<int>();
-        linkedList.Append(rand.Next(1, 30));
-        linkedList.Append(rand.Next(1, 30));
-        linkedList.Append(rand.Next(1, 30));
-    }
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            // Safe to call methods on CodeDisplay here
-            await CodeDisplay.HighlightLine(0);
-        }
-    }
-
-
-    private async Task PrependValue()
-    {
-        try
-        {
-            linkedList.Prepend(inputValue);
-            var headToInsert = ConvertNodeToJavaScriptFormat(linkedList.Head);
-
-            await JSRuntime.InvokeVoidAsync("insertAtInSLL", headToInsert, linkedList.GetHeadIndex());
-        }
-        catch (InvalidOperationException ex)
-        {
-            messageOutput = ex.Message;
-        }
-    }
-
-    private async Task AppendValue()
-    {
-        try
-        {
-            linkedList.Append(inputValue);
-            var tailToInsert = ConvertNodeToJavaScriptFormat(linkedList.Tail);
-
-            await JSRuntime.InvokeVoidAsync("insertAtInSLL", tailToInsert, linkedList.GetTailIndex() - 1);
-        }
-        catch (InvalidOperationException ex)
-        {
-            messageOutput = ex.Message;
-        }
-    }
-
-    private async Task SearchValue()
-    {
-        await JSRuntime.InvokeVoidAsync("searchValueInSLL", inputValue);
-
-        if (linkedList.Head == null)
-        {
-            await CodeDisplay.HighlightLine(0); // Highlight "if empty, return NOT_FOUND"
-            await Task.Delay(1000); // Wait for 1 second
-            return;
+                default:
+                    return new List<string> { "Select an operation to view the code." };
+            }
         }
 
-        int index = 0;
-        SinglyLinkedListNode<int> current = linkedList.Head;
-
-        await CodeDisplay.HighlightLine(1); // Highlight "index = 0, tmp = head"
-        await Task.Delay(1000); // Wait for 1 second after highlighting
-
-        while (current != null)
+        private async Task HandleHighlightRequest(int lineIndex)
         {
-            if (current._data.Equals(inputValue))
+            await JSRuntime.InvokeVoidAsync("highlightLine", lineIndex);
+        }
+
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender)
             {
-                await CodeDisplay.HighlightLine(6); // Highlight "return index"
-                await Task.Delay(1000); // Pause after highlighting before breaking
-                break;
+                // Convert the linked list to a format suitable for JavaScript
+                var linkedListData = ConvertListToJavaScriptFormat(linkedList);
+                // Call the JavaScript function to render the linked list
+                await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData);
+            }
+        }
+
+        private List<object> ConvertListToJavaScriptFormat(SinglyLinkedList<int> list)
+        {
+            var nodes = new List<object>();
+            var currentNode = list.Head;
+            while (currentNode != null)
+            {
+                nodes.Add(new
+                {
+                    value = currentNode._data,
+                    next = currentNode.Next != null ? currentNode.Next.Id : (Guid?)null,
+                    id = currentNode.Id
+                });
+                currentNode = currentNode.Next;
+            }
+            return nodes;
+        }
+
+        private async Task PrependValue()
+        {
+            try
+            {
+                linkedList.Prepend(inputValue);
+                var headToInsert = ConvertNodeToJavaScriptFormat(linkedList.Head);
+                await JSRuntime.InvokeVoidAsync("insertAtInSLL", headToInsert, linkedList.GetHeadIndex());
+            }
+            catch (InvalidOperationException ex)
+            {
+                messageOutput = ex.Message;
+            }
+        }
+
+        private async Task AppendValue()
+        {
+            try
+            {
+                linkedList.Append(inputValue);
+                var tailToInsert = ConvertNodeToJavaScriptFormat(linkedList.Tail);
+                await JSRuntime.InvokeVoidAsync("insertAtInSLL", tailToInsert, linkedList.GetTailIndex() - 1);
+            }
+            catch (InvalidOperationException ex)
+            {
+                messageOutput = ex.Message;
+            }
+        }
+
+        private async Task SearchValue()
+        {
+            await JSRuntime.InvokeVoidAsync("searchValueInSLL", inputValue);
+
+            if (linkedList.Head == null)
+            {
+                await CodeDisplay.HighlightLine(0);
+                await Task.Delay(1000);
+                return;
             }
 
-            await CodeDisplay.HighlightLine(2); // Highlight "while (tmp.item != v)"
-            await Task.Delay(1000); // Pause to see the condition check
+            int index = 0;
+            SinglyLinkedListNode<int> current = linkedList.Head;
 
-            current = current.Next;
-            index++;
+            await CodeDisplay.HighlightLine(1);
+            await Task.Delay(1000);
 
-            if (current == null)
+            while (current != null)
             {
-                await CodeDisplay.HighlightLine(4); // Highlight "if tmp == null"
-                await Task.Delay(500); // Shorter delay for conditional checks
-                await CodeDisplay.HighlightLine(5); // Highlight "return NOT_FOUND"
-                await Task.Delay(1000); // Pause before exiting
+                if (current._data.Equals(inputValue))
+                {
+                    await CodeDisplay.HighlightLine(6);
+                    await Task.Delay(1000);
+                    break;
+                }
+
+                await CodeDisplay.HighlightLine(2);
+                await Task.Delay(1000);
+
+                current = current.Next;
+                index++;
+
+                if (current == null)
+                {
+                    await CodeDisplay.HighlightLine(4);
+                    await Task.Delay(500);
+                    await CodeDisplay.HighlightLine(5);
+                    await Task.Delay(1000);
+                }
+                else
+                {
+                    await CodeDisplay.HighlightLine(3);
+                    await Task.Delay(1000);
+                }
+            }
+        }
+
+        private async Task RemoveValue()
+        {
+            var nodeToRemove = linkedList.Search(inputValue);
+            if (nodeToRemove != null)
+            {
+                var nodeInfo = ConvertNodeToJavaScriptFormat(nodeToRemove);
+                linkedList.Delete(inputValue);
+                await JSRuntime.InvokeVoidAsync("removeValueInSll", nodeInfo);
             }
             else
             {
-                await CodeDisplay.HighlightLine(3); // Highlight "index++, tmp = tmp.next"
-                await Task.Delay(1000); // Pause to view the operation
+                HighlightAllNodesOrDisplayMessage();
+            }
+
+            await JSRuntime.InvokeVoidAsync("resetSllColours");
+        }
+
+        private void CreateSinglyLinkedList()
+        {
+            linkedList = new SinglyLinkedList<int>();
+            for (int i = 0; i < inputValue; i++)
+            {
+                linkedList.Append(rand.Next(1, 30));
+            }
+            UpdateDisplay(linkedList).ContinueWith(_ => StateHasChanged());
+        }
+
+        private async Task UpdateDisplay(SinglyLinkedList<int> list)
+        {
+            var linkedListData = ConvertListToJavaScriptFormat(list);
+            await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData);
+        }
+
+        private object ConvertNodeToJavaScriptFormat(SinglyLinkedListNode<int> node)
+        {
+            return new
+            {
+                value = node._data,
+                next = node.Next != null ? node.Next.Id : (Guid?)null,
+                id = node.Id
+            };
+        }
+
+        private async Task PerformInsertion()
+        {
+            try
+            {
+                var insertedValue = ConvertNodeToJavaScriptFormat(linkedList.InsertAt(insertPosition, inputValue));
+                if (insertPosition > linkedList.Count - 1)
+                {
+                    insertPosition = linkedList.Count - 2;
+                }
+                await JSRuntime.InvokeVoidAsync("insertAtInSLL", insertedValue, insertPosition);
+            }
+            catch (InvalidOperationException ex)
+            {
+                messageOutput = ex.Message;
             }
         }
-    }
 
-
-    private async Task RemoveValue()
-    {
-        var nodeToRemove = linkedList.Search(inputValue);
-        if (nodeToRemove != null)
+        private void HighlightAllNodesOrDisplayMessage()
         {
-            var nodeInfo = ConvertNodeToJavaScriptFormat(nodeToRemove);
-
-            linkedList.Delete(inputValue);
-
-            await JSRuntime.InvokeVoidAsync("removeValueInSll", nodeInfo);
-        }
-        else
-        {
-            HighlightAllNodesOrDisplayMessage();
+            messageOutput = "The entered number is not in the singly linked list.";
         }
 
-        await JSRuntime.InvokeVoidAsync("resetSllColours");
-    }
-
-    private void CreateSinglyLinkedList()
-    {
-        linkedList = new SinglyLinkedList<int>();
-        for (int i = 0; i < inputValue; i++)
+        private void ClearMessage()
         {
-            linkedList.Append(rand.Next(1, 30));
+            messageOutput = "";
         }
-        UpdateDisplay(linkedList).ContinueWith(_ => { });
-    }
-
-    private async Task UpdateDisplay(SinglyLinkedList<int> list)
-    {
-        var linkedListData = ConvertListToJavaScriptFormat(list);
-        await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData);
-    }
-
-    private List<object> ConvertListToJavaScriptFormat(SinglyLinkedList<int> list)
-    {
-        var nodes = new List<object>();
-        var currentNode = list.Head;
-        while (currentNode != null)
-        {
-            nodes.Add(new
-            {
-                value = currentNode._data,
-                next = currentNode.Next,
-                id = currentNode.Id
-            });
-            currentNode = currentNode.Next;
-        }
-        return nodes;
-    }
-
-    private object ConvertNodeToJavaScriptFormat(SinglyLinkedListNode<int> node)
-    {
-        if (node == null)
-        {
-            messageOutput = "List is full";
-            return null;
-        }
-
-        return new
-        {
-            value = node._data,
-            next = node.Next != null ? node.Next.Id : (Guid?)null,
-            id = node.Id
-        };
-    }
-
-    private async Task PerformInsertion()
-    {
-        try
-        {
-            var insertedValue = ConvertNodeToJavaScriptFormat(linkedList.InsertAt(insertPosition, inputValue));
-            if (insertPosition > linkedList.Count - 1)
-            {
-                insertPosition = linkedList.Count - 2;
-            }
-            await JSRuntime.InvokeVoidAsync("insertAtInSLL", insertedValue, insertPosition);
-        }
-        catch (InvalidOperationException ex)
-        {
-            messageOutput = ex.Message;
-        }
-    }
-
-    private void HighlightAllNodesOrDisplayMessage()
-    {
-        messageOutput = "The entered number is not in the singly linked list.";
-    }
-
-    private void ClearMessage()
-    {
-        messageOutput = "";
-    }
-}               
+}
