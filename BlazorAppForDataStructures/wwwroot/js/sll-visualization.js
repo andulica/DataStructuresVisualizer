@@ -140,7 +140,7 @@
     function highlightLinkAndArrowhead(sourceNodeId, targetNodeId) {
         let linkId = `#link-${sourceNodeId}-${targetNodeId}`;
         svg.select(linkId)
-            .transition().duration(500)
+            .transition().duration(1000)
             .style('stroke', 'orange')
             .attr('marker-end', 'url(#highlighted-arrowhead)');
     }
@@ -158,7 +158,7 @@
                     }
 
                     svg.select(`#node-${node.id}`)
-                        .transition().duration(500)
+                        .transition().duration(1000)
                         .style('fill', 'orange');
 
                     if (index > 0) {
@@ -167,7 +167,7 @@
 
                     if (node.value === value) {
                         svg.select(`#node-${node.id}`)
-                            .transition().duration(500)
+                            .transition().duration(1000)
                             .style('fill', 'green');
                         found = true;
                         clearTimeouts(timeouts); // Clear all remaining timeouts
@@ -420,7 +420,7 @@
     }
 
     function highlightLine(lineNumber) {
-        const lines = document.querySelectorAll('.code-line');
+       const lines = document.querySelectorAll('.code-line');
         lines.forEach((line, index) => {
             line.classList.remove('highlight');
             if (index === lineNumber) {

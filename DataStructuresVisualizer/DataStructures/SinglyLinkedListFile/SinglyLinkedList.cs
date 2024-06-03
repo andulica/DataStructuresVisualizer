@@ -3,8 +3,10 @@ using System.Collections;
 
 public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
 {
-    // The head node of the singly linked list.
     private SinglyLinkedListNode<T> _head { get; set; }
+
+    public Action<int> HighlightRequested { get; set; }
+
     public SinglyLinkedListNode<T> Head
     {
         get { return _head; }
@@ -50,6 +52,11 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         maxCapacity = capacity;
         count = 0;
         _head = null;
+    }
+
+    protected virtual void OnHighlightRequested(int lineNumber)
+    {
+        HighlightRequested?.Invoke(lineNumber);
     }
 
     /// <summary>
@@ -147,30 +154,36 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// Deletes the first occurrence of a node with the specified data from the list.
     /// </summary>
     /// <param name="data">The data of the node to delete.</param>
-    public void Delete(T data)
+    /// <returns>The node that was deleted, or null if no node was found with the specified data.</returns>
+    public SinglyLinkedListNode<T> Delete(T data)
     {
-        if (_head == null) return; // Check if the list is empty
+        if (_head == null) return null; // Check if the list is empty and return null
+
+        SinglyLinkedListNode<T> nodeToDelete = null;
 
         // Check if the head contains the data to be deleted
         if (EqualityComparer<T>.Default.Equals(_head._data, data))
         {
-            _head = _head.Next; // Delete the head node
+            nodeToDelete = _head;
+            _head = _head.Next; // Move head to next node, effectively deleting it
             count--;
-            return;
+            return nodeToDelete;
         }
 
         SinglyLinkedListNode<T> current = _head;
-        while (current.Next != null && !EqualityComparer<T>.Default.Equals(current.Next._data, data))
+        while (current.Next != null)
         {
-            current = current.Next; // Traverse the list to find the node before the target node
+            if (EqualityComparer<T>.Default.Equals(current.Next._data, data))
+            {
+                nodeToDelete = current.Next;
+                current.Next = current.Next.Next; // Disconnect the node from the list
+                count--;
+                return nodeToDelete;
+            }
+            current = current.Next;
         }
 
-        // If the node after the current node needs to be deleted
-        if (current.Next != null)
-        {
-            current.Next = current.Next.Next; // Delete the node
-            count--;
-        }
+        return null; // Return null if no node was found and deleted
     }
 
     /// <summary>
@@ -278,17 +291,52 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// </summary>
     /// <param name="data">The data to search for in the list.</param>
     /// <returns>The node containing the data if found in the list; otherwise, null.</returns>
-    public SinglyLinkedListNode<T> Search(T data)
+    public async Task<SinglyLinkedListNode<T>> Search(T data)
     {
+        // Check if the list is empty and handle the first line of the script
+        if (_head == null)
+        {
+            OnHighlightRequested(0); // "if empty, return NOT_FOUND"
+            await Task.Delay(200);
+            return null;
+        }
+        OnHighlightRequested(1); // "index = 0, tmp = head"
+        await Task.Delay(200);
+
         SinglyLinkedListNode<T> current = _head;
+        int position = 0;
+
         while (current != null)
         {
+            OnHighlightRequested(2); // "while (tmp.item != v)"
+            await Task.Delay(500);
+
             if (EqualityComparer<T>.Default.Equals(current._data, data))
             {
-                return current;  // Return the node itself, not just the data
+                OnHighlightRequested(6); // "return index"
+                await Task.Delay(500);
+                return current;
             }
+
+            // Update the tmp and index for the next loop iteration
             current = current.Next;
+            position++;
+
+            // Check if the next node is null to handle the last if condition
+            if (current == null)
+            {
+                OnHighlightRequested(4); // "if tmp == null"
+                await Task.Delay(500);
+                OnHighlightRequested(5); // "return NOT_FOUND"
+                await Task.Delay(500);
+            }
+            else
+            {
+                OnHighlightRequested(3); // "index++, tmp = tmp.next"
+                await Task.Delay(500);
+            }
         }
+
         return null;
     }
 

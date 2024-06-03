@@ -84,45 +84,49 @@
     @if (!string.IsNullOrEmpty(messageOutput))
     {
         <div class="notification-container">
-                <span class="notification-message">@messageOutput</span>
-                <button class="notification-close" @onclick="ClearMessage">✖</button>
-            
+            <span class="notification-message">@messageOutput</span>
+            <button class="notification-close" @onclick="ClearMessage">✖</button>
+
         </div>
     }
 </div>
 
 @code {
 
-        private CodeDisplay? CodeDisplay;
-        private SinglyLinkedList<int> linkedList = new SinglyLinkedList<int>();
-        private Random rand = new Random();
-        private string selectedAction = "none";
-        private int insertPosition;
-        private int inputValue;
-        private string messageOutput = "";
-        private IEnumerable<string>? currentCode;
-        private string currentOperation = "Search";
+    private CodeDisplay? CodeDisplay;
+    private SinglyLinkedList<int> linkedList = new SinglyLinkedList<int>();
+    private Random rand = new Random();
+    private string selectedAction = "none";
+    private int insertPosition;
+    private int inputValue;
+    private string messageOutput = "";
+    private IEnumerable<string>? currentCode;
+    private string currentOperation = "Search";
 
-        protected override void OnInitialized()
-        {
-            linkedList = new SinglyLinkedList<int>();
-            linkedList.Append(rand.Next(1, 30));
-            linkedList.Append(rand.Next(1, 30));
-            linkedList.Append(rand.Next(1, 30));
-        }
+    protected override void OnInitialized()
+    {
+        linkedList = new SinglyLinkedList<int>();
 
-        protected override void OnParametersSet()
-        {
-            currentCode = GetCodeByOperation(currentOperation);
-        }
+        linkedList.HighlightRequested += HandleHighlightRequest; // Ensure this is before any operations
 
-        private IEnumerable<string> GetCodeByOperation(string operation)
-        {
+        linkedList.Append(rand.Next(1, 30));
+        linkedList.Append(rand.Next(1, 30));
+        linkedList.Append(rand.Next(1, 30));
+    }
+
+    // Ensure this is before any operations
+    protected override void OnParametersSet()
+    {
+        currentCode = GetCodeByOperation(currentOperation);
+    }
+
+    private IEnumerable<string> GetCodeByOperation(string operation)
+    {
         // Define code snippets for each operation
-            switch (operation)
-            {
-                case "Search":
-                    return new List<string>
+        switch (operation)
+        {
+            case "Search":
+                return new List<string>
                 {
                     "if empty, return NOT_FOUND",
                     "index = 0, tmp = head",
@@ -132,186 +136,158 @@
                     "    return NOT_FOUND",
                     "return index"
                 };
-                default:
-                    return new List<string> { "Select an operation to view the code." };
-            }
+            default:
+                return new List<string> { "Select an operation to view the code." };
         }
+    }
 
-        private async Task HandleHighlightRequest(int lineIndex)
+    private void HandleHighlightRequest(int lineIndex)
+    {
+        JSRuntime.InvokeVoidAsync("highlightLine", lineIndex);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
         {
-            await JSRuntime.InvokeVoidAsync("highlightLine", lineIndex);
-        }
-
-        protected override async Task OnAfterRenderAsync(bool firstRender)
-        {
-            if (firstRender)
-            {
-                // Convert the linked list to a format suitable for JavaScript
-                var linkedListData = ConvertListToJavaScriptFormat(linkedList);
-                // Call the JavaScript function to render the linked list
-                await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData);
-            }
-        }
-
-        private List<object> ConvertListToJavaScriptFormat(SinglyLinkedList<int> list)
-        {
-            var nodes = new List<object>();
-            var currentNode = list.Head;
-            while (currentNode != null)
-            {
-                nodes.Add(new
-                {
-                    value = currentNode._data,
-                    next = currentNode.Next != null ? currentNode.Next.Id : (Guid?)null,
-                    id = currentNode.Id
-                });
-                currentNode = currentNode.Next;
-            }
-            return nodes;
-        }
-
-        private async Task PrependValue()
-        {
-            try
-            {
-                linkedList.Prepend(inputValue);
-                var headToInsert = ConvertNodeToJavaScriptFormat(linkedList.Head);
-                await JSRuntime.InvokeVoidAsync("insertAtInSLL", headToInsert, linkedList.GetHeadIndex());
-            }
-            catch (InvalidOperationException ex)
-            {
-                messageOutput = ex.Message;
-            }
-        }
-
-        private async Task AppendValue()
-        {
-            try
-            {
-                linkedList.Append(inputValue);
-                var tailToInsert = ConvertNodeToJavaScriptFormat(linkedList.Tail);
-                await JSRuntime.InvokeVoidAsync("insertAtInSLL", tailToInsert, linkedList.GetTailIndex() - 1);
-            }
-            catch (InvalidOperationException ex)
-            {
-                messageOutput = ex.Message;
-            }
-        }
-
-        private async Task SearchValue()
-        {
-            await JSRuntime.InvokeVoidAsync("searchValueInSLL", inputValue);
-
-            if (linkedList.Head == null)
-            {
-                await CodeDisplay.HighlightLine(0);
-                await Task.Delay(1000);
-                return;
-            }
-
-            int index = 0;
-            SinglyLinkedListNode<int> current = linkedList.Head;
-
-            await CodeDisplay.HighlightLine(1);
-            await Task.Delay(1000);
-
-            while (current != null)
-            {
-                if (current._data.Equals(inputValue))
-                {
-                    await CodeDisplay.HighlightLine(6);
-                    await Task.Delay(1000);
-                    break;
-                }
-
-                await CodeDisplay.HighlightLine(2);
-                await Task.Delay(1000);
-
-                current = current.Next;
-                index++;
-
-                if (current == null)
-                {
-                    await CodeDisplay.HighlightLine(4);
-                    await Task.Delay(500);
-                    await CodeDisplay.HighlightLine(5);
-                    await Task.Delay(1000);
-                }
-                else
-                {
-                    await CodeDisplay.HighlightLine(3);
-                    await Task.Delay(1000);
-                }
-            }
-        }
-
-        private async Task RemoveValue()
-        {
-            var nodeToRemove = linkedList.Search(inputValue);
-            if (nodeToRemove != null)
-            {
-                var nodeInfo = ConvertNodeToJavaScriptFormat(nodeToRemove);
-                linkedList.Delete(inputValue);
-                await JSRuntime.InvokeVoidAsync("removeValueInSll", nodeInfo);
-            }
-            else
-            {
-                HighlightAllNodesOrDisplayMessage();
-            }
-
-            await JSRuntime.InvokeVoidAsync("resetSllColours");
-        }
-
-        private void CreateSinglyLinkedList()
-        {
-            linkedList = new SinglyLinkedList<int>();
-            for (int i = 0; i < inputValue; i++)
-            {
-                linkedList.Append(rand.Next(1, 30));
-            }
-            UpdateDisplay(linkedList).ContinueWith(_ => StateHasChanged());
-        }
-
-        private async Task UpdateDisplay(SinglyLinkedList<int> list)
-        {
-            var linkedListData = ConvertListToJavaScriptFormat(list);
+            // Convert the linked list to a format suitable for JavaScript
+            var linkedListData = ConvertListToJavaScriptFormat(linkedList);
+            // Call the JavaScript function to render the linked list
             await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData);
         }
+    }
 
-        private object ConvertNodeToJavaScriptFormat(SinglyLinkedListNode<int> node)
+    private List<object> ConvertListToJavaScriptFormat(SinglyLinkedList<int> list)
+    {
+        var nodes = new List<object>();
+        var currentNode = list.Head;
+        while (currentNode != null)
         {
-            return new
+            nodes.Add(new
             {
-                value = node._data,
-                next = node.Next != null ? node.Next.Id : (Guid?)null,
-                id = node.Id
-            };
+                value = currentNode._data,
+                next = currentNode.Next != null ? currentNode.Next.Id : (Guid?)null,
+                id = currentNode.Id
+            });
+            currentNode = currentNode.Next;
+        }
+        return nodes;
+    }
+
+    private async Task PrependValue()
+    {
+        try
+        {
+            linkedList.Prepend(inputValue);
+            var headToInsert = ConvertNodeToJavaScriptFormat(linkedList.Head);
+            await JSRuntime.InvokeVoidAsync("insertAtInSLL", headToInsert, linkedList.GetHeadIndex());
+        }
+        catch (InvalidOperationException ex)
+        {
+            messageOutput = ex.Message;
+        }
+    }
+
+    private async Task AppendValue()
+    {
+        try
+        {
+            linkedList.Append(inputValue);
+            var tailToInsert = ConvertNodeToJavaScriptFormat(linkedList.Tail);
+            await JSRuntime.InvokeVoidAsync("insertAtInSLL", tailToInsert, linkedList.GetTailIndex() - 1);
+        }
+        catch (InvalidOperationException ex)
+        {
+            messageOutput = ex.Message;
+        }
+    }
+
+    private async Task SearchValue()
+    {
+        await JSRuntime.InvokeVoidAsync("searchValueInSLL", inputValue);
+        var nodeToHighlight = linkedList.Search(inputValue);
+    }
+
+    private async Task RemoveValue()
+    {
+        // Await the asynchronous Search method
+        var nodeToRemove = linkedList.Delete(inputValue);
+        if (nodeToRemove != null)
+        {
+            var nodeInfo = ConvertNodeToJavaScriptFormat(nodeToRemove);
+            linkedList.Delete(inputValue);
+            await JSRuntime.InvokeVoidAsync("removeValueInSll", nodeInfo);
+        }
+        else
+        {
+            HighlightAllNodesOrDisplayMessage();
         }
 
-        private async Task PerformInsertion()
+        await JSRuntime.InvokeVoidAsync("resetSllColours");
+    }
+
+    private async Task CreateSinglyLinkedList()
+    {
+        if (linkedList != null)
         {
-            try
+            // Optionally clear existing event subscriptions to prevent memory leaks
+            linkedList.HighlightRequested -= HandleHighlightRequest;
+        }
+
+        linkedList = new SinglyLinkedList<int>();
+
+        // Re-subscribe to the event
+        linkedList.HighlightRequested += HandleHighlightRequest;
+
+        for (int i = 0; i < inputValue; i++)
+        {
+            linkedList.Append(rand.Next(1, 30));
+        }
+
+        await UpdateDisplay(linkedList);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task UpdateDisplay(SinglyLinkedList<int> list)
+    {
+        var linkedListData = ConvertListToJavaScriptFormat(list);
+        await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData);
+    }
+
+    private object ConvertNodeToJavaScriptFormat(SinglyLinkedListNode<int> node)
+    {
+        return new
+        {
+            value = node._data,
+            next = node.Next != null ? node.Next.Id : (Guid?)null,
+            id = node.Id
+        };
+    }
+
+    private async Task PerformInsertion()
+    {
+        try
+        {
+            var insertedValue = ConvertNodeToJavaScriptFormat(linkedList.InsertAt(insertPosition, inputValue));
+            if (insertPosition > linkedList.Count - 1)
             {
-                var insertedValue = ConvertNodeToJavaScriptFormat(linkedList.InsertAt(insertPosition, inputValue));
-                if (insertPosition > linkedList.Count - 1)
-                {
-                    insertPosition = linkedList.Count - 2;
-                }
-                await JSRuntime.InvokeVoidAsync("insertAtInSLL", insertedValue, insertPosition);
+                insertPosition = linkedList.Count - 2;
             }
-            catch (InvalidOperationException ex)
-            {
-                messageOutput = ex.Message;
-            }
+            await JSRuntime.InvokeVoidAsync("insertAtInSLL", insertedValue, insertPosition);
         }
-
-        private void HighlightAllNodesOrDisplayMessage()
+        catch (InvalidOperationException ex)
         {
-            messageOutput = "The entered number is not in the singly linked list.";
+            messageOutput = ex.Message;
         }
+    }
 
-        private void ClearMessage()
-        {
-            messageOutput = "";
-        }
+    private void HighlightAllNodesOrDisplayMessage()
+    {
+        messageOutput = "The entered number is not in the singly linked list.";
+    }
+
+    private void ClearMessage()
+    {
+        messageOutput = "";
+    }
 }
