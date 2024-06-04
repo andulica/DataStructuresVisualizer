@@ -3,7 +3,7 @@ using System.Collections;
 
 public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
 {
-    private SinglyLinkedListNode<T> _head { get; set; }
+    private SinglyLinkedListNode<T>? _head { get; set; }
 
     public Action<int> HighlightRequested { get; set; }
 
