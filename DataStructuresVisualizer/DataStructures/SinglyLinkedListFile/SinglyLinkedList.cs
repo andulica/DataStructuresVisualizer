@@ -3,33 +3,12 @@ using System.Collections;
 
 public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
 {
-    private SinglyLinkedListNode<T>? _head { get; set; }
-
+    private SinglyLinkedListNode<T>? _head;
+    private SinglyLinkedListNode<T>? _tail;
     public Action<int> HighlightRequested { get; set; }
 
-    public SinglyLinkedListNode<T> Head
-    {
-        get { return _head; }
-        set { _head = value; }
-    }
-
-    public SinglyLinkedListNode<T> Tail
-    {
-        get
-        {
-            if (_head == null)
-            {
-                return null;
-            }
-
-            SinglyLinkedListNode<T> current = _head;
-            while (current.Next != null)
-            {
-                current = current.Next;
-            }
-            return current;
-        }
-    }
+    public SinglyLinkedListNode<T> Head => _head;
+    public SinglyLinkedListNode<T> Tail => _tail;
 
     // Count of nodes in the singly linked list.
     private int count;
@@ -59,11 +38,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         HighlightRequested?.Invoke(lineNumber);
     }
 
-    /// <summary>
-    /// Appends a new node with the specified data to the end of the list.
-    /// </summary>
-    /// <param name="data">The data to append to the list.</param>
-    public void Append(T data)
+    public void Add(T data)
     {
         if (count >= maxCapacity)
         {
@@ -74,18 +49,49 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
 
         if (_head == null)
         {
-            _head = newNode;
+            _head = _tail = newNode; // If the list is empty, the new node becomes both head and tail.
         }
         else
         {
-            SinglyLinkedListNode<T> current = _head;
-            while (current.Next != null)
-            {
-                current = current.Next;
-            }
-            current.Next = newNode;
+            _tail.Next = newNode; // Append the new node to the end of the list.
+            _tail = newNode;      // Update the tail to the new node.
         }
-        count++;
+
+        count++; // Increment the count of nodes in the list.
+    }
+
+    /// <summary>
+    /// Appends a new node with the specified data to the end of the list.
+    /// </summary>
+    /// <param name="data">The data to append to the list.</param>
+    public async Task Append(T data)
+    {
+        if (Count >= maxCapacity)
+        {
+            throw new InvalidOperationException("List is full.");
+        }
+
+        SinglyLinkedListNode<T> newNode = new SinglyLinkedListNode<T>(data);
+
+        HighlightRequested?.Invoke(0); // "Vertex vtx = new Vertex(v)"
+        await Task.Delay(1000);
+
+        if (_head == null)
+        {
+            _head = _tail = newNode; // Set both head and tail to the new node if list was empty
+            HighlightRequested?.Invoke(1); // "tail.next = vtx" and "tail = vtx" as it's the first element
+            await Task.Delay(1000);
+        }
+        else
+        {
+            _tail.Next = newNode; // Link the new node at the end of the list
+            _tail = newNode; // Update the tail to the new node
+        }
+
+        HighlightRequested?.Invoke(2); // "tail = vtx"
+        await Task.Delay(1000);
+
+        count++; // Increment the count of nodes
     }
 
     /// <summary>

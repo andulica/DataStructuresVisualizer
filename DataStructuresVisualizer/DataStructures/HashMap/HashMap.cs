@@ -98,7 +98,7 @@ namespace DataStructuresVisualizer.DataStructures.HashMap
 
             if (EqualityComparer<TKey>.Default.Equals(bucket.Head._data.Key, key))
             {
-                bucket.Head = bucket.Head.Next;
+                //bucket.Head = bucket.Head.Next;
                 return true;
             }
 

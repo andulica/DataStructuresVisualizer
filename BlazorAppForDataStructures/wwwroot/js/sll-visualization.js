@@ -186,6 +186,27 @@
         });
     }
 
+    function highlightTailNode() {
+        return new Promise((resolve) => {
+            if (nodes.length === 0) {
+                resolve(); // No nodes to highlight, just resolve
+                return;
+            }
+
+            const tailNode = nodes[nodes.length - 1]; // Get the last node (tail node)
+
+            // Highlight only the tail node in orange
+            svg.select(`#node-${tailNode.id}`)
+                .transition().duration(1000)
+                .style('fill', 'orange');
+
+            setTimeout(() => {
+                resolve(); // Resolve after the highlight completes, without changing color to green
+            }, 1000);
+        });
+    }
+
+
     function clearTimeouts(timeouts) {
         timeouts.forEach(timeout => clearTimeout(timeout));
     }
@@ -312,6 +333,26 @@
                 }, 1300);
             }, 1200);
         }, 1000);
+    }
+
+    async function insertNodeAtTail(value) {
+
+        setTimeout(() => {
+            // Create the new node to be the new tail
+            const newNode = createTailNode(value);
+            nodes.push(newNode);  // Append the new node to the end of the list
+
+            // Get the previous tail to draw the link
+            const prevNode = nodes[nodes.length - 2];
+
+            if (prevNode) {
+                drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, `link-${prevNode.id}-${newNode.id}`);
+            }
+
+            highlightTailNode();
+
+
+        }, 500);
     }
 
     function updateNodePositions() {
@@ -451,6 +492,12 @@
         resetLinkColors();
         removeNodeInSll(nodeToBeRemoved);
     };
+
+    window.insertTailInSll = function (value) {
+        resetNodeColors();
+        resetLinkColors();
+        insertNodeAtTail(value);
+    }
 
     window.resetSllColours = function () {
         resetNodeColors();

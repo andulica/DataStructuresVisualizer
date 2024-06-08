@@ -120,9 +120,9 @@
     protected override void OnInitialized()
     {
         linkedList.HighlightRequested += HandleHighlightRequest;
-        linkedList.Append(rand.Next(1, 30));
-        linkedList.Append(rand.Next(1, 30));
-        linkedList.Append(rand.Next(1, 30));
+        linkedList.Add(rand.Next(1, 30));
+        linkedList.Add(rand.Next(1, 30));
+        linkedList.Add(rand.Next(1, 30));
         currentCode = GetCodeByOperation(_selectedAction);
     }
 
@@ -229,13 +229,18 @@
     {
         try
         {
-            linkedList.Append(inputValue);
+            linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
+            await linkedList.Append(inputValue);
             var tailToInsert = ConvertNodeToJavaScriptFormat(linkedList.Tail);
-            await JSRuntime.InvokeVoidAsync("insertAtInSLL", tailToInsert, linkedList.GetTailIndex() - 1);
+            await JSRuntime.InvokeVoidAsync("insertTailInSll", tailToInsert);
         }
         catch (InvalidOperationException ex)
         {
             messageOutput = ex.Message;
+        }
+        finally
+        {
+            linkedList.HighlightRequested -= HandleHighlightRequest; // Clean up event subscription
         }
     }
 
@@ -278,7 +283,7 @@
 
         for (int i = 0; i < inputValue; i++)
         {
-            linkedList.Append(rand.Next(1, 30));
+            linkedList.Add(rand.Next(1, 30));
         }
 
         await UpdateDisplay(linkedList);
