@@ -348,11 +348,11 @@
             if (prevNode) {
                 drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, `link-${prevNode.id}-${newNode.id}`);
             }
+            setTimeout(() => {
+                resetNodeColors();
+            }, 1000); 
 
-            highlightTailNode();
-
-
-        }, 500);
+        }, 1000);
     }
 
     function updateNodePositions() {

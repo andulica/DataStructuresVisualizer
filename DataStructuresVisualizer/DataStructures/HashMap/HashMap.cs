@@ -62,7 +62,7 @@ namespace DataStructuresVisualizer.DataStructures.HashMap
             }
 
             // Key does not exist, append new entry
-            bucket.Append(entry);
+            bucket.Add(entry);
         }
 
         /// <summary>

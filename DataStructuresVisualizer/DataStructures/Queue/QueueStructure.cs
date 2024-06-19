@@ -18,7 +18,7 @@ public class QueueStructure<T> : IEnumerable<T>
     /// <param name="value">The item to add to the queue.</param>
     public void Enqueue(T value)
     {
-        list.Append(value);
+        list.Add(value);
     }
 
     /// <summary>

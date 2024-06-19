@@ -172,7 +172,7 @@
                     "Vertex del = pre.next, after = del.next",
                     "pre.next = after",
                     "delete del"
-                    
+
                 }  
         };
 
@@ -228,11 +228,12 @@
     private async Task AppendValue()
     {
         try
-        {
+        {   
             linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
-            await linkedList.Append(inputValue);
-            var tailToInsert = ConvertNodeToJavaScriptFormat(linkedList.Tail);
-            await JSRuntime.InvokeVoidAsync("insertTailInSll", tailToInsert);
+            var tail = new SinglyLinkedListNode<int>(inputValue);
+            var tailToInsert = ConvertNodeToJavaScriptFormat(tail);
+            linkedList.Append(tail,2000);
+            JSRuntime.InvokeVoidAsync("insertTailInSll", tailToInsert);
         }
         catch (InvalidOperationException ex)
         {

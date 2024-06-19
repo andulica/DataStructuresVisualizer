@@ -64,35 +64,34 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// Appends a new node with the specified data to the end of the list.
     /// </summary>
     /// <param name="data">The data to append to the list.</param>
-    public async Task Append(T data)
+    public async Task Append(SinglyLinkedListNode<T> newNode, int delay = 0)
     {
         if (Count >= maxCapacity)
         {
             throw new InvalidOperationException("List is full.");
         }
 
-        SinglyLinkedListNode<T> newNode = new SinglyLinkedListNode<T>(data);
-
+        // Invoke highlighting and delay for visual effect
         HighlightRequested?.Invoke(0); // "Vertex vtx = new Vertex(v)"
-        await Task.Delay(1000);
+        await Task.Delay(delay);  // Delay before proceeding, default is 0 if not specified
 
         if (_head == null)
         {
             _head = _tail = newNode; // Set both head and tail to the new node if list was empty
-            HighlightRequested?.Invoke(1); // "tail.next = vtx" and "tail = vtx" as it's the first element
-            await Task.Delay(1000);
+            HighlightRequested?.Invoke(1); // Highlight that this node is now the tail
+            await Task.Delay(1000); // Further delay to visualize this step
         }
         else
         {
             _tail.Next = newNode; // Link the new node at the end of the list
             _tail = newNode; // Update the tail to the new node
+            HighlightRequested?.Invoke(2); // Highlight that the tail has been updated
+            await Task.Delay(1000); // Further delay to visualize this step
         }
-
-        HighlightRequested?.Invoke(2); // "tail = vtx"
-        await Task.Delay(1000);
 
         count++; // Increment the count of nodes
     }
+
 
     /// <summary>
     /// Prepends a new node with the specified data to the beginning of the list.
