@@ -215,15 +215,28 @@
     {
         try
         {
-            linkedList.Prepend(inputValue);
-            var headToInsert = ConvertNodeToJavaScriptFormat(linkedList.Head);
-            await JSRuntime.InvokeVoidAsync("insertAtInSLL", headToInsert, linkedList.GetHeadIndex());
+            linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
+
+            // Create the new node here to be able to pass it to JavaScript
+            var head = new SinglyLinkedListNode<int>(inputValue);
+            var headToInsert = ConvertNodeToJavaScriptFormat(head);
+
+            // Prepend the node to the linked list with a delay if needed for visualization
+            linkedList.Prepend(head, 2000);
+
+            // Invoke JavaScript animation function
+            await JSRuntime.InvokeVoidAsync("insertAtInSLL", headToInsert, 0);
         }
         catch (InvalidOperationException ex)
         {
             messageOutput = ex.Message;
         }
+        finally
+        {
+            linkedList.HighlightRequested -= HandleHighlightRequest; // Clean up event subscription
+        }
     }
+
 
     private async Task AppendValue()
     {

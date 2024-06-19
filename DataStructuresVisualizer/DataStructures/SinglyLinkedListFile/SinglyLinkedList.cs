@@ -1,5 +1,6 @@
 ﻿using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
 using System.Collections;
+using System.Reflection;
 
 public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
 {
@@ -111,17 +112,24 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// Prepends a new node with the specified data to the beginning of the list.
     /// </summary>
     /// <param name="data">The data to prepend to the list.</param>
-    public void Prepend(T data)
+    public async Task Prepend(SinglyLinkedListNode<T> newNode, int delay = 0)
     {
         if (count >= maxCapacity)
         {
             throw new InvalidOperationException("List is full.");
         }
 
-        SinglyLinkedListNode<T> newNode = new SinglyLinkedListNode<T>(data);
+        HighlightRequested?.Invoke(0); // "Vertex vtx = new Vertex(v)"
+        await Task.Delay(delay);
 
+        HighlightRequested?.Invoke(1); // "vtx.next = head"
+        await Task.Delay(delay);
         newNode.Next = _head;
+
+        HighlightRequested?.Invoke(2); // "head = vtx"
+        await Task.Delay(delay);
         _head = newNode;
+
         count++;
     }
 
