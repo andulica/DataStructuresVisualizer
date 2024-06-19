@@ -38,6 +38,15 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         HighlightRequested?.Invoke(lineNumber);
     }
 
+    /// <summary>
+    /// Adds a new node with the specified data to the end of the singly linked list.
+    /// </summary>
+    /// <param name="data">The data to store in the new node.</param>
+    /// <remarks>
+    /// This method updates the tail of the list with the new node, making it the last node. If the list was previously empty,
+    /// the new node becomes both the head and the tail. This method throws an exception if the list has reached its maximum capacity.
+    /// </remarks>
+    /// <exception cref="InvalidOperationException">Thrown when the list has reached its maximum capacity and cannot accept new nodes.</exception>
     public void Add(T data)
     {
         if (count >= maxCapacity)
@@ -61,9 +70,14 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     }
 
     /// <summary>
-    /// Appends a new node with the specified data to the end of the list.
+    /// Appends a new node to the end of the singly linked list, with an optional delay to facilitate UI visualization.
     /// </summary>
-    /// <param name="data">The data to append to the list.</param>
+    /// <param name="newNode">The new node to append to the list.</param>
+    /// <param name="delay">The delay in milliseconds before the node is visually appended, defaulting to 0 for no delay.</param>
+    /// <remarks>
+    /// This method triggers UI updates through highlighted code lines to visually represent each step of the append operation.
+    /// </remarks>
+    /// <exception cref="InvalidOperationException">Thrown if the list has reached its maximum capacity.</exception>
     public async Task Append(SinglyLinkedListNode<T> newNode, int delay = 0)
     {
         if (Count >= maxCapacity)
@@ -73,23 +87,23 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
 
         // Invoke highlighting and delay for visual effect
         HighlightRequested?.Invoke(0); // "Vertex vtx = new Vertex(v)"
-        await Task.Delay(delay);  // Delay before proceeding, default is 0 if not specified
+        await Task.Delay(delay); 
 
         if (_head == null)
         {
             _head = _tail = newNode; // Set both head and tail to the new node if list was empty
             HighlightRequested?.Invoke(1); // Highlight that this node is now the tail
-            await Task.Delay(1000); // Further delay to visualize this step
+            await Task.Delay(1000);
         }
         else
         {
-            _tail.Next = newNode; // Link the new node at the end of the list
-            _tail = newNode; // Update the tail to the new node
+            _tail.Next = newNode;
+            _tail = newNode; 
             HighlightRequested?.Invoke(2); // Highlight that the tail has been updated
-            await Task.Delay(1000); // Further delay to visualize this step
+            await Task.Delay(1000);
         }
 
-        count++; // Increment the count of nodes
+        count++;
     }
 
 
