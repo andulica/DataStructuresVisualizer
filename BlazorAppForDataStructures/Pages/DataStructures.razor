@@ -1,19 +1,73 @@
 ﻿@page "/dataStructure"
 @inject NavigationManager NavigationManager
 
-<h1>Select a Data Structure to Visualize</h1>
+<h1 class="page-title">Select a Data Structure to Visualize</h1>
 
-@foreach (var ds in dataStructures)
-{
-    <button @onclick="() => NavigateToVisualizer(ds)">@ds</button>
-}
+<div class="button-container">
+    @foreach (var ds in dataStructures)
+    {
+        <button class="data-structure-button" @onclick="() => NavigateToVisualizer(ds)">
+            @ds
+        </button>
+    }
+</div>
+
+<style>
+    body {
+        font-family: 'Roboto', Arial, sans-serif;
+        background-color: #fff;
+        color: #333;
+        margin: 0;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .page-title {
+        color: #FFA500; /* Orange */
+        margin-bottom: 20px;
+    }
+
+    .button-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .data-structure-button {
+        background-color: #FFEB3B; /* Yellow */
+        border: none;
+        color: #004D40; /* Dark Green */
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.3s;
+    }
+
+    .data-structure-button:hover {
+        background-color: #4CAF50; /* Green */
+        transform: scale(1.1);
+    }
+</style>
+
+<style>
+    @@media (max-width: 600px) {
+        .button-container {
+            flex-direction: column;
+        }
+
+        .data-structure-button {
+            width: 80%;
+        }
+    }
+</style>
+
 
 @code {
-    private string[] dataStructures = { "Array", "SinglyLinkedList","DoublyLinkedList", "BinarySearchTree", "Queue", "Stack", "HashTable", "HashMap" };
+    private string[] dataStructures = { "Array", "SinglyLinkedList", "DoublyLinkedList", "BinarySearchTree", "Queue", "Stack", "HashTable", "HashMap" };
 
     private void NavigateToVisualizer(string dataStructure)
     {
         NavigationManager.NavigateTo($"/visualize/{dataStructure}");
     }
 }
-
