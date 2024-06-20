@@ -178,39 +178,52 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     }
 
     /// <summary>
-    /// Deletes the first occurrence of a node with the specified data from the list.
+    /// Deletes the first occurrence of a node with the specified data from the list asynchronously.
     /// </summary>
     /// <param name="data">The data of the node to delete.</param>
-    /// <returns>The node that was deleted, or null if no node was found with the specified data.</returns>
-    public SinglyLinkedListNode<T> Delete(T data)
+    public async Task Delete(T data)
     {
-        if (_head == null) return null; // Check if the list is empty and return null
-
-        SinglyLinkedListNode<T> nodeToDelete = null;
-
-        // Check if the head contains the data to be deleted
-        if (EqualityComparer<T>.Default.Equals(_head._data, data))
+        if (_head == null)
         {
-            nodeToDelete = _head;
-            _head = _head.Next; // Move head to next node, effectively deleting it
-            count--;
-            return nodeToDelete;
+            HighlightRequested?.Invoke(0); // "if empty, do nothing"
+            await Task.Delay(500);
+            return; // Check if the list is empty and exit
         }
+
+        HighlightRequested?.Invoke(1); // "Vertex pre = head"
+        await Task.Delay(500);
 
         SinglyLinkedListNode<T> current = _head;
-        while (current.Next != null)
+        if (EqualityComparer<T>.Default.Equals(current._data, data))
         {
-            if (EqualityComparer<T>.Default.Equals(current.Next._data, data))
-            {
-                nodeToDelete = current.Next;
-                current.Next = current.Next.Next; // Disconnect the node from the list
-                count--;
-                return nodeToDelete;
-            }
-            current = current.Next;
+            _head = _head.Next; // Move head to next node, effectively deleting it
+            count--;
+            HighlightRequested?.Invoke(6); // "delete del"
+            await Task.Delay(500);
+            return;
         }
 
-        return null; // Return null if no node was found and deleted
+        while (current.Next != null)
+        {
+            HighlightRequested?.Invoke(2); // "for (k = 0; k<i-1; k++)"
+            await Task.Delay(500);
+
+            if (EqualityComparer<T>.Default.Equals(current.Next._data, data))
+            {
+                current.Next = current.Next.Next; // Disconnect the node from the list
+                count--;
+                HighlightRequested?.Invoke(5); // "pre.next = after"
+                await Task.Delay(500);
+                return;
+            }
+
+            current = current.Next;
+            HighlightRequested?.Invoke(3); // "pre = pre.next"
+            await Task.Delay(500);
+        }
+
+        HighlightRequested?.Invoke(4); // "Vertex del = pre.next, after = del.next"
+        await Task.Delay(500);
     }
 
     /// <summary>
@@ -469,6 +482,25 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
             index++;
         }
         return index;
+    }
+
+    /// <summary>
+    /// Finds the first node containing the specified data.
+    /// </summary>
+    /// <param name="data">The data to search for in the nodes.</param>
+    /// <returns>The first node containing the specified data, or null if no such node is found.</returns>
+    public SinglyLinkedListNode<T> FindNode(T data)
+    {
+        SinglyLinkedListNode<T> current = _head;
+        while (current != null)
+        {
+            if (EqualityComparer<T>.Default.Equals(current._data, data))
+            {
+                return current;
+            }
+            current = current.Next;
+        }
+        return null; // No matching node found
     }
 
     /// <summary>

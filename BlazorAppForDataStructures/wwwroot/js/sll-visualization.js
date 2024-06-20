@@ -36,7 +36,7 @@
 
     window.drawLinkedList = function (singlyLinkedList) {
         // Setup SVG dimensions
-        margin, width = 700 - margin.left - margin.right, height = 400 - margin.top - margin.bottom;
+        margin, width = 700 - margin.left - margin.right, height = 250 - margin.top - margin.bottom;
 
         // Clear previous SVG and create a new one
         d3.select("#sll-display").select("svg").remove();
