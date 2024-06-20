@@ -271,16 +271,14 @@
             HighlightAllNodesOrDisplayMessage();
             return;
         }
-        else
-        {
-            var nodeToRemove = linkedList.FindNode(inputValue);
-            linkedList.Delete(inputValue);
-            var nodeInfo = ConvertNodeToJavaScriptFormat(nodeToRemove);
-            await JSRuntime.InvokeVoidAsync("removeValueInSll", nodeInfo);
-        }
 
-        await JSRuntime.InvokeVoidAsync("resetSllColours");
+        var nodeToRemove = linkedList.FindNode(inputValue);
+        linkedList.Delete(inputValue);
+        var nodeInfo = ConvertNodeToJavaScriptFormat(nodeToRemove);
+
+        await JSRuntime.InvokeVoidAsync("removeValueInSll", nodeInfo);
     }
+
 
     private async Task CreateSinglyLinkedList()
     {
