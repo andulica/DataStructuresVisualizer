@@ -198,11 +198,16 @@
     {
         try
         {
-            var insertedValue = ConvertNodeToJavaScriptFormat(linkedList.InsertAt(insertPosition, inputValue));
+            // Adjust the index for 0-based indexing used in the backend
             if (insertPosition > linkedList.Count - 1)
             {
-                insertPosition = linkedList.Count - 2;
+                insertPosition = linkedList.Count;
             }
+
+            var insertedNode = linkedList.InsertAt(insertPosition, inputValue);
+            var insertedValue = ConvertNodeToJavaScriptFormat(insertedNode);
+
+            // Call the JavaScript function with the adjusted position for correct visual placement
             await JSRuntime.InvokeVoidAsync("insertAtInSLL", insertedValue, insertPosition);
         }
         catch (InvalidOperationException ex)
@@ -210,6 +215,7 @@
             messageOutput = ex.Message;
         }
     }
+
 
     private async Task PrependValue()
     {
