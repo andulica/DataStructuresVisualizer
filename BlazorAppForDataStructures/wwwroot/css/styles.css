@@ -24,9 +24,9 @@
     cursor: pointer;
 }
 
-.custom-button:hover {
+    .custom-button:hover {
         background-color: #0056b3;
-}
+    }
 
 .notification-container {
     position: fixed;
@@ -52,6 +52,7 @@
     font-size: 16px;
     color: #555;
 }
+
 .code-line {
     font-family: 'Consolas', 'Courier New', monospace;
     white-space: pre; /* Preserves whitespace for alignment */
@@ -60,6 +61,3 @@
 .highlight {
     background-color: yellow; /* Highlight color */
 }
-
-
-
