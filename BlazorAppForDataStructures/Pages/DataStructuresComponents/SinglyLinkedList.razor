@@ -189,7 +189,6 @@
         {
             // Convert the linked list to a format suitable for JavaScript
             var linkedListData = ConvertListToJavaScriptFormat(linkedList);
-            // Call the JavaScript function to render the linked list
             await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData);
         }
     }
@@ -198,24 +197,31 @@
     {
         try
         {
-            // Adjust the index for 0-based indexing used in the backend
             if (insertPosition > linkedList.Count - 1)
             {
                 insertPosition = linkedList.Count;
             }
 
-            var insertedNode = linkedList.InsertAt(insertPosition, inputValue);
-            var insertedValue = ConvertNodeToJavaScriptFormat(insertedNode);
+            var newNode = new SinglyLinkedListNode<int>(inputValue);
+            var insertedValue = ConvertNodeToJavaScriptFormat(newNode);
 
-            // Call the JavaScript function with the adjusted position for correct visual placement
-            await JSRuntime.InvokeVoidAsync("insertAtInSLL", insertedValue, insertPosition);
+            linkedList.HighlightRequested += HandleHighlightRequest;
+
+            // Start InsertAt and JavaScript function without awaiting them immediately
+            var insertTask = linkedList.InsertAt(insertPosition, newNode, 500);
+            var jsTask = JSRuntime.InvokeVoidAsync("insertAtInSLL", insertedValue, insertPosition).AsTask();
+
+            await Task.WhenAll(insertTask, jsTask);
         }
         catch (InvalidOperationException ex)
         {
             messageOutput = ex.Message;
         }
+        finally
+        {
+            linkedList.HighlightRequested -= HandleHighlightRequest;
+        }
     }
-
 
     private async Task PrependValue()
     {
@@ -242,7 +248,6 @@
             linkedList.HighlightRequested -= HandleHighlightRequest; // Clean up event subscription
         }
     }
-
 
     private async Task AppendValue()
     {
@@ -284,7 +289,6 @@
 
         await JSRuntime.InvokeVoidAsync("removeValueInSll", nodeInfo);
     }
-
 
     private async Task CreateSinglyLinkedList()
     {

@@ -138,42 +138,55 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// If the index is beyond the last position, the node is added at the end.
     /// </summary>
     /// <param name="index">The index at which to insert the node.</param>
-    /// <param name="data">The data to insert into the list.</param>
+    /// <param name="newNode">The new node to insert into the list.</param>
+    /// <param name="delay">The delay in milliseconds for visualizing the steps.</param>
     /// <returns>The newly inserted node.</returns>
     /// <exception cref="InvalidOperationException">
     /// Thrown if the list has reached its maximum capacity.
     /// </exception>
-    public SinglyLinkedListNode<T> InsertAt(int index, T data)
+    public async Task<SinglyLinkedListNode<T>> InsertAt(int index, SinglyLinkedListNode<T> newNode, int delay = 0)
     {
         if (count >= maxCapacity)
         {
             throw new InvalidOperationException("List is full.");
         }
 
-        SinglyLinkedListNode<T> newNode = new SinglyLinkedListNode<T>(data);
+        HighlightRequested?.Invoke(0); // "Vertex pre = head"
+        await Task.Delay(delay);
 
         if (_head == null || index == 0)
         {
             newNode.Next = _head;
             _head = newNode;
             count++;
+            HighlightRequested?.Invoke(1); // "head = vtx"
+            await Task.Delay(delay);
             return newNode;
         }
 
         SinglyLinkedListNode<T> current = _head;
         int currentIndex = 0;
 
+        HighlightRequested?.Invoke(1); // "Vertex pre = head"
+        await Task.Delay(delay);
+
         // Traverse until the end of the list or the specified index
         while (current.Next != null && currentIndex < index - 1)
         {
             current = current.Next;
             currentIndex++;
+            HighlightRequested?.Invoke(2); // "for (k = 0; k<i-1; k++)"
+            await Task.Delay(delay);
         }
 
         // Insert the new node
         newNode.Next = current.Next;
         current.Next = newNode;
         count++;
+
+        HighlightRequested?.Invoke(3); // "pre.next = vtx"
+        await Task.Delay(delay);
+
         return newNode;
     }
 
