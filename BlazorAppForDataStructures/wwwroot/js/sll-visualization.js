@@ -283,7 +283,9 @@
     }
 
     async function insertNode(value, position) {
-        await highlightNodesForInsertion((index) => index === position - 1); // Highlight nodes up to the position
+        if (position !== 0) {
+            await highlightNodesForInsertion((index) => index === position - 1); // Highlight nodes up to the position
+        }
 
         setTimeout(() => {
             let newNode;
