@@ -15,22 +15,34 @@
     }
 
     // Draw line with arrow and assign an ID immediately
-    function drawLineWithArrow(startX, startY, endX, endY, radius, strokeWidth, id) {
+    function drawLineWithArrow(startX, startY, endX, endY, radius, strokeWidth, id, delay) {
         const adjustedPoints = adjustLineEndpoints(startX, startY, endX, endY, radius, strokeWidth);
+
+        // Calculate the total length of the line
+        const lineLength = Math.sqrt(Math.pow(adjustedPoints.endX - adjustedPoints.startX, 2) + Math.pow(adjustedPoints.endY - adjustedPoints.startY, 2));
+
         const line = svg.append('line')
             .attr('class', 'link')
             .attr('x1', adjustedPoints.startX)
             .attr('y1', adjustedPoints.startY)
-            .attr('x2', adjustedPoints.endX)
-            .attr('y2', adjustedPoints.endY)
+            .attr('x2', adjustedPoints.startX)
+            .attr('y2', adjustedPoints.startY)
             .attr('stroke', '#000')
             .attr('marker-end', 'url(#arrowhead)')
-            .attr('stroke-width', strokeWidth);
+            .attr('stroke-width', strokeWidth)
+            .attr('stroke-dasharray', lineLength)
+            .attr('stroke-dashoffset', lineLength)
+            .transition()
+            .duration(delay)
+            .attr('x2', adjustedPoints.endX)
+            .attr('y2', adjustedPoints.endY)
+            .attr('stroke-dashoffset', 0);
 
         if (id) {
             line.attr('id', id);
         }
 
+        console.log(`Line drawn with ID: ${id}`);
         return line;
     }
 
@@ -206,7 +218,6 @@
         });
     }
 
-
     function clearTimeouts(timeouts) {
         timeouts.forEach(timeout => clearTimeout(timeout));
     }
@@ -272,8 +283,6 @@
             .attr("text-anchor", "middle")
             .style("fill", "black");
 
-        //drawLineWithArrow(lastNode.x, lastNode.y, targetX, targetY, 20, 2, `link-${lastNode.id}-${node.id}`);
-
         return {
             id: node.id,
             x: targetX,
@@ -282,59 +291,80 @@
         };
     }
 
-    async function insertNode(value, position) {
+    async function insertNode(value, position, delay) {
+
         if (position !== 0) {
-            await highlightNodesForInsertion((index) => index === position - 1); // Highlight nodes up to the position
+            await highlightNodesForInsertion((index) => index === position); // Highlight nodes up to the position 
+        }
+
+        let newNode;
+        if (position === nodes.length) {
+            // Handle insertion at the tail
+            newNode = createTailNode(value);
+            nodes.push(newNode);
+        } else {
+            // Handle insertion at the specified position
+            newNode = createNewNode(value, position);
+            nodes.splice(position, 0, newNode);
+        }
+
+        let prevNode, nextNode, link1Id, link2Id;
+
+        if (position === 0 && nodes.length > 1) {
+            // Inserting at the head when there are multiple nodes
+            await new Promise(resolve => {
+                setTimeout(() => {
+                    drawLineWithArrow(newNode.x, newNode.y, nodes[1].x, nodes[1].y, 20, 2, `link-${newNode.id}-${nodes[1].id}`, delay);
+                    resolve();
+                }, delay);
+            });
+        } else if (position === nodes.length - 1 && nodes.length > 1) {
+            // Inserting at the tail
+            prevNode = nodes[position];
+            await new Promise(resolve => {
+                setTimeout(() => {
+                    drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, `link-${prevNode.id}-${newNode.id}`, delay);
+                    resolve();
+                }, delay);
+            });
+        } else {
+            prevNode = nodes[position - 1];
+            nextNode = nodes[position + 1];
+
+            link1Id = `link-${prevNode.id}-${newNode.id}`;
+            link2Id = `link-${newNode.id}-${nextNode.id}`;
+
+            // Remove the existing link between prevNode and nextNode
+            const existingLinkId = `link-${prevNode.id}-${nextNode.id}`;
+            svg.select(`#${existingLinkId}`).remove();
+
+            await new Promise(resolve => {
+                setTimeout(() => {
+                    drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, link1Id, delay);
+                    resolve();
+                }, delay);
+            });
+
+            // Add an additional delay between the two drawing calls
+            await new Promise(resolve => setTimeout(resolve, delay));
+
+            await new Promise(resolve => {
+                setTimeout(() => {
+                    drawLineWithArrow(newNode.x, newNode.y, nextNode.x, nextNode.y, 20, 2, link2Id, delay);
+                    resolve();
+                }, delay);
+            });
         }
 
         setTimeout(() => {
-            let newNode;
-            if (position === nodes.length) {
-                // Handle insertion at the tail
-                newNode = createTailNode(value);
-                nodes.push(newNode);
-            } else {
-                // Handle insertion at the specified position
-                newNode = createNewNode(value, position);
-                nodes.splice(position, 0, newNode);
-            }
-
-            let prevNode, nextNode, link1Id, link2Id;
-
-            if (position === 0 && nodes.length > 1) {
-                // Inserting at the head when there are multiple nodes
-                drawLineWithArrow(newNode.x, newNode.y, nodes[1].x, nodes[1].y, 20, 2, `link-${newNode.id}-${nodes[1].id}`);
-            } else if (position > 0 && position < nodes.length - 2) {
-                // Inserting in the middle
-                prevNode = nodes[position - 1];
-                nextNode = nodes[position + 1];
-
-                link1Id = `link-${prevNode.id}-${newNode.id}`;
-                link2Id = `link-${newNode.id}-${nextNode.id}`;
-
-                drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, link1Id);
-                drawLineWithArrow(newNode.x, newNode.y, nextNode.x, nextNode.y, 20, 2, link2Id);
-                            
-            } else if (position === nodes.length - 1 && nodes.length > 1) {
-                // Inserting at the tail
-                prevNode = nodes[position];
-                drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, `link-${prevNode.id}-${newNode.id}`);
-            }
+            updateNodePositions();
+            redrawLinks();
+            repositionText();
 
             setTimeout(() => {
-                // Remove the temporary links if they exist
-                if (link1Id) svg.select(`#${link1Id}`).remove();
-                if (link2Id) svg.select(`#${link2Id}`).remove();
-
-                updateNodePositions();
-                redrawLinks();
-                repositionText();
-
-                setTimeout(() => {
-                    resetNodeColors();
-                }, 1300);
-            }, 1200);
-        }, 1000);
+                resetNodeColors();
+            }, 1300);
+        }, 1200);
     }
 
     async function insertNodeAtTail(value) {
@@ -483,10 +513,10 @@
         highlightNodes(value);
     };
 
-    window.insertAtInSLL = function (value, selectedIndex) {
+    window.insertAtInSLL = function (value, selectedIndex, delay) {
         resetNodeColors();
         resetLinkColors();
-        insertNode(value, selectedIndex);
+        insertNode(value, selectedIndex, delay);
     };
 
     window.removeValueInSll = function (nodeToBeRemoved) {

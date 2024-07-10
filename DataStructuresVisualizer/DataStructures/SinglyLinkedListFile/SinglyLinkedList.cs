@@ -151,15 +151,12 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
             throw new InvalidOperationException("List is full.");
         }
 
-        HighlightRequested?.Invoke(0); // "Vertex pre = head"
-        await Task.Delay(delay);
-
         if (_head == null || index == 0)
         {
             newNode.Next = _head;
             _head = newNode;
             count++;
-            HighlightRequested?.Invoke(1); // "head = vtx"
+            HighlightRequested?.Invoke(0); // "head = vtx"
             await Task.Delay(delay);
             return newNode;
         }
@@ -167,16 +164,18 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         SinglyLinkedListNode<T> current = _head;
         int currentIndex = 0;
 
-        HighlightRequested?.Invoke(1); // "Vertex pre = head"
+        HighlightRequested?.Invoke(0); // "Vertex pre = head"
         await Task.Delay(delay);
 
         // Traverse until the end of the list or the specified index
-        while (current.Next != null && currentIndex < index - 1)
+        while (current.Next != null && currentIndex < index)
         {
+            HighlightRequested?.Invoke(1); // "for (k = 0; k<i-1; k++)"
+            await Task.Delay(delay / 2);
             current = current.Next;
             currentIndex++;
             HighlightRequested?.Invoke(2); // "for (k = 0; k<i-1; k++)"
-            await Task.Delay(delay);
+            await Task.Delay(delay / 2);
         }
 
         // Insert the new node
@@ -184,7 +183,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         current.Next = newNode;
         count++;
 
-        HighlightRequested?.Invoke(3); // "pre.next = vtx"
+        HighlightRequested?.Invoke(6); // "pre.next = vtx"
         await Task.Delay(delay);
 
         return newNode;
