@@ -168,14 +168,14 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         await Task.Delay(delay);
 
         // Traverse until the end of the list or the specified index
-        while (current.Next != null && currentIndex < index)
+        while (current.Next != null && currentIndex < index - 1)
         {
             HighlightRequested?.Invoke(1); // "for (k = 0; k<i-1; k++)"
-            await Task.Delay(delay / 2);
+            await Task.Delay(delay);
             current = current.Next;
             currentIndex++;
             HighlightRequested?.Invoke(2); // "for (k = 0; k<i-1; k++)"
-            await Task.Delay(delay / 2);
+            await Task.Delay(delay);
         }
 
         // Insert the new node

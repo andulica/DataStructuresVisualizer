@@ -120,7 +120,7 @@
                 let nextNode = nodes[i + 1];
                 drawLineWithArrow(node.x, node.y, nextNode.x, nextNode.y, 20, 2, `link-${node.id}-${nextNode.id}`);
             }
-        });        
+        });
     };
 
     function highlightNodesForInsertion(condition) {
@@ -128,13 +128,13 @@
             let timeouts = []; // Store timeout IDs for potential clearing
 
             nodes.forEach((node, index) => {
-                let timeoutId = setTimeout(() => {
+                let timeoutId = setTimeout(async () => {
                     // Highlight the current node
                     svg.select(`#node-${node.id}`).transition().duration(500).style('fill', 'orange');
 
                     // Highlight the link and the arrowhead from the previous node
                     if (index > 0) {
-                        highlightLinkAndArrowhead(nodes[index - 1].id, node.id);
+                        await highlightLinkAndArrowhead(nodes[index - 1].id, node.id);
                     }
 
                     // Check the stopping condition
@@ -151,10 +151,13 @@
 
     function highlightLinkAndArrowhead(sourceNodeId, targetNodeId) {
         let linkId = `#link-${sourceNodeId}-${targetNodeId}`;
-        svg.select(linkId)
-            .transition().duration(1000)
-            .style('stroke', 'orange')
-            .attr('marker-end', 'url(#highlighted-arrowhead)');
+        return new Promise((resolve) => {
+            svg.select(linkId)
+                .transition().duration(1000)
+                .style('stroke', 'orange')
+                .attr('marker-end', 'url(#highlighted-arrowhead)')
+                .on('end', resolve); // Resolve the promise once the transition is complete
+        });
     }
 
     function highlightNodes(value) {
@@ -382,7 +385,7 @@
             }
             setTimeout(() => {
                 resetNodeColors();
-            }, 1000); 
+            }, 1000);
 
         }, 1000);
     }
@@ -493,7 +496,7 @@
     }
 
     function highlightLine(lineNumber) {
-       const lines = document.querySelectorAll('.code-line');
+        const lines = document.querySelectorAll('.code-line');
         lines.forEach((line, index) => {
             line.classList.remove('highlight');
             if (index === lineNumber) {
@@ -503,7 +506,7 @@
     }
 
 
-    window.highlightLine = function(lineNumber) {
+    window.highlightLine = function (lineNumber) {
         highlightLine(lineNumber);
     };
 
