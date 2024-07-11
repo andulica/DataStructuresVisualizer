@@ -208,10 +208,9 @@
             linkedList.HighlightRequested += HandleHighlightRequest;
 
             // Start InsertAt and JavaScript function without awaiting them immediately
-            var insertTask = linkedList.InsertAt(insertPosition, newNode, 600);
-            var jsTask = JSRuntime.InvokeVoidAsync("insertAtInSLL", insertedValue, insertPosition, 700).AsTask();
+            linkedList.InsertAt(insertPosition, newNode, 600);
+            JSRuntime.InvokeVoidAsync("insertAtInSLL", insertedValue, insertPosition, 700).AsTask();
 
-            await Task.WhenAll(insertTask, jsTask);
         }
         catch (InvalidOperationException ex)
         {
