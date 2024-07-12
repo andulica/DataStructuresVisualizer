@@ -255,7 +255,7 @@
             var tail = new SinglyLinkedListNode<int>(inputValue);
             var tailToInsert = ConvertNodeToJavaScriptFormat(tail);
             linkedList.Append(tail, 2000);
-            JSRuntime.InvokeVoidAsync("insertTailInSll", tailToInsert);
+            JSRuntime.InvokeVoidAsync("insertTailInSll", tailToInsert, 1500);
         }
         catch (InvalidOperationException ex)
         {

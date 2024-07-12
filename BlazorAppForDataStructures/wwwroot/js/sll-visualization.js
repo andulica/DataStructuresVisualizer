@@ -379,7 +379,7 @@
         repositionText();
 
     }
-    async function insertNodeAtTail(value) {
+    async function insertNodeAtTail(value, delay) {
 
         setTimeout(() => {
             // Create the new node to be the new tail
@@ -390,7 +390,9 @@
             const prevNode = nodes[nodes.length - 2];
 
             if (prevNode) {
-                drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, `link-${prevNode.id}-${newNode.id}`);
+                setTimeout(() => {
+                    drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, `link-${prevNode.id}-${newNode.id}`, delay);
+                }, 1000);
             }
             setTimeout(() => {
                 resetNodeColors();
@@ -398,6 +400,7 @@
 
         }, 1000);
     }
+
 
     function updateNodePositions() {
         const nodeSpacing = 100;
@@ -537,10 +540,10 @@
         removeNodeInSll(nodeToBeRemoved);
     };
 
-    window.insertTailInSll = function (value) {
+    window.insertTailInSll = function (value, delay) {
         resetNodeColors();
         resetLinkColors();
-        insertNodeAtTail(value);
+        insertNodeAtTail(value, delay);
     }
 
     window.resetSllColours = function () {

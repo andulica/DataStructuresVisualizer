@@ -93,15 +93,17 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         if (_head == null)
         {
             _head = _tail = newNode; // Set both head and tail to the new node if list was empty
-            HighlightRequested?.Invoke(1); // Highlight that this node is now the tail
-            await Task.Delay(1000);
+            HighlightRequested?.Invoke(1); // "tail.next = vtx"
+            await Task.Delay(delay);
         }
         else
         {
+            HighlightRequested?.Invoke(1); // "tail.next = vtx"
+            await Task.Delay(delay);
             _tail.Next = newNode;
             _tail = newNode; 
-            HighlightRequested?.Invoke(2); // Highlight that the tail has been updated
-            await Task.Delay(1000);
+            HighlightRequested?.Invoke(2); // "tail = vtx"
+            await Task.Delay(delay);
         }
 
         count++;
