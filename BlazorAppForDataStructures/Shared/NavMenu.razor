@@ -1,6 +1,6 @@
 ﻿<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">BlazorAppForDataStructures</a>
+        <a class="navbar-brand" href="">DataStructViz</a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -14,16 +14,6 @@
                 <span class="oi oi-home" aria-hidden="true"></span> Home
             </NavLink>
         </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="oi oi-plus" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="fetchdata">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
-            </NavLink>
-        </div>
         <!-- Add links for Identity pages -->
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="Identity/Account/Login">
@@ -33,6 +23,17 @@
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="Identity/Account/Register">
                 <span class="oi oi-account-logout" aria-hidden="true"></span> Register
+            </NavLink>
+        </div>
+        <!-- Data Structures Dropdown Menu -->
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/visualize/SinglyLinkedList">
+                Singly Linked List
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/visualize/BinarySearchTree">
+                Binary Search Tree
             </NavLink>
         </div>
     </nav>
