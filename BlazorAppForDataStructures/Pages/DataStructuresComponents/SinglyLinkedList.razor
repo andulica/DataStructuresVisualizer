@@ -207,8 +207,8 @@
 
             linkedList.HighlightRequested += HandleHighlightRequest;
 
-            linkedList.InsertAt(insertPosition, newNode, 600);
-            JSRuntime.InvokeVoidAsync("insertAtInSLL", insertedValue, insertPosition, 700).AsTask();
+            linkedList.InsertAt(insertPosition, newNode, 1750);
+            JSRuntime.InvokeVoidAsync("insertAtInSLL", insertedValue, insertPosition, 2600).AsTask();
 
         }
         catch (InvalidOperationException ex)

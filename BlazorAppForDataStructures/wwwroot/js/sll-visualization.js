@@ -123,7 +123,7 @@
         });
     };
 
-    async function highlightNodesForInsertion(position) {
+    async function highlightNodesForInsertion(position, delay) {
         return new Promise((resolve) => {
             let timeouts = []; // Store timeout IDs for potential clearing
             let found = false;
@@ -133,11 +133,11 @@
                     if (found) return; // Stop further highlighting once the condition is met
 
                     // Highlight the current node
-                    svg.select(`#node-${node.id}`).transition().duration(500).style('fill', 'orange');
+                    svg.select(`#node-${node.id}`).transition().duration(delay).style('fill', 'orange');
 
                     // Highlight the link and the arrowhead from the previous node
                     if (index > 0) {
-                        highlightLinkAndArrowhead(nodes[index - 1].id, node.id);
+                        highlightLinkAndArrowhead(nodes[index - 1].id, node.id, delay);
                     }
 
                     // Check the stopping condition
@@ -146,7 +146,7 @@
                         clearTimeouts(timeouts);
                         resolve(); // Resolve the promise once the condition is met
                     }
-                }, 1000 * index);
+                }, delay * index);
 
                 timeouts.push(timeoutId);
             });
@@ -154,7 +154,7 @@
             // Ensure promise is resolved even if no node matches
             let finalTimeout = setTimeout(() => {
                 if (!found) resolve();
-            }, 1000 * nodes.length);
+            }, delay * nodes.length);
             timeouts.push(finalTimeout);
 
             // Function to clear all timeouts
@@ -165,11 +165,11 @@
     }
 
 
-    function highlightLinkAndArrowhead(sourceNodeId, targetNodeId) {
+    function highlightLinkAndArrowhead(sourceNodeId, targetNodeId, delay) {
         let linkId = `#link-${sourceNodeId}-${targetNodeId}`;
         return new Promise((resolve) => {
             svg.select(linkId)
-                .transition().duration(1000)
+                .transition().duration(delay)
                 .style('stroke', 'orange')
                 .attr('marker-end', 'url(#highlighted-arrowhead)')
                 .on('end', resolve); // Resolve the promise once the transition is complete
@@ -311,7 +311,7 @@
     }
 
     async function insertNode(value, position, delay) {
-        await highlightNodesForInsertion(position); // Highlight nodes up to the position
+        await highlightNodesForInsertion(position, delay); // Highlight nodes up to the position
 
         setTimeout(() => {
             let newNode;
@@ -366,11 +366,11 @@
                         // Reset node colors after a delay
                         setTimeout(() => {
                             resetNodeColors();
-                        }, 1300);
-                    }, 1200);
+                        }, delay);
+                    }, delay);
                 }, delay);
             }, delay);
-        }, 1000);
+        }, delay);
     }
 
     function refreshSinglyLinkedList() {

@@ -165,7 +165,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         int currentIndex = 0;
 
         HighlightRequested?.Invoke(0); // "Vertex pre = head"
-        await Task.Delay(delay / 2);
+        await Task.Delay(delay / 6);
 
         // Traverse until the end of the list or the specified index
         while (current.Next != null && currentIndex < index)
@@ -176,7 +176,18 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
             currentIndex++;
             HighlightRequested?.Invoke(2); // "pre = pre.next"
             await Task.Delay(delay);
+
+            if (currentIndex == index)
+            {
+                HighlightRequested?.Invoke(3); // "Vertex aft = pre.next"
+                await Task.Delay(delay / 4);
+            }
         }
+        HighlightRequested?.Invoke(4); // "Vertex vtx = new Vertex(v)"
+        await Task.Delay(delay);
+
+        HighlightRequested?.Invoke(5); // "vtx.next = aft"
+        await Task.Delay(delay + 1000);
 
         // Insert the new node
         newNode.Next = current.Next;
