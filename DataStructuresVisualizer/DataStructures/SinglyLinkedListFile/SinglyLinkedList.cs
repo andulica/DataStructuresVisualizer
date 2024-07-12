@@ -239,7 +239,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     }
 
     /// <summary>
-    /// Deletes a node at the specified index from the singly linked list.
+    /// Deletes a node at the specified index from the singly linked list asynchronously.
     /// </summary>
     /// <remarks>
     /// This method allows for deletion of nodes at any position within the list.
@@ -247,37 +247,65 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// The list is zero-indexed.
     /// </remarks>
     /// <param name="index">The zero-based index of the node to be deleted.</param>
+    /// <param name="delay">The delay in milliseconds for visualizing the steps.</param>
     /// <exception cref="IndexOutOfRangeException">
     /// Thrown when the specified index is less than 0 or greater than or equal to the size of the list.
     /// </exception>
-    public void DeleteAt(int index)
+    public async Task DeleteAt(int index, int delay = 500)
     {
         if (index < 0 || index >= count)
         {
             throw new IndexOutOfRangeException($"Index {index} is out of range for the linked list.");
         }
 
-        if (index == 0)
+        if (_head == null)
         {
-            DeleteHead();
-            return;
-        }
-
-        if (index == count - 1)
-        {
-            DeleteTail();
-            return;
+            HighlightRequested?.Invoke(0); // "if empty, do nothing"
+            await Task.Delay(delay);
+            return; // Check if the list is empty and exit
         }
 
         SinglyLinkedListNode<T> current = _head;
+
+        if (index == 0)
+        {
+            HighlightRequested?.Invoke(1); // "Vertex pre = head"
+            await Task.Delay(delay);
+
+            _head = _head.Next; // Move head to next node, effectively deleting it
+            count--;
+            HighlightRequested?.Invoke(6); // "delete del"
+            await Task.Delay(delay);
+            return;
+        }
+
+        HighlightRequested?.Invoke(1); // "Vertex pre = head"
+        await Task.Delay(delay);
+
         for (int i = 0; i < index - 1; i++)
         {
+            HighlightRequested?.Invoke(2); // "for (k = 0; k<i-1; k++)"
+            await Task.Delay(delay);
+
             current = current.Next;
+
+            HighlightRequested?.Invoke(3); // "pre = pre.next"
+            await Task.Delay(delay);
         }
+
+        HighlightRequested?.Invoke(4); // "Vertex del = pre.next, after = del.next"
+        await Task.Delay(delay);
 
         current.Next = current.Next?.Next;
         count--;
+
+        HighlightRequested?.Invoke(5); // "pre.next = after"
+        await Task.Delay(delay);
+
+        HighlightRequested?.Invoke(6); // "delete del"
+        await Task.Delay(delay);
     }
+
 
     /// <summary>
     /// Deletes the head node of the list and returns its data. Used for stack-like operations.
@@ -497,23 +525,36 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     }
 
     /// <summary>
-    /// Finds the first node containing the specified data.
+    /// Finds the node at the specified index.
     /// </summary>
-    /// <param name="data">The data to search for in the nodes.</param>
-    /// <returns>The first node containing the specified data, or null if no such node is found.</returns>
-    public SinglyLinkedListNode<T> FindNode(T data)
+    /// <param name="index">The zero-based index of the node to find.</param>
+    /// <returns>The node at the specified index, or null if the index is out of range.</returns>
+    /// <exception cref="IndexOutOfRangeException">
+    /// Thrown when the specified index is less than 0 or greater than or equal to the size of the list.
+    /// </exception>
+    public SinglyLinkedListNode<T> FindNode(int index)
     {
+        if (index < 0 || index >= count)
+        {
+            throw new IndexOutOfRangeException($"Index {index} is out of range for the linked list.");
+        }
+
         SinglyLinkedListNode<T> current = _head;
+        int currentIndex = 0;
+
         while (current != null)
         {
-            if (EqualityComparer<T>.Default.Equals(current._data, data))
+            if (currentIndex == index)
             {
                 return current;
             }
             current = current.Next;
+            currentIndex++;
         }
-        return null; // No matching node found
+
+        return null; // Should not reach here if the index is valid
     }
+
     /// <summary>
     /// Determines whether the singly linked list has reached its maximum capacity.
     /// </summary>

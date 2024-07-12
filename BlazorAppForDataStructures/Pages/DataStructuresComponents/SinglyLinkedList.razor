@@ -332,20 +332,14 @@
         StateHasChanged();
         try
         {
-            if (!linkedList.Contains(inputValue))
-            {
-                HighlightAllNodesOrDisplayMessage();
-                return;
-            }
-
             linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
             var nodeToRemove = linkedList.FindNode(inputValue);
             var nodeInfo = ConvertNodeToJavaScriptFormat(nodeToRemove);
 
-            var removeTask = linkedList.Delete(inputValue);
+            var removeTask = linkedList.DeleteAt(inputValue);
             var jsTask = JSRuntime.InvokeVoidAsync("removeValueInSll", nodeInfo).AsTask();
-
+             
             await Task.WhenAll(removeTask, jsTask); // Run both tasks concurrently
         }
         finally
