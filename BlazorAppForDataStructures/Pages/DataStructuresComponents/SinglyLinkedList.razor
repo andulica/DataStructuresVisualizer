@@ -235,7 +235,7 @@
             linkedList.Prepend(head, 2000);
 
             // Invoke JavaScript animation function
-            await JSRuntime.InvokeVoidAsync("insertAtInSLL", headToInsert, 0);
+            await JSRuntime.InvokeVoidAsync("insertAtInSLL", headToInsert, 0, 2000);
         }
         catch (InvalidOperationException ex)
         {

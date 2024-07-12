@@ -118,6 +118,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         {
             throw new InvalidOperationException("List is full.");
         }
+        await Task.Delay(delay);
 
         HighlightRequested?.Invoke(0); // "Vertex vtx = new Vertex(v)"
         await Task.Delay(delay);
