@@ -251,7 +251,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// <exception cref="IndexOutOfRangeException">
     /// Thrown when the specified index is less than 0 or greater than or equal to the size of the list.
     /// </exception>
-    public async Task DeleteAt(int index, int delay = 500)
+    public async Task DeleteAt(int index, int delay)
     {
         if (index < 0 || index >= count)
         {
@@ -371,17 +371,17 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// </summary>
     /// <param name="data">The data to search for in the list.</param>
     /// <returns>The node containing the data if found in the list; otherwise, null.</returns>
-    public async Task<SinglyLinkedListNode<T>> Search(T data)
+    public async Task<SinglyLinkedListNode<T>> Search(T data, int delay)
     {
         // Check if the list is empty and handle the first line of the script
         if (_head == null)
         {
             OnHighlightRequested(0); // "if empty, return NOT_FOUND"
-            await Task.Delay(200);
+            await Task.Delay(delay);
             return null;
         }
         OnHighlightRequested(1); // "index = 0, tmp = head"
-        await Task.Delay(200);
+        await Task.Delay(delay / 4);
 
         SinglyLinkedListNode<T> current = _head;
         int position = 0;
@@ -389,12 +389,12 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         while (current != null)
         {
             OnHighlightRequested(2); // "while (tmp.item != v)"
-            await Task.Delay(500);
+            await Task.Delay(delay);
 
             if (EqualityComparer<T>.Default.Equals(current._data, data))
             {
                 OnHighlightRequested(6); // "return index"
-                await Task.Delay(500);
+                await Task.Delay(delay);
                 return current;
             }
 
@@ -406,14 +406,14 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
             if (current == null)
             {
                 OnHighlightRequested(4); // "if tmp == null"
-                await Task.Delay(500);
+                await Task.Delay(delay);
                 OnHighlightRequested(5); // "return NOT_FOUND"
-                await Task.Delay(500);
+                await Task.Delay(delay);
             }
             else
             {
                 OnHighlightRequested(3); // "index++, tmp = tmp.next"
-                await Task.Delay(500);
+                await Task.Delay(delay);
             }
         }
 

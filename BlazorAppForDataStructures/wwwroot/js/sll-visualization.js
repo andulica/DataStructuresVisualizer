@@ -518,10 +518,10 @@
         highlightLine(lineNumber);
     };
 
-    window.searchValueInSLL = function (value) {
+    window.searchValueInSLL = function (value, delay) {
         resetNodeColors();
         resetLinkColors();
-        highlightNodes(value);
+        highlightNodes(value, delay);
     };
 
     window.insertAtInSLL = function (value, selectedIndex, delay) {

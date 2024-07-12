@@ -313,8 +313,8 @@
         {
             linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
-            var searchTask = linkedList.Search(inputValue);
-            var jsTask = JSRuntime.InvokeVoidAsync("searchValueInSLL", inputValue).AsTask();
+            var searchTask = linkedList.Search(inputValue, 700);
+            var jsTask = JSRuntime.InvokeVoidAsync("searchValueInSLL", inputValue, 1500).AsTask();
 
             await Task.WhenAll(searchTask, jsTask); // Run both tasks concurrently
         }
