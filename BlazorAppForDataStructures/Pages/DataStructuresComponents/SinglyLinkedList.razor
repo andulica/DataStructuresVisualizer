@@ -21,38 +21,52 @@
         {
             case "insertAtPosition":
                 <div class="insertion-fields">
-                    <input type="number" @bind="inputValue" placeholder="Enter Value" />
-                    <input type="number" @bind="insertPosition" placeholder="Enter Position" />
+                    <label for="inputValue">Input Value</label>
+                    <input type="number" id="inputValue" @bind="inputValue" placeholder="Enter Value" />
+
+                    <label for="insertPosition">Insert Position</label>
+                    <input type="number" id="insertPosition" @bind="insertPosition" placeholder="Enter Position" />
+
                     <button class="custom-button" @onclick="PerformInsertion" disabled="@isOperationInProgress">Insert</button>
                 </div>
                 break;
             case "prepend":
                 <div class="insertion-fields">
-                    <input type="number" @bind="inputValue" placeholder="Enter Value" />
+                    <label for="inputValue">Input Value</label>
+                    <input type="number" id="inputValue" @bind="inputValue" placeholder="Enter Value" />
+
                     <button class="custom-button" @onclick="PrependValue" disabled="@isOperationInProgress">Prepend</button>
                 </div>
                 break;
             case "append":
                 <div class="insertion-fields">
-                    <input type="number" @bind="inputValue" placeholder="Enter Value" />
+                    <label for="inputValue">Input Value</label>
+                    <input type="number" id="inputValue" @bind="inputValue" placeholder="Enter Value" />
+
                     <button class="custom-button" @onclick="AppendValue" disabled="@isOperationInProgress">Append</button>
                 </div>
                 break;
             case "search":
                 <div class="insertion-fields">
-                    <input type="number" @bind="inputValue" placeholder="Enter Value" />
+                    <label for="inputValue">Input Value</label>
+                    <input type="number" id="inputValue" @bind="inputValue" placeholder="Enter Value" />
+
                     <button class="custom-button" @onclick="SearchValue" disabled="@isOperationInProgress">Search</button>
                 </div>
                 break;
             case "remove":
                 <div class="insertion-fields">
-                    <input type="number" @bind="inputValue" placeholder="Enter Value" />
+                    <label for="inputValue">Input Index</label>
+                    <input type="number" id="inputValue" @bind="inputValue" placeholder="Enter Value" />
+
                     <button class="custom-button" @onclick="RemoveValue" disabled="@isOperationInProgress">Remove</button>
                 </div>
                 break;
             case "create":
                 <div class="create-fields">
-                    <input type="number" @bind="inputValue" placeholder="Enter Value" />
+                    <label for="inputValue">Number of Nodes</label>
+                    <input type="number" id="inputValue" @bind="inputValue" placeholder="Enter Value" />
+
                     <button class="custom-button" @onclick="CreateSinglyLinkedList" disabled="@isOperationInProgress">Create List</button>
                 </div>
                 break;
