@@ -81,19 +81,6 @@
 
     <CodeDisplay CodeLines="@currentCode" OnHighlightRequest="HandleHighlightRequest" />
 
-    <div>@messageOutput</div>
-
-    @foreach (var node in linkedList)
-    {
-        <div class="node-with-arrows">
-            <div class="node">@node._data</div>
-            @if (node.Next != null)
-            {
-                <div class="arrow down">→</div>
-            }
-        </div>
-    }
-
     @if (!string.IsNullOrEmpty(messageOutput))
     {
         <div class="notification-container">
@@ -354,7 +341,7 @@
         {
             linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
-            var nodeToRemove = linkedList.FindNode(inputValue);
+            var nodeToRemove = linkedList.FindNodeByIndex(inputValue);
             var nodeInfo = ConvertNodeToJavaScriptFormat(nodeToRemove);
 
             var removeTask = linkedList.DeleteAt(inputValue, 1000);

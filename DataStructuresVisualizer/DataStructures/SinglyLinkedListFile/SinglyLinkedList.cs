@@ -532,7 +532,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// <exception cref="IndexOutOfRangeException">
     /// Thrown when the specified index is less than 0 or greater than or equal to the size of the list.
     /// </exception>
-    public SinglyLinkedListNode<T> FindNode(int index)
+    public SinglyLinkedListNode<T> FindNodeByIndex(int index)
     {
         if (index < 0 || index >= count)
         {
