@@ -207,7 +207,6 @@
 
             linkedList.HighlightRequested += HandleHighlightRequest;
 
-            // Start InsertAt and JavaScript function without awaiting them immediately
             linkedList.InsertAt(insertPosition, newNode, 600);
             JSRuntime.InvokeVoidAsync("insertAtInSLL", insertedValue, insertPosition, 700).AsTask();
 

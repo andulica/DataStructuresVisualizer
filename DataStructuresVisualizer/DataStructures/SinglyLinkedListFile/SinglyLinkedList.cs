@@ -165,16 +165,16 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         int currentIndex = 0;
 
         HighlightRequested?.Invoke(0); // "Vertex pre = head"
-        await Task.Delay(delay);
+        await Task.Delay(delay / 2);
 
         // Traverse until the end of the list or the specified index
-        while (current.Next != null && currentIndex < index - 1)
+        while (current.Next != null && currentIndex < index)
         {
             HighlightRequested?.Invoke(1); // "for (k = 0; k<i-1; k++)"
             await Task.Delay(delay);
             current = current.Next;
             currentIndex++;
-            HighlightRequested?.Invoke(2); // "for (k = 0; k<i-1; k++)"
+            HighlightRequested?.Invoke(2); // "pre = pre.next"
             await Task.Delay(delay);
         }
 

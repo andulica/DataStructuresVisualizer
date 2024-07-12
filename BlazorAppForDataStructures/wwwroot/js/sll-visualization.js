@@ -247,7 +247,7 @@
 
     function createNewNode(node, position) {
         let targetX = nodes[position].x;
-        let targetY = nodes[position].y - 50;
+        let targetY = nodes[position].y - 65;
 
         // Create the new node circle
         svg.append("circle")
@@ -341,21 +341,22 @@
                 link2Id = `link-${newNode.id}-${nextNode.id}`;
             }
 
-            if (prevNode && nextNode) {
-                const existingLinkId = `link-${prevNode.id}-${nextNode.id}`;
-                // Remove the existing link before creating new links
-                svg.select(`#${existingLinkId}`).remove();
-            }
 
             // Draw new links with a delay
             setTimeout(() => {
-                if (prevNode) {
-                    drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, link1Id, delay);
+                if (nextNode) {
+                    drawLineWithArrow(newNode.x, newNode.y, nextNode.x, nextNode.y, 20, 2, link2Id, delay);
                 }
 
                 setTimeout(() => {
-                    if (nextNode) {
-                        drawLineWithArrow(newNode.x, newNode.y, nextNode.x, nextNode.y, 20, 2, link2Id, delay);
+                    if (prevNode) {
+                        drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, link1Id, delay);
+                    }
+
+                    if (prevNode && nextNode) {
+                        const existingLinkId = `link-${prevNode.id}-${nextNode.id}`;
+                        // Remove the existing link before creating new links
+                        svg.select(`#${existingLinkId}`).remove();
                     }
 
                     setTimeout(() => {
