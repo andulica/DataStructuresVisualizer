@@ -164,7 +164,6 @@
         });
     }
 
-
     function highlightLinkAndArrowhead(sourceNodeId, targetNodeId, delay) {
         let linkId = `#link-${sourceNodeId}-${targetNodeId}`;
         return new Promise((resolve) => {
@@ -176,7 +175,7 @@
         });
     }
 
-    function highlightNodes(value) {
+    function highlightNodes(value, delay) {
         return new Promise((resolve) => {
             let timeouts = []; // Array to store timeout IDs for potential clearing
             let found = false;
@@ -189,7 +188,7 @@
                     }
 
                     svg.select(`#node-${node.id}`)
-                        .transition().duration(1000)
+                        .transition().duration(delay)
                         .style('fill', 'orange');
 
                     if (index > 0) {
@@ -198,13 +197,13 @@
 
                     if (node.value === value) {
                         svg.select(`#node-${node.id}`)
-                            .transition().duration(1000)
-                            .style('fill', 'green');
+                            .transition().duration(500)
+                            .style('fill', 'red');
                         found = true;
                         clearTimeouts(timeouts); // Clear all remaining timeouts
                         resolve();
                     }
-                }, 1000 * index);
+                }, delay * index);
 
                 timeouts.push(timeout);
             });
@@ -452,19 +451,19 @@
             .attr('marker-end', 'url(#arrowhead)'); // Default arrowhead, not the highlighted one
     }
 
-    function removeNodeInSll(nodeToBeRemoved) {
+    function removeNodeInSll(nodeToBeRemoved, delay) {
         return new Promise((resolve) => {
-            highlightNodes(nodeToBeRemoved.value).then(() => {
+            highlightNodes(nodeToBeRemoved.value, delay).then(() => {
                 setTimeout(() => {
                     // Transition and then remove the node's visual elements
                     svg.select(`#node-${nodeToBeRemoved.id}`)
-                        .transition().duration(500)
+                        .transition().duration(delay)
                         .style('opacity', 0) // Fade out effect
                         .on('end', () => {
                             svg.select(`#node-${nodeToBeRemoved.id}`).remove();
                             // Proceed with text removal after node is removed
                             svg.select(`#textId-${nodeToBeRemoved.id}`)
-                                .transition().duration(500)
+                                .transition().duration(delay)
                                 .style('opacity', 0) // Fade out effect for text
                                 .on('end', () => {
                                     svg.select(`#textId-${nodeToBeRemoved.id}`).remove();
@@ -472,15 +471,12 @@
                                     // Update links if necessary and resolve when complete
                                     updateLinksAfterRemoval(nodeToBeRemoved);
 
-                                    // Once links are updated, reposition nodes, text and redraw links
-                                    updateNodePositions();
-                                    redrawLinks();
-                                    repositionText();
+                                    refreshSinglyLinkedList();
 
                                     resolve(); // Ensure all transitions have time to complete
                                 });
                         });
-                }, 1000); // Delay before removing the node to allow for highlighting
+                }, delay); // Delay before removing the node to allow for highlighting
             });
         });
     }
@@ -534,10 +530,10 @@
         insertNode(value, selectedIndex, delay);
     };
 
-    window.removeValueInSll = function (nodeToBeRemoved) {
+    window.removeValueInSll = function (nodeToBeRemoved, delay) {
         resetNodeColors();
         resetLinkColors();
-        removeNodeInSll(nodeToBeRemoved);
+        removeNodeInSll(nodeToBeRemoved, delay);
     };
 
     window.insertTailInSll = function (value, delay) {

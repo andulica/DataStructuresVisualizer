@@ -280,7 +280,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         }
 
         HighlightRequested?.Invoke(1); // "Vertex pre = head"
-        await Task.Delay(delay);
+        await Task.Delay(delay / 4);
 
         for (int i = 0; i < index - 1; i++)
         {

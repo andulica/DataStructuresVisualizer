@@ -328,6 +328,12 @@
     private async Task RemoveValue()
     {
         if (isOperationInProgress) return; // Prevent multiple operations
+
+        if (inputValue > linkedList.Count)
+        {
+            messageOutput = "The index you are trying to delete does not exist. Please enter a smaller value.";
+            return;
+        }
         isOperationInProgress = true;
         StateHasChanged();
         try
@@ -337,8 +343,8 @@
             var nodeToRemove = linkedList.FindNode(inputValue);
             var nodeInfo = ConvertNodeToJavaScriptFormat(nodeToRemove);
 
-            var removeTask = linkedList.DeleteAt(inputValue);
-            var jsTask = JSRuntime.InvokeVoidAsync("removeValueInSll", nodeInfo).AsTask();
+            var removeTask = linkedList.DeleteAt(inputValue, 1000);
+            var jsTask = JSRuntime.InvokeVoidAsync("removeValueInSll", nodeInfo, 1500).AsTask();
              
             await Task.WhenAll(removeTask, jsTask); // Run both tasks concurrently
         }
