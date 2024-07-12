@@ -264,6 +264,7 @@
         finally
         {
             linkedList.HighlightRequested -= HandleHighlightRequest; // Clean up event subscription
+            StateHasChanged();
         }
     }
 
