@@ -15,24 +15,10 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     private int count;
 
     // Maximum capacity of the singly linked list.
-    private int maxCapacity;
+    public readonly int maxCapacity = 6;
 
     // Public property to access the count.
     public int Count => count;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="SinglyLinkedList{T}"/> class with a specified maximum capacity.
-    /// </summary>
-    /// <param name="capacity">
-    /// The maximum number of nodes that can be added to the linked list. 
-    /// The default value is 6.
-    /// </param>
-    public SinglyLinkedList(int capacity = 6)
-    {
-        maxCapacity = capacity;
-        count = 0;
-        _head = null;
-    }
 
     protected virtual void OnHighlightRequested(int lineNumber)
     {
@@ -527,6 +513,19 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
             current = current.Next;
         }
         return null; // No matching node found
+    }
+    /// <summary>
+    /// Determines whether the singly linked list has reached its maximum capacity.
+    /// </summary>
+    /// <returns>
+    /// <c>true</c> if the count of nodes in the list is greater than or equal to the maximum capacity; otherwise, <c>false</c>.
+    /// </returns>
+    /// <remarks>
+    /// This method is used to check if any further insertions are allowed in the singly linked list.
+    /// </remarks>
+    public bool IsFull()
+    {
+        return count >= maxCapacity;
     }
 
     /// <summary>
