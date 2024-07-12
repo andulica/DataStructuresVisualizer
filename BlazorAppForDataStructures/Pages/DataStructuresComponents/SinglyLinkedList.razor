@@ -23,37 +23,37 @@
                 <div class="insertion-fields">
                     <input type="number" @bind="inputValue" placeholder="Enter Value" />
                     <input type="number" @bind="insertPosition" placeholder="Enter Position" />
-                    <button class="custom-button" @onclick="PerformInsertion">Insert</button>
+                    <button class="custom-button" @onclick="PerformInsertion" disabled="@isOperationInProgress">Insert</button>
                 </div>
                 break;
             case "prepend":
                 <div class="insertion-fields">
                     <input type="number" @bind="inputValue" placeholder="Enter Value" />
-                    <button class="custom-button" @onclick="PrependValue">Prepend</button>
+                    <button class="custom-button" @onclick="PrependValue" disabled="@isOperationInProgress">Prepend</button>
                 </div>
                 break;
             case "append":
                 <div class="insertion-fields">
                     <input type="number" @bind="inputValue" placeholder="Enter Value" />
-                    <button class="custom-button" @onclick="AppendValue">Append</button>
+                    <button class="custom-button" @onclick="AppendValue" disabled="@isOperationInProgress">Append</button>
                 </div>
                 break;
             case "search":
                 <div class="insertion-fields">
                     <input type="number" @bind="inputValue" placeholder="Enter Value" />
-                    <button class="custom-button" @onclick="SearchValue">Search</button>
+                    <button class="custom-button" @onclick="SearchValue" disabled="@isOperationInProgress">Search</button>
                 </div>
                 break;
             case "remove":
                 <div class="insertion-fields">
                     <input type="number" @bind="inputValue" placeholder="Enter Value" />
-                    <button class="custom-button" @onclick="RemoveValue">Remove</button>
+                    <button class="custom-button" @onclick="RemoveValue" disabled="@isOperationInProgress">Remove</button>
                 </div>
                 break;
             case "create":
                 <div class="create-fields">
                     <input type="number" @bind="inputValue" placeholder="Enter Value" />
-                    <button class="custom-button" @onclick="CreateSinglyLinkedList">Create List</button>
+                    <button class="custom-button" @onclick="CreateSinglyLinkedList" disabled="@isOperationInProgress">Create List</button>
                 </div>
                 break;
             default:
@@ -72,7 +72,6 @@
     @foreach (var node in linkedList)
     {
         <div class="node-with-arrows">
-
             <div class="node">@node._data</div>
             @if (node.Next != null)
             {
@@ -86,13 +85,11 @@
         <div class="notification-container">
             <span class="notification-message">@messageOutput</span>
             <button class="notification-close" @onclick="ClearMessage">✖</button>
-
         </div>
     }
 </div>
 
 @code {
-
     private CodeDisplay? CodeDisplay;
     private SinglyLinkedList<int> linkedList = new SinglyLinkedList<int>();
     private Random rand = new Random();
@@ -102,6 +99,7 @@
     private string messageOutput = "";
     private IEnumerable<string> currentCode = Enumerable.Empty<string>();
     private string? currentOperation = " ";
+    private bool isOperationInProgress = false; // Flag to track operation state
 
     public string selectedAction
     {
@@ -154,7 +152,6 @@
                 },
                 ["insertAtPosition"] = new List<string>
                 {
-
                     "Vertex pre = head",
                     "for (k = 0; k<i-1; k++)",
                     "  pre = pre.next",
@@ -172,7 +169,6 @@
                     "Vertex del = pre.next, after = del.next",
                     "pre.next = after",
                     "delete del"
-
                 }
             };
 
@@ -195,8 +191,13 @@
 
     private async Task PerformInsertion()
     {
+        if (isOperationInProgress) return; // Prevent multiple operations
+        isOperationInProgress = true;
+        StateHasChanged();
         try
         {
+            linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
+
             if (insertPosition > linkedList.Count - 1)
             {
                 insertPosition = linkedList.Count;
@@ -205,11 +206,10 @@
             var newNode = new SinglyLinkedListNode<int>(inputValue);
             var insertedValue = ConvertNodeToJavaScriptFormat(newNode);
 
-            linkedList.HighlightRequested += HandleHighlightRequest;
+            var insertTask = linkedList.InsertAt(insertPosition, newNode, 1750);
+            var jsTask = JSRuntime.InvokeVoidAsync("insertAtInSLL", insertedValue, insertPosition, 2600).AsTask();
 
-            linkedList.InsertAt(insertPosition, newNode, 1750);
-            JSRuntime.InvokeVoidAsync("insertAtInSLL", insertedValue, insertPosition, 2600).AsTask();
-
+            await Task.WhenAll(insertTask, jsTask); // Run both tasks concurrently
         }
         catch (InvalidOperationException ex)
         {
@@ -218,24 +218,28 @@
         finally
         {
             linkedList.HighlightRequested -= HandleHighlightRequest;
+            isOperationInProgress = false; // Reset flag after operation
+            StateHasChanged();
         }
     }
 
+
     private async Task PrependValue()
     {
+        if (isOperationInProgress) return; // Prevent multiple operations
+        isOperationInProgress = true;
+        StateHasChanged();
         try
         {
             linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
-            // Create the new node here to be able to pass it to JavaScript
             var head = new SinglyLinkedListNode<int>(inputValue);
             var headToInsert = ConvertNodeToJavaScriptFormat(head);
 
-            // Prepend the node to the linked list with a delay if needed for visualization
-            linkedList.Prepend(head, 2000);
+            var prependTask = linkedList.Prepend(head, 2000);
+            var jsTask = JSRuntime.InvokeVoidAsync("insertAtInSLL", headToInsert, 0, 2000).AsTask();
 
-            // Invoke JavaScript animation function
-            await JSRuntime.InvokeVoidAsync("insertAtInSLL", headToInsert, 0, 2000);
+            await Task.WhenAll(prependTask, jsTask); // Run both tasks concurrently
         }
         catch (InvalidOperationException ex)
         {
@@ -244,18 +248,27 @@
         finally
         {
             linkedList.HighlightRequested -= HandleHighlightRequest; // Clean up event subscription
+            isOperationInProgress = false; // Reset flag after operation
+            StateHasChanged();
         }
     }
 
     private async Task AppendValue()
     {
+        if (isOperationInProgress) return; // Prevent multiple operations
+        isOperationInProgress = true;
+        StateHasChanged();
         try
         {
             linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
+
             var tail = new SinglyLinkedListNode<int>(inputValue);
             var tailToInsert = ConvertNodeToJavaScriptFormat(tail);
-            linkedList.Append(tail, 2000);
-            JSRuntime.InvokeVoidAsync("insertTailInSll", tailToInsert, 1500);
+
+            var appendTask = linkedList.Append(tail, 2000);
+            var jsTask = JSRuntime.InvokeVoidAsync("insertTailInSll", tailToInsert, 1500).AsTask();
+
+            await Task.WhenAll(appendTask, jsTask); // Run both tasks concurrently
         }
         catch (InvalidOperationException ex)
         {
@@ -264,51 +277,95 @@
         finally
         {
             linkedList.HighlightRequested -= HandleHighlightRequest; // Clean up event subscription
+            isOperationInProgress = false; // Reset flag after operation
             StateHasChanged();
         }
     }
 
     private async Task SearchValue()
     {
-        await JSRuntime.InvokeVoidAsync("searchValueInSLL", inputValue);
-        var nodeToHighlight = linkedList.Search(inputValue);
+        if (isOperationInProgress) return; // Prevent multiple operations
+        isOperationInProgress = true;
+        StateHasChanged();
+        try
+        {
+            linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
+
+            var searchTask = linkedList.Search(inputValue);
+            var jsTask = JSRuntime.InvokeVoidAsync("searchValueInSLL", inputValue).AsTask();
+
+            await Task.WhenAll(searchTask, jsTask); // Run both tasks concurrently
+        }
+        finally
+        {
+            linkedList.HighlightRequested -= HandleHighlightRequest; // Clean up event subscription
+            isOperationInProgress = false; // Reset flag after operation
+            StateHasChanged();
+        }
     }
 
     private async Task RemoveValue()
     {
-        if (!linkedList.Contains(inputValue))
+        if (isOperationInProgress) return; // Prevent multiple operations
+        isOperationInProgress = true;
+        StateHasChanged();
+        try
         {
-            HighlightAllNodesOrDisplayMessage();
-            return;
+            if (!linkedList.Contains(inputValue))
+            {
+                HighlightAllNodesOrDisplayMessage();
+                return;
+            }
+
+            linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
+
+            var nodeToRemove = linkedList.FindNode(inputValue);
+            var nodeInfo = ConvertNodeToJavaScriptFormat(nodeToRemove);
+
+            var removeTask = linkedList.Delete(inputValue);
+            var jsTask = JSRuntime.InvokeVoidAsync("removeValueInSll", nodeInfo).AsTask();
+
+            await Task.WhenAll(removeTask, jsTask); // Run both tasks concurrently
         }
-
-        var nodeToRemove = linkedList.FindNode(inputValue);
-        linkedList.Delete(inputValue);
-        var nodeInfo = ConvertNodeToJavaScriptFormat(nodeToRemove);
-
-        await JSRuntime.InvokeVoidAsync("removeValueInSll", nodeInfo);
+        finally
+        {
+            linkedList.HighlightRequested -= HandleHighlightRequest; // Clean up event subscription
+            isOperationInProgress = false; // Reset flag after operation
+            StateHasChanged();
+        }
     }
 
     private async Task CreateSinglyLinkedList()
     {
-        if (linkedList != null)
+        if (isOperationInProgress) return; // Prevent multiple operations
+        isOperationInProgress = true;
+        StateHasChanged();
+        try
         {
-            // Optionally clear existing event subscriptions to prevent memory leaks
-            linkedList.HighlightRequested -= HandleHighlightRequest;
+            if (linkedList != null)
+            {
+                // Optionally clear existing event subscriptions to prevent memory leaks
+                linkedList.HighlightRequested -= HandleHighlightRequest;
+            }
+
+            linkedList = new SinglyLinkedList<int>();
+
+            // Re-subscribe to the event
+            linkedList.HighlightRequested += HandleHighlightRequest;
+
+            for (int i = 0; i < inputValue; i++)
+            {
+                linkedList.Add(rand.Next(1, 30));
+            }
+
+            await UpdateDisplay(linkedList);
+            await InvokeAsync(StateHasChanged);
         }
-
-        linkedList = new SinglyLinkedList<int>();
-
-        // Re-subscribe to the event
-        linkedList.HighlightRequested += HandleHighlightRequest;
-
-        for (int i = 0; i < inputValue; i++)
+        finally
         {
-            linkedList.Add(rand.Next(1, 30));
+            isOperationInProgress = false; // Reset flag after operation
+            StateHasChanged();
         }
-
-        await UpdateDisplay(linkedList);
-        await InvokeAsync(StateHasChanged);
     }
 
     private void HandleHighlightRequest(int lineIndex)
@@ -358,4 +415,4 @@
     {
         messageOutput = "";
     }
-}            
+}
