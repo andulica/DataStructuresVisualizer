@@ -1,0 +1,17 @@
+﻿<svg class="@CssClass" width="50" height="30">
+    <defs>
+        <marker id="right-arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="black" />
+        </marker>
+    </defs>
+    <line x1="0" y1="15" x2="32" y2="15" stroke="@ArrowColor" stroke-width="2" marker-end="url(#right-arrowhead)" />
+</svg>
+
+@code {
+    [Parameter] public string CssClass { get; set; }
+    [Parameter] public bool Highlight { get; set; }
+
+    private string ArrowColor => Highlight ? "red" : "black";
+}
+
+
