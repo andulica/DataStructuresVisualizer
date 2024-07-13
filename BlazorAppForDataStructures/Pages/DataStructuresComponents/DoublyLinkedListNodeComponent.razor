@@ -1,0 +1,41 @@
+﻿@using DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
+@namespace BlazorAppForDataStructures.Pages.DataStructuresComponents
+@typeparam T
+
+<div class="node" style="background-color:@NodeColor" @onclick="HandleClick">
+    <span>@NodeValue</span>
+    @if (NextNode != null)
+    {
+        <span class="arrow">→</span>
+    }
+    @if (PrevNode != null)
+    {
+        <span class="arrow">←</span>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public T NodeValue { get; set; }
+
+    [Parameter]
+    public DoublyLinkedListNode<T> NextNode { get; set; }
+
+    [Parameter]
+    public DoublyLinkedListNode<T> PrevNode { get; set; }
+
+    [Parameter]
+    public string NodeColor { get; set; } = "white";
+
+    [Parameter]
+    public EventCallback OnNodeClick { get; set; }
+
+    private async Task HandleClick()
+    {
+        if (OnNodeClick.HasDelegate)
+        {
+            await OnNodeClick.InvokeAsync(null);
+        }
+    }
+}
+

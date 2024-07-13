@@ -1,110 +1,204 @@
-﻿@inject NavigationManager NavigationManager
-@using DataStructuresVisualizer.DataStructures.DoublyLinkedListFile;
+﻿@page "/doublyLinkedList"
+@using DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
+@using BlazorAppForDataStructures.Pages.DataStructuresComponents
+@inject IJSRuntime JSRuntime
 
-<div id="doubly-linkedList" class="container">
-    <h3>Doubly Linked List Operations</h3>
+<h3>Doubly Linked List Operations</h3>
 
-    <div class="operation-selection">
-        <select @bind="selectedAction">
-            <option value="insertAtPosition">InsertAtPosition</option>
-            <option value="prepend">Prepend</option>
-            <option value="append">Append</option>
-            <option value="search">Search</option>
-            <option value="remove">Remove</option>
-            <option value="create">Create</option>
-        </select>
-        @switch (selectedAction)
+<div class="operation-selection">
+    <select @bind="selectedAction">
+        <option value="insertAtPosition">Insert At Position</option>
+        <option value="prepend">Prepend</option>
+        <option value="append">Append</option>
+        <option value="search">Search</option>
+        <option value="remove">Remove</option>
+        <option value="create">Create</option>
+    </select>
+    @switch (selectedAction)
+    {
+        case "insertAtPosition":
+            <div class="insertion-fields">
+                <label>Input Value:</label>
+                <input type="number" @bind="inputValue" placeholder="Enter Value" />
+                <label>Insert Position:</label>
+                <input type="number" @bind="insertPosition" placeholder="Enter Position" />
+                <button class="custom-button" @onclick="PerformInsertion" disabled="@isOperationInProgress">Insert</button>
+            </div>
+            break;
+        case "prepend":
+            <div class="insertion-fields">
+                <label>Input Value:</label>
+                <input type="number" @bind="inputValue" placeholder="Enter Value" />
+                <button class="custom-button" @onclick="PrependValue" disabled="@isOperationInProgress">Prepend</button>
+            </div>
+            break;
+        case "append":
+            <div class="insertion-fields">
+                <label>Input Value:</label>
+                <input type="number" @bind="inputValue" placeholder="Enter Value" />
+                <button class="custom-button" @onclick="AppendValue" disabled="@isOperationInProgress">Append</button>
+            </div>
+            break;
+        case "search":
+            <div class="insertion-fields">
+                <label>Input Value:</label>
+                <input type="number" @bind="inputValue" placeholder="Enter Value" />
+                <button class="custom-button" @onclick="SearchValue" disabled="@isOperationInProgress">Search</button>
+            </div>
+            break;
+        case "remove":
+            <div class="insertion-fields">
+                <label>Input Value:</label>
+                <input type="number" @bind="inputValue" placeholder="Enter Value" />
+                <button class="custom-button" @onclick="RemoveValue" disabled="@isOperationInProgress">Remove</button>
+            </div>
+            break;
+        case "create":
+            <div class="create-fields">
+                <label>Input Value:</label>
+                <input type="number" @bind="inputValue" placeholder="Enter Value" />
+                <button class="custom-button" @onclick="CreateDoublyLinkedList" disabled="@isOperationInProgress">Create List</button>
+            </div>
+            break;
+        default:
+            break;
+    }
+</div>
+
+<div class="linked-list">
+    @if (doublyLinkedList.Head != null)
+    {
+        <DoublyLinkedListNodeComponent NodeValue="@doublyLinkedList.Head._data" NextNode="@doublyLinkedList.Head.Next" PrevNode="@doublyLinkedList.Head.Prev" />
+        var currentNode = doublyLinkedList.Head.Next;
+        while (currentNode != null)
         {
-            case "insertAtPosition":
-                <div class="insertion-fields">
-                    <input type="number" @bind="inputValue" placeholder="Enter Value" />
-                    <input type="number" @bind="insertPosition" placeholder="Enter Position" />
-                    <button class="custom-button" @onclick="PerformInsertion">Insert</button>
-                </div>
-                break;
-            case "prepend":
-                <div class="insertion-fields">
-                    <input type="number" @bind="inputValue" placeholder="Enter Value" />
-                    <button class="custom-button" @onclick="PrependValue">Prepend</button>
-                </div>
-                break;
-            case "append":
-                <div class="insertion-fields">
-                    <input type="number" @bind="inputValue" placeholder="Enter Value" />
-                    <button class="custom-button" @onclick="AppendValue">Append</button>
-                </div>
-                break;
-            case "search":
-                <div class="insertion-fields">
-                    <input type="number" @bind="inputValue" placeholder="Enter Value" />
-                    <button class="custom-button" @onclick="SearchValue">Search</button>
-                </div>
-                break;
-            case "remove":
-                <div class="insertion-fields">
-                    <input type="number" @bind="inputValue" placeholder="Enter Value" />
-                    <button class="custom-button" @onclick="RemoveValue">Remove</button>
-                </div>
-                break;
-            case "create":
-                <div class="create-fields">
-                    <input type="number" @bind="inputValue" placeholder="Enter Value" />
-                    <button class="custom-button" @onclick="CreateSinglyLinkedList">Create List</button>
-                </div>
-                break;
-            default:
-                break;
+            <DoublyLinkedListNodeComponent NodeValue="currentNode._data" NextNode="currentNode.Next" PrevNode="currentNode.Prev" />
+            currentNode = currentNode.Next;
         }
-    </div>
-
-    <div id="dll-display">
-        @* Render the linked list here *@
-    </div>
-
-    <div>@messageOutput</div>
-    </div>
-
-
+    }
+</div>
 
 @code {
-    private DoublyLinkedList<int> doublyLinkedList = new DoublyLinkedList<int>();
-    private string selectedAction = "none";
-    private int insertPosition;
+    private string selectedAction = "create";
     private int inputValue;
-    private string messageOutput = "";
-    Random rand = new Random();
+    private int insertPosition;
+    private bool isOperationInProgress = false;
 
-    protected override void OnInitialized()
-    {
-        doublyLinkedList = new DoublyLinkedList<int>();
-        doublyLinkedList.Append(rand.Next(1, 30));
-        doublyLinkedList.Append(rand.Next(1, 30));
-        doublyLinkedList.Append(rand.Next(1, 30));
+    private DoublyLinkedList<int> doublyLinkedList = new DoublyLinkedList<int>();
 
+    private async Task PerformInsertion()
+    {
+        isOperationInProgress = true;
+        try
+        {
+            await Task.Delay(500); // Simulate delay
+            doublyLinkedList.InsertAt(inputValue, insertPosition);
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            // Handle exception
+        }
+        finally
+        {
+            isOperationInProgress = false;
+        }
     }
 
-    private Task AppendValue(MouseEventArgs e)
+    private async Task PrependValue()
     {
-        throw new NotImplementedException();
+        isOperationInProgress = true;
+        try
+        {
+            await Task.Delay(500); // Simulate delay
+            doublyLinkedList.Prepend(inputValue);
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            // Handle exception
+        }
+        finally
+        {
+            isOperationInProgress = false;
+        }
     }
-    private Task PerformInsertion(MouseEventArgs e)
+
+    private async Task AppendValue()
     {
-        throw new NotImplementedException();
+        isOperationInProgress = true;
+        try
+        {
+            await Task.Delay(500); // Simulate delay
+            doublyLinkedList.Append(inputValue);
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            // Handle exception
+        }
+        finally
+        {
+            isOperationInProgress = false;
+        }
     }
-    private Task PrependValue(MouseEventArgs e)
+
+    private async Task SearchValue()
     {
-        throw new NotImplementedException();
+        isOperationInProgress = true;
+        try
+        {
+            await Task.Delay(500); // Simulate delay
+            // Implement search logic
+        }
+        catch (Exception ex)
+        {
+            // Handle exception
+        }
+        finally
+        {
+            isOperationInProgress = false;
+        }
     }
-    private Task SearchValue(MouseEventArgs e)
+
+    private async Task RemoveValue()
     {
-        throw new NotImplementedException();
+        isOperationInProgress = true;
+        try
+        {
+            await Task.Delay(500); // Simulate delay
+            doublyLinkedList.Delete(inputValue);
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            // Handle exception
+        }
+        finally
+        {
+            isOperationInProgress = false;
+        }
     }
-    private Task RemoveValue(MouseEventArgs e)
+
+    private async Task CreateDoublyLinkedList()
     {
-        throw new NotImplementedException();
-    }
-    private Task CreateSinglyLinkedList(MouseEventArgs e)
-    {
-        throw new NotImplementedException();
+        isOperationInProgress = true;
+        try
+        {
+            await Task.Delay(500); // Simulate delay
+            for (int i = 0; i < inputValue; i++)
+            {
+                doublyLinkedList.Append(i + 1); // Simulate appending nodes
+            }
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            // Handle exception
+        }
+        finally
+        {
+            isOperationInProgress = false;
+        }
     }
 }

@@ -61,3 +61,18 @@
 .highlight {
     background-color: yellow; /* Highlight color */
 }
+
+.node {
+    display: inline-block;
+    padding: 10px;
+    border: 1px solid black;
+    border-radius: 5px;
+    margin: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.arrow {
+    display: inline-block;
+    padding: 0 5px;
+}
+
