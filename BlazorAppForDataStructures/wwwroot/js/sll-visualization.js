@@ -42,7 +42,6 @@
             line.attr('id', id);
         }
 
-        console.log(`Line drawn with ID: ${id}`);
         return line;
     }
 

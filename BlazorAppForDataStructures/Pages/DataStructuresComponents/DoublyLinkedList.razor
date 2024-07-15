@@ -1,4 +1,5 @@
 ﻿@page "/doublyLinkedList"
+@inject IJSRuntime JSRuntime
 @using DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
 
 <h3>Doubly Linked List Operations</h3>
@@ -59,38 +60,12 @@
                 <button class="custom-button" @onclick="CreateDoublyLinkedList" disabled="@isOperationInProgress">Create List</button>
             </div>
             break;
-        case "traverse":
-            <button class="custom-button" @onclick="TraverseList" disabled="@isOperationInProgress">Traverse</button>
-            break;
         default:
             break;
     }
 </div>
 
-<div class="linked-list">
-    @if (doublyLinkedList.Head != null)
-    {
-        <Node NodeValue="@doublyLinkedList.Head._data" Highlight="@isOperationInProgress" Index="0" />
-        <div class="arrow-container">
-            <LeftArrow Highlight="@isOperationInProgress" />
-            <RightArrow Highlight="@isOperationInProgress" />
-        </div>
-
-        var currentNode = doublyLinkedList.Head.Next;
-        var index = 1;
-        while (currentNode != null)
-        {
-            <Node NodeValue="currentNode._data" Highlight="@isOperationInProgress" Index="index" />
-            <div class="arrow-container">
-                <LeftArrow Highlight="@isOperationInProgress" />
-                <RightArrow Highlight="@isOperationInProgress" />
-            </div>
-            currentNode = currentNode.Next;
-            index++;
-        }
-    }
-</div>
-
+<div id="dll-display"></div>
 
 @code {
     private string selectedAction = "create";
@@ -99,16 +74,25 @@
     private bool isOperationInProgress = false;
 
     private DoublyLinkedList<int> doublyLinkedList = new DoublyLinkedList<int>();
-    private int highlightValue = -1;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var dllData = ConvertListToJavaScriptFormat(doublyLinkedList);
+            await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", dllData);
+        }
+    }
 
     private async Task PerformInsertion()
     {
         isOperationInProgress = true;
         try
         {
-            await Task.Delay(500); // Simulate delay
+            await Task.Delay(500);
             doublyLinkedList.InsertAt(inputValue, insertPosition);
-            StateHasChanged();
+            var dllData = ConvertListToJavaScriptFormat(doublyLinkedList);
+            await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", dllData);
         }
         catch (Exception ex)
         {
@@ -125,9 +109,10 @@
         isOperationInProgress = true;
         try
         {
-            await Task.Delay(500); // Simulate delay
+            await Task.Delay(500);
             doublyLinkedList.Prepend(inputValue);
-            StateHasChanged();
+            var dllData = ConvertListToJavaScriptFormat(doublyLinkedList);
+            await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", dllData);
         }
         catch (Exception ex)
         {
@@ -144,9 +129,10 @@
         isOperationInProgress = true;
         try
         {
-            await Task.Delay(500); // Simulate delay
+            await Task.Delay(500);
             doublyLinkedList.Append(inputValue);
-            StateHasChanged();
+            var dllData = ConvertListToJavaScriptFormat(doublyLinkedList);
+            await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", dllData);
         }
         catch (Exception ex)
         {
@@ -163,8 +149,7 @@
         isOperationInProgress = true;
         try
         {
-            await Task.Delay(500); // Simulate delay
-                                   // Implement search logic
+            await JSRuntime.InvokeVoidAsync("searchValueInDLL", inputValue, 1000); // 1000ms delay
         }
         catch (Exception ex)
         {
@@ -183,7 +168,7 @@
         {
             await Task.Delay(500); // Simulate delay
             doublyLinkedList.Delete(inputValue);
-            StateHasChanged();
+            await JSRuntime.InvokeVoidAsync("removeValueInSll", inputValue, 1000); // 1000ms delay
         }
         catch (Exception ex)
         {
@@ -205,7 +190,8 @@
             {
                 doublyLinkedList.Append(i + 1); // Simulate appending nodes
             }
-            StateHasChanged();
+            var linkedListData = ConvertListToJavaScriptFormat(doublyLinkedList);
+            await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", linkedListData);
         }
         catch (Exception ex)
         {
@@ -217,34 +203,21 @@
         }
     }
 
-    private async Task TraverseList()
+    private List<object> ConvertListToJavaScriptFormat(DoublyLinkedList<int> list)
     {
-        isOperationInProgress = true;
-        try
+        var nodes = new List<object>();
+        var currentNode = list.Head;
+        while (currentNode != null)
         {
-            var currentNode = doublyLinkedList.Head;
-            while (currentNode != null)
+            nodes.Add(new
             {
-                highlightValue = currentNode._data; // Highlight current node
-                StateHasChanged(); // Update UI
-                await Task.Delay(1000); // Wait for 1 second
-                currentNode = currentNode.Next;
-            }
-            highlightValue = -1; // Clear highlight
-            StateHasChanged(); // Update UI
+                value = currentNode._data,
+                next = currentNode.Next != null ? currentNode.Next.Id : (Guid?)null,
+                prev = currentNode.Prev != null ? currentNode.Prev.Id : (Guid?)null,
+                id = currentNode.Id
+            });
+            currentNode = currentNode.Next;
         }
-        catch (Exception ex)
-        {
-            // Handle exception
-        }
-        finally
-        {
-            isOperationInProgress = false;
-        }
+        return nodes;
     }
 }
-
-
-
-
-
