@@ -1,6 +1,5 @@
 ﻿@page "/doublyLinkedList"
 @using DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
-@inject IJSRuntime JSRuntime
 
 <h3>Doubly Linked List Operations</h3>
 
@@ -12,7 +11,7 @@
         <option value="search">Search</option>
         <option value="remove">Remove</option>
         <option value="create">Create</option>
-        <option value="traverse">Traverse</option> <!-- Added traverse option -->
+        <option value="traverse">Traverse</option>
     </select>
     @switch (selectedAction)
     {
@@ -71,28 +70,23 @@
 <div class="linked-list">
     @if (doublyLinkedList.Head != null)
     {
-        <Node NodeValue="@doublyLinkedList.Head._data" />
+        <Node NodeValue="@doublyLinkedList.Head._data" Highlight="@isOperationInProgress" Index="0" />
         <div class="arrow-container">
-            <LeftArrow CssClass="left-arrow" Highlight="@(doublyLinkedList.Head._data == highlightValue)" />
+            <LeftArrow Highlight="@isOperationInProgress" />
+            <RightArrow Highlight="@isOperationInProgress" />
         </div>
 
         var currentNode = doublyLinkedList.Head.Next;
+        var index = 1;
         while (currentNode != null)
         {
-            if (currentNode.Prev != null)
-            {
-                <div class="arrow-container">
-                    <RightArrow CssClass="right-arrow" Highlight="@(doublyLinkedList.Head._data == highlightValue)" />
-                </div>
-            }
-            <Node NodeValue="currentNode._data" />
-            if (currentNode.Next != null)
-            {
-                <div class="arrow-container">
-                    <LeftArrow CssClass="left-arrow" Highlight="@(currentNode._data == highlightValue)" />
-                </div>
-            }
+            <Node NodeValue="currentNode._data" Highlight="@isOperationInProgress" Index="index" />
+            <div class="arrow-container">
+                <LeftArrow Highlight="@isOperationInProgress" />
+                <RightArrow Highlight="@isOperationInProgress" />
+            </div>
             currentNode = currentNode.Next;
+            index++;
         }
     }
 </div>
@@ -105,7 +99,7 @@
     private bool isOperationInProgress = false;
 
     private DoublyLinkedList<int> doublyLinkedList = new DoublyLinkedList<int>();
-    private int highlightValue = 2;
+    private int highlightValue = -1;
 
     private async Task PerformInsertion()
     {
@@ -170,7 +164,7 @@
         try
         {
             await Task.Delay(500); // Simulate delay
-            // Implement search logic
+                                   // Implement search logic
         }
         catch (Exception ex)
         {
@@ -249,3 +243,8 @@
         }
     }
 }
+
+
+
+
+
