@@ -81,7 +81,7 @@
             .attr('xoverflow', 'visible')
             .append('svg:path')
             .attr('d', 'M 0,-5 L 10 ,0 L 0,5')
-            .attr('fill', '#000');
+            .attr('fill', '#000'); 
 
         svg.append('defs').append('marker')
             .attr('id', 'highlighted-right-arrowhead')
@@ -168,7 +168,7 @@
                     if (node.value === value) {
                         svg.select(`#node-${node.id}`)
                             .transition().duration(500)
-                            .style('fill', 'red');
+                            .style('fill', 'green');
                         found = true;
                         clearTimeouts(timeouts);
                         resolve();
@@ -207,6 +207,8 @@
     };
 
     window.searchValueInDLL = function (value, delay) {
+        window.resetNodeColors(svg, nodes);
+        window.resetLinkColors(svg);
         highlightNodes(value, delay);
     };
 
