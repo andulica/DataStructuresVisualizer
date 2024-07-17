@@ -1,4 +1,4 @@
-let root, svg, treemap, width, height, currentTreeNode; // Declare global variables
+(function () {let root, svg, treemap, width, height, currentTreeNode; // Declare global variables
 let margin = { top: 20, right: 90, bottom: 30, left: 90 }; // Set the margins for the tree diagram
 window.drawBST = function (treeRootNode) {
     
@@ -169,4 +169,6 @@ function searchRecursive(node, value, parentId, depth = 0) {
             return searchRecursive(node.right, value, node.id, depth);
         }
     }, delay + 100); // Adjust timing slightly if needed
+    }
 }
+)();

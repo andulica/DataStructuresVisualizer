@@ -46,6 +46,9 @@
     }
 
     window.drawLinkedList = function (singlyLinkedList) {
+
+        console.log('drawLinkedList called'); // Add this line to verify if the function is called
+
         // Setup SVG dimensions
         margin, width = 700 - margin.left - margin.right, height = 250 - margin.top - margin.bottom;
 

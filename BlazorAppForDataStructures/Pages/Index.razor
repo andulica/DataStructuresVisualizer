@@ -1,4 +1,5 @@
 ﻿@page "/"
+@inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
 <PageTitle>Home</PageTitle>
 
@@ -8,9 +9,101 @@
         <p>Click the button below to start exploring various data structures and their operations.</p>
         <button @onclick="NavigateToPage">Explore Data Structures</button>
     </div>
+
+    <svg id="sll-display" class="background-svg" width="800" height="150">
+        <defs>
+            <marker id="right-arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="black" />
+            </marker>
+            <marker id="left-arrowhead" markerWidth="5" markerHeight="3.5" refX="0" refY="1.75" orient="auto">
+                <polygon points="0 0, 5 1.75, 0 3.5" fill="black" />
+            </marker>
+        </defs>
+    </svg>
 </div>
 
+<style>
+    .page-container {
+        text-align: center;
+        padding: 20px;
+    }
+
+    .card {
+        background-color: white;
+        border: 1px solid #ccc;
+        padding: 20px;
+        border-radius: 10px;
+        display: inline-block;
+    }
+
+    .background-svg {
+        margin-top: 20px;
+    }
+
+    svg {
+        display: block;
+        margin: 0 auto;
+    }
+
+    .highlight {
+        fill: orange !important;
+    }
+
+    .found {
+        fill: green !important;
+    }
+</style>
+
 @code {
+    private SinglyLinkedList<int> linkedList = new SinglyLinkedList<int>();
+    private Random rand = new Random();
+
+    protected override void OnInitialized()
+    {
+        Console.WriteLine("Component Initialized"); // Debug statement
+        linkedList.Add(rand.Next(1, 30));
+        linkedList.Add(rand.Next(1, 30));
+        linkedList.Add(rand.Next(1, 30));
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        Console.WriteLine($"OnAfterRenderAsync called, firstRender: {firstRender}"); // Debug statement
+
+        if (firstRender)
+        {
+            try
+            {
+                // Convert the linked list to a format suitable for JavaScript
+                var linkedListData = ConvertListToJavaScriptFormat(linkedList);
+                Console.WriteLine("Calling drawLinkedList"); // Debug statement
+                await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData);
+                Console.WriteLine("drawLinkedList invoked"); // Debug statement
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error during JS interop: {ex.Message}"); // Debug statement
+            }
+        }
+    }
+
+    private List<object> ConvertListToJavaScriptFormat(SinglyLinkedList<int> list)
+    {
+        var nodes = new List<object>();
+        var currentNode = list.Head;
+        while (currentNode != null)
+        {
+            nodes.Add(new
+            {
+                value = currentNode._data,
+                next = currentNode.Next != null ? currentNode.Next.Id : (Guid?)null,
+                id = currentNode.Id
+            });
+            currentNode = currentNode.Next;
+        }
+        return nodes;
+    }
+
     private void NavigateToPage()
     {
         NavigationManager.NavigateTo("/dataStructure");
