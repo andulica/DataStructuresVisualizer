@@ -1,5 +1,6 @@
 ﻿@page "/"
 @inject IJSRuntime JSRuntime
+@using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
 @inject NavigationManager NavigationManager
 <PageTitle>Home</PageTitle>
 
@@ -60,7 +61,6 @@
 
     protected override void OnInitialized()
     {
-        Console.WriteLine("Component Initialized"); // Debug statement
         linkedList.Add(rand.Next(1, 30));
         linkedList.Add(rand.Next(1, 30));
         linkedList.Add(rand.Next(1, 30));
@@ -68,23 +68,33 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        Console.WriteLine($"OnAfterRenderAsync called, firstRender: {firstRender}"); // Debug statement
-
         if (firstRender)
         {
-            try
+            // Convert the linked list to a format suitable for JavaScript
+            var linkedListData = ConvertListToJavaScriptFormat(linkedList);
+            await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData);
+
+            // Start the insertion loop
+            for (int i = 0; i < 3; i++)
             {
-                // Convert the linked list to a format suitable for JavaScript
-                var linkedListData = ConvertListToJavaScriptFormat(linkedList);
-                Console.WriteLine("Calling drawLinkedList"); // Debug statement
-                await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData);
-                Console.WriteLine("drawLinkedList invoked"); // Debug statement
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error during JS interop: {ex.Message}"); // Debug statement
+                int position = i % (linkedList.Count + 1);
+
+                var newNode = new SinglyLinkedListNode<int>(rand.Next(1, 30));
+                var jsNode = ConvertNodeToJavaScriptFormat(newNode);
+                await JSRuntime.InvokeVoidAsync("insertAtInSLL", jsNode, position, 1000);
+                await Task.Delay(6500);
             }
         }
+    }
+
+    private object ConvertNodeToJavaScriptFormat(SinglyLinkedListNode<int> node)
+    {
+        return new
+        {
+            value = node._data,
+            next = node.Next != null ? node.Next.Id : (Guid?)null,
+            id = node.Id
+        };
     }
 
     private List<object> ConvertListToJavaScriptFormat(SinglyLinkedList<int> list)
