@@ -30,11 +30,26 @@
 
 
 @code {
-    private BinarySearchTree<int> bst = new BinarySearchTree<int>(5);
+    private BinarySearchTree<int> bst = new BinarySearchTree<int>(7);
     private int inputValue;
     private string message;
     private Random rand = new Random();
 
+    protected override void OnInitialized()
+    {
+        UpdateDisplay(bst).ContinueWith(_ => { }); // Handle async call without await
+    }
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Convert the linked list to a format suitable for JavaScript
+            var bstData = ConvertBSTToD3Format(bst.Root);
+            await JSRuntime.InvokeVoidAsync("drawBST", bstData);
+        }
+    }
     private void CreateTree()
     {
         bst = new BinarySearchTree<int>(5);
