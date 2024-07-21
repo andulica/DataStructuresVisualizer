@@ -13,7 +13,7 @@
         };
     }
 
-    function drawLineWithArrow(startX, startY, endX, endY, radius, strokeWidth, id, direction) {
+    function drawLineWithArrow(startX, startY, endX, endY, radius, strokeWidth, id, direction, delay) {
         let offsetX = 0, offsetY = 0;
 
         if (direction === 'right') {
@@ -37,7 +37,7 @@
             .attr('stroke-dasharray', lineLength)
             .attr('stroke-dashoffset', lineLength)
             .transition()
-            .duration(1000)
+            .duration(delay)
             .attr('stroke-dashoffset', 0);
 
         if (id) {
@@ -185,6 +185,62 @@
         });
     }
 
+    async function insertNodeAtTail(value, delay) {
+
+        setTimeout(() => {
+            // Create the new node to be the new tail
+            const newNode = createTailNode(value);
+            nodes.push(newNode);  // Append the new node to the end of the list
+
+            // Get the previous tail to draw the link
+            const prevNode = nodes[nodes.length - 2];
+
+            if (prevNode) {
+                setTimeout(() => {
+                    drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, `link-${prevNode.id}-${newNode.id}`, 'right', delay);
+                    drawLineWithArrow(newNode.x, newNode.y, prevNode.x, prevNode.y, 20, 2, `link-${newNode.id}-${prevNode.id}`, 'left', delay);
+                }, 1000);
+            }
+            setTimeout(() => {
+                resetNodeColors();
+            }, 1000);
+
+        }, 1000);
+    }
+
+    function createTailNode(node) {
+        let lastNode = nodes[nodes.length - 1];
+        let targetX = lastNode.x + 100;
+        let targetY = lastNode.y;
+
+        // Create the new node circle
+        svg.append("circle")
+            .attr("id", `node-${node.id}`)
+            .attr("class", "node")
+            .attr("cx", targetX)
+            .attr("cy", targetY)
+            .attr("r", 20)
+            .style("fill", "green")
+            .style("stroke", "black")
+            .style("stroke-width", 2);
+
+        // Add the value text
+        svg.append("text")
+            .attr("id", `textId-${node.id}`)
+            .attr("x", targetX)
+            .attr("y", targetY + 5)
+            .text(node.value)
+            .attr("text-anchor", "middle")
+            .style("fill", "black");
+
+        return {
+            id: node.id,
+            x: targetX,
+            y: targetY,
+            value: node.value
+        };
+    }
+
     function highlightLinkAndArrowhead(sourceNodeId, targetNodeId, direction, delay) {
         let linkId = `#link-${sourceNodeId}-${targetNodeId}`;
         return new Promise((resolve) => {
@@ -211,6 +267,18 @@
         window.resetLinkColors(svg);
         highlightNodes(value, delay);
     };
+
+    window.insertAtInDll = function (value, index, delay) {
+        window.resetNodeColors(svg, nodes);
+        window.resetLinkColors(svg);
+        highlightNodes(value, delay);
+    }
+
+    window.insertTailInDll = function (value, delay) {
+        window.resetNodeColors(svg, nodes);
+        window.resetLinkColors(svg);
+        insertNodeAtTail(value, delay);
+    }
 
     window.drawDoublyLinkedList = drawDoublyLinkedList;
 })();

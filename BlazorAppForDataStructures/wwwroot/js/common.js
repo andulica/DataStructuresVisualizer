@@ -8,9 +8,24 @@ window.resetNodeColors = function (svg, nodes) {
     });
 }
 
+//window.resetLinkColors = function (svg) {
+//    svg.selectAll(".link")
+//        .transition().duration(500)
+//        .style('stroke', '#000')
+//        .attr('marker-end', 'url(#arrowhead)');
+//}
+
+
 window.resetLinkColors = function (svg) {
+    // Reset right arrowhead links
     svg.selectAll(".link")
         .transition().duration(500)
         .style('stroke', '#000')
-        .attr('marker-end', 'url(#arrowhead)');
+        .attr('marker-end', 'url(#right-arrowhead)');
+
+    // Reset left arrowhead links
+    svg.selectAll(".link")
+        .transition().duration(500)
+        .style('stroke', '#000')
+        .attr('marker-end', 'url(#left-arrowhead)');
 }

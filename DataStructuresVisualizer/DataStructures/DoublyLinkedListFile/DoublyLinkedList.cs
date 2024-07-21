@@ -26,12 +26,13 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         /// Appends a new node with the specified data at the end of the list.
         /// </summary>
         /// <param name="data">The data to be appended.</param>
-        public void Append(T data)
+        public DoublyLinkedListNode<T> Append(T data)
         {
             DoublyLinkedListNode<T> newNode = new DoublyLinkedListNode<T>(data);
             if (tail == null)
             {
                 head = tail = newNode;
+                return newNode;
             }
             else
             {
@@ -40,6 +41,7 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
                 tail = newNode;
             }
             count++;
+            return newNode;
         }
 
         /// <summary>

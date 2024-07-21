@@ -91,7 +91,7 @@
             await Task.Delay(500);
             doublyLinkedList.InsertAt(inputValue, insertPosition);
             var dllData = ConvertListToJavaScriptFormat(doublyLinkedList);
-            await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", dllData);
+            await JSRuntime.InvokeVoidAsync("insertAtInDll", dllData);
         }
         catch (Exception ex)
         {
@@ -129,9 +129,9 @@
         try
         {
             await Task.Delay(500);
-            doublyLinkedList.Append(inputValue);
-            var dllData = ConvertListToJavaScriptFormat(doublyLinkedList);
-            await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", dllData);
+            var nodeToInsert = doublyLinkedList.Append(inputValue);
+            var dllData = ConvertNodeToJavaScriptFormat(nodeToInsert);
+            await JSRuntime.InvokeVoidAsync("insertTailInDll", dllData, 2000);
         }
         catch (Exception ex)
         {
@@ -200,6 +200,17 @@
         {
             isOperationInProgress = false;
         }
+    }
+
+    private object ConvertNodeToJavaScriptFormat(DoublyLinkedListNode<int> node)
+    {
+        return new
+        {
+            value = node._data,
+            next = node.Next != null ? node.Next.Id : (Guid?)null,
+            prev = node.Prev != null ? node.Prev.Id : (Guid?)null,
+            id = node.Id
+        };
     }
 
     private List<object> ConvertListToJavaScriptFormat(DoublyLinkedList<int> list)
