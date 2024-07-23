@@ -96,21 +96,23 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         /// Prepends a new node with specified data at the start of the list.
         /// </summary>
         /// <param name="data">_data for the new node.</param>
-        public void Prepend(T data)
+        public DoublyLinkedListNode<T> Prepend(T data)
         {
             DoublyLinkedListNode<T> newNode = new DoublyLinkedListNode<T>(data);
             if (head == null)
             {
                 head = tail = newNode;
+                count++;
+                return newNode;
             }
             else
             {
                 head.Prev = newNode;
                 newNode.Next = head;
                 head = newNode;
+                count++;
+                return newNode;
             }
-
-            count++;
         }
 
         /// <summary>

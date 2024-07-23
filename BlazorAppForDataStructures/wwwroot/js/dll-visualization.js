@@ -184,6 +184,146 @@
             timeouts.push(finalTimeout);
         });
     }
+    async function insertNode(value, position, delay) {
+        await highlightNodesForInsertion(position, delay); // Highlight nodes up to the position
+
+        setTimeout(() => {
+            let newNode;
+            if (position === nodes.length) {
+                // Handle insertion at the tail
+                newNode = createTailNode(value);
+                nodes.push(newNode);
+            } else if (position === 0) {
+                // Handle insertion at the head
+                newNode = createNewNode(value, position);
+                nodes.splice(position, 0, newNode);
+            } else {
+                // Handle insertion at the specified position
+                newNode = createNewNode(value, position);
+                nodes.splice(position, 0, newNode);
+            }
+
+            let prevNode, nextNode, link1Id, link2Id, link3Id, link4Id;
+
+            if (position > 0) {
+                prevNode = nodes[position - 1];
+                link1Id = `link-${prevNode.id}-${newNode.id}`;
+                link2Id = `link-${newNode.id}-${prevNode.id}`;
+            }
+
+            if (position < nodes.length - 1) {
+                nextNode = nodes[position + 1];
+                link3Id = `link-${newNode.id}-${nextNode.id}`;
+                link4Id = `link-${nextNode.id}-${newNode.id}`;
+            }
+
+
+            // Draw new links with a delay
+            setTimeout(() => {
+                if (nextNode) {
+                    drawLineWithArrow(newNode.x, newNode.y, nextNode.x, nextNode.y, 20, 2, link3Id, delay, 'right', delay);
+                    drawLineWithArrow(nextNode.x, nextNode.y, newNode.x, newNode.y, 20, 2, link4Id, delay, 'left', delay);
+                }
+
+                setTimeout(() => {
+                    if (prevNode) {
+                        drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, link1Id, delay, 'right', delay);
+                        drawLineWithArrow(newNode.x, newNode.y, prevNode.x, prevNode.y, 20, 2, link2Id, delay, 'left', delay);
+                    }
+
+                    if (prevNode && nextNode) {
+                        const existingLinkId1 = `link-${prevNode.id}-${nextNode.id}`;
+                        const existingLinkId2 = `link-${nextNode.id}-${prevNode.id}`;
+                        // Remove the existing link before creating new links
+                        svg.select(`#${existingLinkId1}`).remove();
+                        svg.select(`#${existingLinkId2}`).remove();
+                    }
+
+                    setTimeout(() => {
+                        // Update the positions and redraw the links
+                        refreshDoublyLinkedList();
+
+                        // Reset node colors after a delay
+                        setTimeout(() => {
+                            window.resetNodeColors();
+                        }, delay);
+                    }, delay);
+                }, delay);
+            }, delay);
+        }, delay);
+    }
+
+    function updateNodePositions() {
+        const nodeSpacing = 100;
+        nodes.forEach((node, index) => {
+            node.x = Math.round(index * nodeSpacing + 50);
+            node.y = Math.round(height / 2);
+            svg.select(`#node-${node.id}`)
+                .transition()
+                .duration(500)
+                .attr("cx", node.x)
+                .attr("cy", node.y);
+        });
+    }
+
+    function redrawLinks() {
+        svg.selectAll('line').remove();
+        nodes.forEach((node, index) => {
+            if (index < nodes.length - 1) {
+                let nextNode = nodes[index + 1];
+                drawLineWithArrow(node.x, node.y, nextNode.x, nextNode.y, 20, 2, `link-${node.id}-${nextNode.id}`, 'right');
+                drawLineWithArrow(nextNode.x, nextNode.y, node.x, node.y, 20, 2, `link-${nextNode.id}-${node.id}`, 'left');
+            }
+        });
+    }
+
+    function repositionText() {
+        nodes.forEach(node => {
+            svg.select(`#textId-${node.id}`)
+                .transition()
+                .duration(500)
+                .attr("x", node.x)
+                .attr("y", node.y + 5);
+        });
+    }
+
+    function refreshDoublyLinkedList() {
+        updateNodePositions();
+        redrawLinks();
+        repositionText();
+    }
+
+    function createNewNode(node, position) {
+        let targetX = nodes[position].x;
+        let targetY = nodes[position].y - 65;
+
+        // Create the new node circle
+        svg.append("circle")
+            .attr("id", `node-${node.id}`)
+            .attr("class", "node")
+            .attr("cx", targetX)
+            .attr("cy", targetY)
+            .attr("r", 20)
+            .style("fill", "green")
+            .style("stroke", "black")
+            .style("stroke-width", 2);
+
+        // Add the value text
+        svg.append("text")
+            .attr("id", `textId-${node.id}`)
+            .attr("x", targetX)
+            .attr("y", targetY + 5)
+            .text(node.value)
+            .attr("text-anchor", "middle")
+            .style("fill", "black");
+
+        return {
+            id: node.id,
+            x: targetX,
+            y: targetY,
+            value: node.value
+        };
+    }
 
     async function insertNodeAtTail(value, delay) {
 
@@ -271,7 +411,7 @@
     window.insertAtInDll = function (value, index, delay) {
         window.resetNodeColors(svg, nodes);
         window.resetLinkColors(svg);
-        highlightNodes(value, delay);
+        insertNode(value,index, delay);
     }
 
     window.insertTailInDll = function (value, delay) {

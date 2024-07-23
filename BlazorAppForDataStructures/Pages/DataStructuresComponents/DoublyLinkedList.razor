@@ -109,9 +109,9 @@
         try
         {
             await Task.Delay(500);
-            doublyLinkedList.Prepend(inputValue);
-            var dllData = ConvertListToJavaScriptFormat(doublyLinkedList);
-            await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", dllData);
+            var nodeToInsert = doublyLinkedList.Prepend(inputValue);
+            var dllData = ConvertNodeToJavaScriptFormat(nodeToInsert);
+            await JSRuntime.InvokeVoidAsync("insertAtInDll", dllData, 0, 1000);
         }
         catch (Exception ex)
         {
