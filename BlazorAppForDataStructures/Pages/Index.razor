@@ -5,7 +5,7 @@
 <PageTitle>Home</PageTitle>
 
 <div class="page-container">
-    <h1>Welcome to the Data Structure Explorer!</h1>
+    <h1 class="page-title">Welcome to the DataStructViz!</h1>
     <div class="card">
         <p>Click the button below to start exploring various data structures and their operations.</p>
         <button @onclick="NavigateToPage">Explore Data Structures</button>
@@ -27,18 +27,28 @@
     .page-container {
         text-align: center;
         padding: 20px;
+        color: blue;
+        background-image: url('/images/home_page_img_bckg.png');
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: -110px -150px;
+        height: 100vh;
+    }
+
+    .page-title {
+        color: black;
     }
 
     .card {
-        background-color: white;
-        border: 1px solid #ccc;
-        padding: 20px;
-        border-radius: 10px;
+        background-color: orange;
+        border: 2px solid black;
+        padding: 15px;
+        border-radius: 20px;
         display: inline-block;
     }
 
     .background-svg {
-        margin-top: 20px;
+        margin-top: 10px;
     }
 
     svg {

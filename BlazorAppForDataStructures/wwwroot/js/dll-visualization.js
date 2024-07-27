@@ -2,9 +2,23 @@
     let svg, nodes;
     let margin = { top: 20, right: 30, bottom: 40, left: 50 };
 
-    function adjustLineEndpoints(x1, y1, x2, y2, radius, strokeWidth, offsetX, offsetY) {
+    function adjustLineEndpoints(x1, y1, x2, y2, radius, strokeWidth, direction) {
         const angle = Math.atan2(y2 - y1, x2 - x1);
         const effectiveRadius = radius + strokeWidth;
+        const offset = 10; // Adjust this value to control the gap between arrows
+
+        let offsetX = 0, offsetY = 0;
+
+        if (direction === 'right') {
+            offsetX = Math.sin(angle) * offset;
+            offsetY = -Math.cos(angle) * offset;
+            console.log("right arrow", offsetX, offsetY);
+        } else if (direction === 'left') {
+            offsetX = -Math.sin(angle) * offset;
+            offsetY = Math.cos(angle) * offset + 10;
+            console.log("left arrow", offsetX, offsetY);
+        }
+
         return {
             startX: x1 + Math.cos(angle) * effectiveRadius + offsetX,
             startY: y1 + Math.sin(angle) * effectiveRadius + offsetY,
@@ -14,15 +28,7 @@
     }
 
     function drawLineWithArrow(startX, startY, endX, endY, radius, strokeWidth, id, direction, delay) {
-        let offsetX = 0, offsetY = 0;
-
-        if (direction === 'right') {
-            offsetY = -10; // Move the line up for the right direction
-        } else if (direction === 'left') {
-            offsetY = 10; // Move the line down for the left direction
-        }
-
-        const adjustedPoints = adjustLineEndpoints(startX, startY, endX, endY, radius, strokeWidth, offsetX, offsetY);
+        const adjustedPoints = adjustLineEndpoints(startX, startY, endX, endY, radius, strokeWidth, direction);
 
         // Calculate the total length of the line
         const lineLength = Math.sqrt(Math.pow(adjustedPoints.endX - adjustedPoints.startX, 2) + Math.pow(adjustedPoints.endY - adjustedPoints.startY, 2));
@@ -193,12 +199,8 @@
                 // Handle insertion at the tail
                 newNode = createTailNode(value);
                 nodes.push(newNode);
-            } else if (position === 0) {
-                // Handle insertion at the head
-                newNode = createNewNode(value, position);
-                nodes.splice(position, 0, newNode);
             } else {
-                // Handle insertion at the specified position
+                // Handle insertion at the head or specified position
                 newNode = createNewNode(value, position);
                 nodes.splice(position, 0, newNode);
             }
@@ -217,18 +219,17 @@
                 link4Id = `link-${nextNode.id}-${newNode.id}`;
             }
 
-
             // Draw new links with a delay
             setTimeout(() => {
                 if (nextNode) {
-                    drawLineWithArrow(newNode.x, newNode.y, nextNode.x, nextNode.y, 20, 2, link3Id, delay, 'right', delay);
-                    drawLineWithArrow(nextNode.x, nextNode.y, newNode.x, newNode.y, 20, 2, link4Id, delay, 'left', delay);
+                    drawLineWithArrow(newNode.x, newNode.y, nextNode.x, nextNode.y, 20, 2, link3Id, 'right', delay);
+                    drawLineWithArrow(nextNode.x, nextNode.y, newNode.x, newNode.y, 20, 2, link4Id, 'left', delay);
                 }
 
                 setTimeout(() => {
                     if (prevNode) {
-                        drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, link1Id, delay, 'right', delay);
-                        drawLineWithArrow(newNode.x, newNode.y, prevNode.x, prevNode.y, 20, 2, link2Id, delay, 'left', delay);
+                        drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, link1Id, 'right', delay);
+                        drawLineWithArrow(newNode.x, newNode.y, prevNode.x, prevNode.y, 20, 2, link2Id, 'left', delay);
                     }
 
                     if (prevNode && nextNode) {
@@ -253,6 +254,47 @@
         }, delay);
     }
 
+    async function highlightNodesForInsertion(position, delay) {
+        return new Promise((resolve) => {
+            let timeouts = []; // Store timeout IDs for potential clearing
+            let found = false;
+
+            nodes.forEach((node, index) => {
+                let timeoutId = setTimeout(() => {
+                    if (found) return; // Stop further highlighting once the condition is met
+
+                    // Highlight the current node
+                    svg.select(`#node-${node.id}`).transition().duration(delay).style('fill', 'orange');
+
+                    // Highlight the link and the arrowhead from the previous node
+                    if (index > 0) {
+                        highlightLinkAndArrowhead(nodes[index - 1].id, node.id, 'right', delay);
+                    }
+
+                    // Check the stopping condition
+                    if (index === position) {
+                        found = true;
+                        clearTimeouts(timeouts);
+                        resolve(); // Resolve the promise once the condition is met
+                    }
+                }, delay * index);
+
+                timeouts.push(timeoutId);
+            });
+
+            // Ensure promise is resolved even if no node matches
+            let finalTimeout = setTimeout(() => {
+                if (!found) resolve();
+            }, delay * nodes.length);
+            timeouts.push(finalTimeout);
+
+            // Function to clear all timeouts
+            function clearTimeouts(timeouts) {
+                timeouts.forEach(timeoutId => clearTimeout(timeoutId));
+            }
+        });
+    }
+
     function updateNodePositions() {
         const nodeSpacing = 100;
         nodes.forEach((node, index) => {
@@ -267,7 +309,8 @@
     }
 
     function redrawLinks() {
-        svg.selectAll('line').remove();
+        svg.selectAll('.link').remove();
+
         nodes.forEach((node, index) => {
             if (index < nodes.length - 1) {
                 let nextNode = nodes[index + 1];
@@ -276,6 +319,7 @@
             }
         });
     }
+
 
     function repositionText() {
         nodes.forEach(node => {

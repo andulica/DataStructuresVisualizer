@@ -50,14 +50,14 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         /// <param name="data">_data for the new node.</param>
         /// <param name="index">Index at which to insert the new node.</param>
         /// <exception cref="IndexOutOfRangeException">Thrown if the index is out of bounds.</exception>
-        public void InsertAt(T data, int index)
+        public DoublyLinkedListNode<T> InsertAt(T data, int index)
         {
             DoublyLinkedListNode<T> newNode = new DoublyLinkedListNode<T>(data);
 
             if (index == 0)
             {
                 Prepend(data); // Use the existing Prepend method for index 0
-                return;
+                return newNode;
             }
 
             DoublyLinkedListNode<T> current = head;
@@ -80,7 +80,7 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
                     }
 
                     current.Next = newNode;
-                    return;
+                    return newNode;
                 }
 
                 current = current.Next;
