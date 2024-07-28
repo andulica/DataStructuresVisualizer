@@ -1,6 +1,6 @@
 @import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
 
-html, body {
+html {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
@@ -91,12 +91,6 @@ a, .btn-link {
     background-size: cover;
 }
 
-h1 {
-    color: #fff;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
-    font-size: 2.5rem;
-}
-
 .card {
     background: rgba(255, 255, 255, 0.8);
     border-radius: 8px;
@@ -126,4 +120,30 @@ button {
         color: white;
     }
 
+
+
+:root {
+    --primary-color: #4CAF50;
+    --secondary-color: #f8f9fa;
+    --text-color: #333;
+    --background-color: #fff;
+}
+
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+header, footer {
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+}
+
+a {
+    color: var(--primary-color);
+}
+
+    a:hover {
+        color: darken(var(--primary-color), 10%);
+    }
 

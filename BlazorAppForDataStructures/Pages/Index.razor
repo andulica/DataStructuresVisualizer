@@ -5,10 +5,9 @@
 <PageTitle>Home</PageTitle>
 
 <div class="page-container">
-    <h1 class="page-title">Welcome to the DataStructViz!</h1>
     <div class="card">
         <p>Click the button below to start exploring various data structures and their operations.</p>
-        <button @onclick="NavigateToPage">Explore Data Structures</button>
+        <button class="btn-explorer" @onclick="NavigateToPage">Explore Data Structures</button>
     </div>
 
     <svg id="sll-display" class="background-svg" width="800" height="150">
@@ -23,16 +22,36 @@
     </svg>
 </div>
 
+
 <style>
     .page-container {
         text-align: center;
         padding: 20px;
-        color: blue;
+        color: black;
         background-image: url('/images/home_page_img_bckg.png');
         background-size: cover;
         background-repeat: no-repeat;
         background-position: -110px -150px;
         height: 100vh;
+    }
+
+    .btn-explorer {
+        background-color: skyblue;
+        color: black;
+        border: 2px solid black;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+        .btn-explorer:hover {
+            background-color: deepskyblue;
+        }
+
+    .background-svg {
+        display: block; /* Ensure the SVG is displayed */
+        z-index: 1; /* Ensure SVG appears above other elements */
+        position: relative; /* Ensure it’s positioned correctly */
     }
 
     .page-title {
@@ -45,10 +64,6 @@
         padding: 15px;
         border-radius: 20px;
         display: inline-block;
-    }
-
-    .background-svg {
-        margin-top: 10px;
     }
 
     svg {
