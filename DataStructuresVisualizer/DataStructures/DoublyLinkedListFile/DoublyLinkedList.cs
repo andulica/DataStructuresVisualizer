@@ -16,6 +16,9 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         // Public property to access the count.
         public int Count => count;
 
+        // Maximum capacity of the doubly linked list.
+        public readonly int maxCapacity = 6;
+
         // Public property to access the head node.
         public DoublyLinkedListNode<T> Head => head;
 

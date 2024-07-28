@@ -62,6 +62,14 @@
         default:
             break;
     }
+
+    @if (!string.IsNullOrEmpty(messageOutput))
+    {
+        <div class="notification-container">
+            <span class="notification-message">@messageOutput</span>
+            <button class="notification-close" @onclick="ClearMessage">✖</button>
+        </div>
+    }
 </div>
 
 <div id="dll-display"></div>
@@ -71,8 +79,18 @@
     private int inputValue;
     private int insertPosition;
     private bool isOperationInProgress = false;
+    private Random rand = new Random();
+    private string messageOutput = "";
+
 
     private DoublyLinkedList<int> doublyLinkedList = new DoublyLinkedList<int>();
+
+    protected override void OnInitialized()
+    {
+        doublyLinkedList.Append(rand.Next(1, 30));
+        doublyLinkedList.Append(rand.Next(1, 30));
+        doublyLinkedList.Append(rand.Next(1, 30));
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -181,16 +199,21 @@
 
     private async Task CreateDoublyLinkedList()
     {
+        if (inputValue > doublyLinkedList.maxCapacity)
+        {
+            messageOutput = "The doubly linked list can have a maximum number of 6 nodes. Please enter a smaller value.";
+            return;
+        }
         isOperationInProgress = true;
+        StateHasChanged();
         try
         {
             doublyLinkedList = new DoublyLinkedList<int>();
-
-            await Task.Delay(500); // Simulate delay
             for (int i = 0; i < inputValue; i++)
             {
-                doublyLinkedList.Append(i + 1); // Simulate appending nodes
+                doublyLinkedList.Append(rand.Next(1, 30));
             }
+
             var linkedListData = ConvertListToJavaScriptFormat(doublyLinkedList);
             await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", linkedListData);
         }
@@ -231,5 +254,10 @@
             currentNode = currentNode.Next;
         }
         return nodes;
+    }
+
+    private void ClearMessage()
+    {
+        messageOutput = "";
     }
 }
