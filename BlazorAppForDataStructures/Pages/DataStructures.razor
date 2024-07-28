@@ -6,9 +6,20 @@
 <div class="button-container">
     @foreach (var ds in dataStructures)
     {
-        <button class="data-structure-button" @onclick="() => NavigateToVisualizer(ds)">
-            @ds
-        </button>
+        <div class="data-structure-wrapper">
+            <button class="data-structure-button" @onclick="() => NavigateToVisualizer(ds)">
+                @ds
+            </button>
+            @if (ds == "SinglyLinkedList")
+            {
+                <img src="/images/sll_visual.gif" alt="Singly Linked List Visualization" class="ds-gif" />
+            }
+            @if (ds == "BinarySearchTree")
+            {
+                <img src="/images/bst_visual.gif" alt="Singly Linked List Visualization" class="ds-gif" />
+            }
+            
+        </div>
     }
 </div>
 
@@ -31,37 +42,39 @@
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
-        gap: 10px;
+        gap: 20px;
+    }
+
+    .data-structure-wrapper {
+        text-align: center;
+        margin-bottom: 20px;
+        width: 200px; /* Ensure consistent width for alignment */
     }
 
     .data-structure-button {
-        background-color: #FFEB3B; /* Yellow */
+        background-color: skyblue;
         border: none;
         color: #004D40; /* Dark Green */
         padding: 10px 20px;
         border-radius: 5px;
         cursor: pointer;
         transition: background-color 0.3s, transform 0.3s;
+        width: 100%;
     }
 
-    .data-structure-button:hover {
-        background-color: #4CAF50; /* Green */
-        transform: scale(1.1);
-    }
-</style>
-
-<style>
-    @@media (max-width: 600px) {
-        .button-container {
-            flex-direction: column;
+        .data-structure-button:hover {
+            background-color: deepskyblue; /* Green */
+            transform: scale(1.1);
         }
 
-        .data-structure-button {
-            width: 80%;
-        }
+    .ds-gif {
+        margin-top: 10px;
+        max-width: 100%;
+        width: 100%; /* Match the button width */
+        height: 150px; /* Adjust height accordingly */
+        border:
     }
 </style>
-
 
 @code {
     private string[] dataStructures = { "Array", "SinglyLinkedList", "DoublyLinkedList", "BinarySearchTree", "Queue", "Stack"};
