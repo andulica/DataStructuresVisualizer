@@ -305,7 +305,6 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         await Task.Delay(delay);
     }
 
-
     /// <summary>
     /// Deletes the head node of the list and returns its data. Used for stack-like operations.
     /// </summary>

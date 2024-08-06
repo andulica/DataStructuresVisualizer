@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Threading;
 
 namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
 {
@@ -35,6 +36,7 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
             if (tail == null)
             {
                 head = tail = newNode;
+                count++;
                 return newNode;
             }
             else
@@ -42,8 +44,8 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
                 tail.Next = newNode;
                 newNode.Prev = tail;
                 tail = newNode;
+                count++;
             }
-            count++;
             return newNode;
         }
 
@@ -305,6 +307,50 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
             return false;
         }
 
+        /// <summary>
+        /// Determines whether the doubly linked list has reached its maximum capacity.
+        /// </summary>
+        /// <returns>
+        /// <c>true</c> if the count of nodes in the list is greater than or equal to the maximum capacity; otherwise, <c>false</c>.
+        /// </returns>
+        /// <remarks>
+        /// This method is used to check if any further insertions are allowed in the doubly linked list.
+        /// </remarks>
+        public bool IsFull()
+        {
+            return count >= maxCapacity;
+        }
+
+        /// <summary>
+        /// Finds the node at the specified index in a doubly linked list.
+        /// </summary>
+        /// <param name="index">The zero-based index of the node to find.</param>
+        /// <returns>The node at the specified index, or null if the index is out of range.</returns>
+        /// <exception cref="IndexOutOfRangeException">
+        /// Thrown when the specified index is less than 0 or greater than or equal to the size of the list.
+        /// </exception>
+        public DoublyLinkedListNode<T> FindNodeByIndex(int index)
+        {
+            if (index < 0 || index >= count)
+            {
+                throw new IndexOutOfRangeException($"Index {index} is out of range for the linked list.");
+            }
+
+            DoublyLinkedListNode<T> current = head;
+            int currentIndex = 0;
+
+            while (current != null)
+            {
+                if (currentIndex == index)
+                {
+                    return current;
+                }
+                current = current.Next;
+                currentIndex++;
+            }
+
+            return null; // Should not reach here if the index is valid
+        }
 
         /// <summary>
         /// Returns a string representation of the doubly linked list.

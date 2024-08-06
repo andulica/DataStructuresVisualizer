@@ -110,7 +110,16 @@
 
     private async Task PerformInsertion()
     {
+        if (isOperationInProgress) return;  // Prevent multiple operations
+
+        if (doublyLinkedList.IsFull())
+        {
+            messageOutput = $"The list has reached its maximum capacity of {doublyLinkedList.maxCapacity} nodes. Cannot insert a new node.";
+            return;
+        }
+
         isOperationInProgress = true;
+
         try
         {
             await Task.Delay(500);
@@ -130,12 +139,22 @@
 
     private async Task PrependValue()
     {
+        if (isOperationInProgress) return; // Prevent multiple operations
+
+        if (doublyLinkedList.IsFull())
+        {
+            messageOutput = $"The list has reached its maximum capacity of {doublyLinkedList.maxCapacity} nodes. Cannot insert a new node.";
+            return;
+        }
+
+        StateHasChanged();
         isOperationInProgress = true;
+
         try
         {
-            await Task.Delay(500);
             var nodeToInsert = doublyLinkedList.Prepend(inputValue);
             var dllData = ConvertNodeToJavaScriptFormat(nodeToInsert);
+            // Wait for the JavaScript function to complete the insertion and animation
             await JSRuntime.InvokeVoidAsync("insertAtInDll", dllData, 0, 1000);
         }
         catch (Exception ex)
@@ -150,7 +169,16 @@
 
     private async Task AppendValue()
     {
+        if (isOperationInProgress) return; // Prevent multiple operations
+
+        if (doublyLinkedList.IsFull())
+        {
+            messageOutput = $"The list has reached its maximum capacity of {doublyLinkedList.maxCapacity} nodes. Cannot insert a new node.";
+            return;
+        }
+
         isOperationInProgress = true;
+
         try
         {
             await Task.Delay(500);
@@ -170,7 +198,10 @@
 
     private async Task SearchValue()
     {
+        if (isOperationInProgress) return; // Prevent multiple operations
         isOperationInProgress = true;
+        StateHasChanged();
+
         try
         {
             await JSRuntime.InvokeVoidAsync("searchValueInDLL", inputValue, 1000); // 1000ms delay
@@ -187,12 +218,26 @@
 
     private async Task RemoveValue()
     {
+        if (isOperationInProgress) return; // Prevent multiple operations
+
+        if (inputValue > doublyLinkedList.Count)
+        {
+            messageOutput = $"The index {inputValue} you are trying to delete does not exist. Please enter a smaller value.";
+            return;
+        }
+
         isOperationInProgress = true;
+        StateHasChanged();
+
         try
         {
+
+            var nodeToRemove = doublyLinkedList.FindNodeByIndex(inputValue);
+            var nodeInfo = ConvertNodeToJavaScriptFormat(nodeToRemove);
+
             await Task.Delay(500); // Simulate delay
             doublyLinkedList.Delete(inputValue);
-            await JSRuntime.InvokeVoidAsync("removeValueInSll", inputValue, 1000); // 1000ms delay
+            await JSRuntime.InvokeVoidAsync("removeValueInDll", nodeInfo, 1000);
         }
         catch (Exception ex)
         {
@@ -211,8 +256,10 @@
             messageOutput = "The doubly linked list can have a maximum number of 6 nodes. Please enter a smaller value.";
             return;
         }
+
         isOperationInProgress = true;
         StateHasChanged();
+
         try
         {
             doublyLinkedList = new DoublyLinkedList<int>();
