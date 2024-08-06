@@ -2,34 +2,69 @@
     let svg, nodes;
     let margin = { top: 20, right: 30, bottom: 40, left: 50 };
 
-    function adjustLineEndpoints(x1, y1, x2, y2, radius, strokeWidth, direction, isInsertMiddle) {
-        const angle = Math.atan2(y2 - y1, x2 - x1);
-        const effectiveRadius = radius + strokeWidth;
-        const verticalOffset = isInsertMiddle ? 10 : 0; // Add vertical offset for middle insertions
+    function adjustLineEndpoints(x1, y1, x2, y2, radius, strokeWidth, direction) {
+        const gap = 10;
+        const effectiveRadius = radius + strokeWidth / 2;
 
-        let offsetX = 0, offsetY = 0;
-        if (direction === 'right') {
-            offsetX = verticalOffset;
-            offsetY = - 10;
-        } else if (direction === 'left') {
-            offsetX = - verticalOffset;
-            offsetY = 10;
+        let startX, startY, endX, endY;
+
+        // Calculate the angle
+        const angle = Math.atan2(y2 - y1, x2 - x1);
+        // Calculate the perpendicular angle
+        const perpendicularAngle = angle + Math.PI / 2;
+        const offsetX = Math.cos(perpendicularAngle) * gap / 2;
+        const offsetY = Math.sin(perpendicularAngle) * gap / 2;
+
+        // Horizontal link
+        if (Math.abs(y2 - y1) < 0.1) {
+            if (direction === 'right') {
+                startX = x1 + effectiveRadius;
+                startY = y1 + offsetY - 18;
+                endX = x2 - effectiveRadius;
+                endY = y2 + offsetY - 18;
+            } else {
+                startX = x1 - effectiveRadius;
+                startY = y1 - offsetY;
+                endX = x2 + effectiveRadius;
+                endY = y2 - offsetY;
+            }
+        }
+        // Vertical link
+        else if (Math.abs(x2 - x1) < 0.1) {
+            if (direction === 'right') {
+                startX = x1 + offsetX + 18;
+                startY = y1 + effectiveRadius;
+                endX = x2 + offsetX + 18;
+                endY = y2 - effectiveRadius;
+            } else {
+                startX = x1 - offsetX - 5;
+                startY = y1 - effectiveRadius;
+                endX = x2 - offsetX - 5;
+                endY = y2 + effectiveRadius;
+            }
+        }
+        // Diagonal link
+        else {
+            if (direction === 'right') {
+                startX = x1 + Math.cos(angle) * effectiveRadius + offsetX + 4;
+                startY = y1 + Math.sin(angle) * effectiveRadius + offsetY - 2;
+                endX = x2 - Math.cos(angle) * effectiveRadius + offsetX - 5;
+                endY = y2 - Math.sin(angle) * effectiveRadius + offsetY;
+            } else {
+                startX = x1 + Math.cos(angle) * effectiveRadius - offsetX - 5;
+                startY = y1 + Math.sin(angle) * effectiveRadius - offsetY - 15;
+                endX = x2 - Math.cos(angle) * effectiveRadius - offsetX - 5;
+                endY = y2 - Math.sin(angle) * effectiveRadius - offsetY - 11;
+            }
         }
 
-        return {
-            startX: x1 + Math.cos(angle) * effectiveRadius + offsetX,
-            startY: y1 + Math.sin(angle) * effectiveRadius + offsetY,
-            endX: x2 - Math.cos(angle) * effectiveRadius + offsetX,
-            endY: y2 - Math.sin(angle) * effectiveRadius + offsetY
-        };
+        return { startX, startY, endX, endY };
     }
 
-    function drawLineWithArrow(startX, startY, endX, endY, radius, strokeWidth, id, direction, delay, isInsertMiddle) {
-        const adjustedPoints = adjustLineEndpoints(startX, startY, endX, endY, radius, strokeWidth, direction, isInsertMiddle);
+    function drawLineWithArrow(startX, startY, endX, endY, radius, strokeWidth, id, direction, delay) {
+        const adjustedPoints = adjustLineEndpoints(startX, startY, endX, endY, radius, strokeWidth, direction);
 
-        // Calculate the total length of the line
         const lineLength = Math.sqrt(Math.pow(adjustedPoints.endX - adjustedPoints.startX, 2) + Math.pow(adjustedPoints.endY - adjustedPoints.startY, 2));
-
         const line = svg.append('path')
             .attr('class', 'link')
             .attr('d', `M${adjustedPoints.startX},${adjustedPoints.startY} L${adjustedPoints.endX},${adjustedPoints.endY}`)
@@ -49,6 +84,7 @@
 
         return line;
     }
+
 
     window.drawDoublyLinkedList = function (doublyLinkedList) {
         margin, width = 700 - margin.left - margin.right, height = 250 - margin.top - margin.bottom;
@@ -223,14 +259,14 @@
                         const isInsertMiddle = position < nodes.length - 1;
 
                         if (nextNode) {
-                            drawLineWithArrow(newNode.x, newNode.y, nextNode.x, nextNode.y, 20, 2, link3Id, 'right', delay, isInsertMiddle);
-                            drawLineWithArrow(nextNode.x, nextNode.y, newNode.x, newNode.y, 20, 2, link4Id, 'left', delay, isInsertMiddle);
+                            drawLineWithArrow(newNode.x, newNode.y, nextNode.x, nextNode.y, 20, 2, link3Id, 'right', delay);
+                            drawLineWithArrow(nextNode.x, nextNode.y, newNode.x, newNode.y, 20, 2, link4Id, 'left', delay);
                         }
 
                         setTimeout(() => {
                             if (prevNode) {
-                                drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, link1Id, 'right', delay, isInsertMiddle, prevNode);
-                                drawLineWithArrow(newNode.x, newNode.y, prevNode.x, prevNode.y, 20, 2, link2Id, 'left', delay, isInsertMiddle, prevNode);
+                                drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, link1Id, 'right', delay);
+                                drawLineWithArrow(newNode.x, newNode.y, prevNode.x, prevNode.y, 20, 2, link2Id, 'left', delay);
                             }
 
                             if (prevNode && nextNode) {
