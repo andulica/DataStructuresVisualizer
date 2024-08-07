@@ -376,8 +376,8 @@
         updateNodePositions();
         redrawLinks();
         repositionText();
-
     }
+
     async function insertNodeAtTail(value, delay) {
 
         setTimeout(() => {

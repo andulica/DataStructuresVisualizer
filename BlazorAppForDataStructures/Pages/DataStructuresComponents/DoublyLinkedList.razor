@@ -110,7 +110,7 @@
 
     private async Task PerformInsertion()
     {
-        if (isOperationInProgress) return;  // Prevent multiple operations
+        if (isOperationInProgress) return;
 
         if (doublyLinkedList.IsFull())
         {
@@ -139,7 +139,7 @@
 
     private async Task PrependValue()
     {
-        if (isOperationInProgress) return; // Prevent multiple operations
+        if (isOperationInProgress) return;
 
         if (doublyLinkedList.IsFull())
         {
@@ -154,7 +154,6 @@
         {
             var nodeToInsert = doublyLinkedList.Prepend(inputValue);
             var dllData = ConvertNodeToJavaScriptFormat(nodeToInsert);
-            // Wait for the JavaScript function to complete the insertion and animation
             await JSRuntime.InvokeVoidAsync("insertAtInDll", dllData, 0, 1000);
         }
         catch (Exception ex)
@@ -169,7 +168,7 @@
 
     private async Task AppendValue()
     {
-        if (isOperationInProgress) return; // Prevent multiple operations
+        if (isOperationInProgress) return;
 
         if (doublyLinkedList.IsFull())
         {
@@ -198,13 +197,13 @@
 
     private async Task SearchValue()
     {
-        if (isOperationInProgress) return; // Prevent multiple operations
+        if (isOperationInProgress) return;
         isOperationInProgress = true;
         StateHasChanged();
 
         try
         {
-            await JSRuntime.InvokeVoidAsync("searchValueInDLL", inputValue, 1000); // 1000ms delay
+            await JSRuntime.InvokeVoidAsync("searchValueInDLL", inputValue, 1000);
         }
         catch (Exception ex)
         {
@@ -218,7 +217,7 @@
 
     private async Task RemoveValue()
     {
-        if (isOperationInProgress) return; // Prevent multiple operations
+        if (isOperationInProgress) return;
 
         if (inputValue > doublyLinkedList.Count)
         {
@@ -231,11 +230,9 @@
 
         try
         {
-
             var nodeToRemove = doublyLinkedList.FindNodeByIndex(inputValue);
             var nodeInfo = ConvertNodeToJavaScriptFormat(nodeToRemove);
 
-            await Task.Delay(500); // Simulate delay
             doublyLinkedList.Delete(inputValue);
             await JSRuntime.InvokeVoidAsync("removeValueInDll", nodeInfo, 1000);
         }

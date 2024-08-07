@@ -8,9 +8,7 @@
 
         let startX, startY, endX, endY;
 
-        // Calculate the angle
         const angle = Math.atan2(y2 - y1, x2 - x1);
-        // Calculate the perpendicular angle
         const perpendicularAngle = angle + Math.PI / 2;
         const offsetX = Math.cos(perpendicularAngle) * gap / 2;
         const offsetY = Math.sin(perpendicularAngle) * gap / 2;
@@ -209,7 +207,6 @@
                             .transition().duration(500)
                             .style('fill', 'green');
                         found = true;
-                        clearTimeouts(timeouts);
                         resolve();
                     }
                 }, delay * index);
@@ -221,10 +218,14 @@
                 if (!found) resolve();
             }, 1000 * nodes.length);
             timeouts.push(finalTimeout);
+        }).then(() => {
+            resetNodeColors();
+            resetLinkColors();
         });
     }
+
     async function insertNode(value, position, delay) {
-        await highlightNodesForInsertion(position, delay); // Highlight nodes up to the position
+        await highlightNodesForInsertion(position, delay);
 
         await new Promise((resolve) => {
             setTimeout(async () => {
@@ -256,7 +257,6 @@
                 // Draw new links with a delay
                 await new Promise((innerResolve) => {
                     setTimeout(() => {
-                        const isInsertMiddle = position < nodes.length - 1;
 
                         if (nextNode) {
                             drawLineWithArrow(newNode.x, newNode.y, nextNode.x, nextNode.y, 20, 2, link3Id, 'right', delay);
@@ -281,7 +281,6 @@
                                 // Update the positions and redraw the links
                                 refreshDoublyLinkedList();
 
-                                // Reset node colors after a delay
                                 setTimeout(() => {
                                     resetNodeColors();
                                     innerResolve();
@@ -303,21 +302,18 @@
 
             nodes.forEach((node, index) => {
                 let timeoutId = setTimeout(() => {
-                    if (found) return; // Stop further highlighting once the condition is met
+                    if (found) return;
 
-                    // Highlight the current node
                     svg.select(`#node-${node.id}`).transition().duration(delay).style('fill', 'orange');
 
-                    // Highlight the link and the arrowhead from the previous node
                     if (index > 0) {
                         highlightLinkAndArrowhead(nodes[index - 1].id, node.id, 'right', delay);
                     }
 
-                    // Check the stopping condition
                     if (index === position) {
                         found = true;
                         clearTimeouts(timeouts);
-                        resolve(); // Resolve the promise once the condition is met
+                        resolve();
                     }
                 }, delay * index);
 
@@ -362,7 +358,6 @@
         });
     }
 
-
     function repositionText() {
         nodes.forEach(node => {
             svg.select(`#textId-${node.id}`)
@@ -383,7 +378,6 @@
         let targetX = nodes[position].x;
         let targetY = nodes[position].y - 65;
 
-        // Create the new node circle
         svg.append("circle")
             .attr("id", `node-${node.id}`)
             .attr("class", "node")
@@ -394,7 +388,6 @@
             .style("stroke", "black")
             .style("stroke-width", 2);
 
-        // Add the value text
         svg.append("text")
             .attr("id", `textId-${node.id}`)
             .attr("x", targetX)
@@ -439,13 +432,12 @@
                     // Transition and then remove the node's visual elements
                     svg.select(`#node-${nodeToBeRemoved.id}`)
                         .transition().duration(delay)
-                        .style('opacity', 0) // Fade out effect
+                        .style('opacity', 0)
                         .on('end', () => {
                             svg.select(`#node-${nodeToBeRemoved.id}`).remove();
-                            // Proceed with text removal after node is removed
                             svg.select(`#textId-${nodeToBeRemoved.id}`)
                                 .transition().duration(delay)
-                                .style('opacity', 0) // Fade out effect for text
+                                .style('opacity', 0)
                                 .on('end', () => {
                                     svg.select(`#textId-${nodeToBeRemoved.id}`).remove();
 
@@ -464,7 +456,7 @@
 
     function updateLinksAfterRemoval(nodeToBeRemoved) {
         let nodeIndex = nodes.findIndex(node => node.id === nodeToBeRemoved.id);
-        nodes = nodes.filter(node => node.id !== nodeToBeRemoved.id); // Remove the node from the nodes array
+        nodes = nodes.filter(node => node.id !== nodeToBeRemoved.id);
 
         if (nodeIndex > 0 && nodeIndex < nodes.length) {
             // Node is in the middle of the list
@@ -498,14 +490,12 @@
         });
     }
 
-    function resetLinkColors(svg) {
-        // Reset right arrowhead links
+    function resetLinkColors() {
         svg.selectAll(".link")
             .transition().duration(500)
             .style('stroke', '#000')
             .attr('marker-end', 'url(#right-arrowhead)');
 
-        // Reset left arrowhead links
         svg.selectAll(".link")
             .transition().duration(500)
             .style('stroke', '#000')
@@ -567,22 +557,19 @@
     };
 
     window.searchValueInDLL = function (value, delay) {
-        refreshDoublyLinkedList();
         highlightNodes(value, delay);
+        refreshDoublyLinkedList();
     };
 
     window.insertAtInDll = async function (dllData, position, delay) {
-        refreshDoublyLinkedList();
         await insertNode(dllData, position, delay);
     };
 
     window.insertTailInDll = function (value, delay) {
-        refreshDoublyLinkedList();
         insertNodeAtTail(value, delay);
     }
 
     window.removeValueInDll = function (value, delay) {
-        refreshDoublyLinkedList();
         removeNode(value, delay);
     }
 
