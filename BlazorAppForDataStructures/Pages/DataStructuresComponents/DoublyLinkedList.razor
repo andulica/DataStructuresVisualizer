@@ -219,7 +219,7 @@
     {
         if (isOperationInProgress) return;
 
-        if (inputValue > doublyLinkedList.Count)
+        if (inputValue >= doublyLinkedList.Count)
         {
             messageOutput = $"The index {inputValue} you are trying to delete does not exist. Please enter a smaller value.";
             return;
@@ -233,7 +233,7 @@
             var nodeToRemove = doublyLinkedList.FindNodeByIndex(inputValue);
             var nodeInfo = ConvertNodeToJavaScriptFormat(nodeToRemove);
 
-            doublyLinkedList.Delete(inputValue);
+            doublyLinkedList.DeleteAt(inputValue);
             await JSRuntime.InvokeVoidAsync("removeValueInDll", nodeInfo, 1000);
         }
         catch (Exception ex)
