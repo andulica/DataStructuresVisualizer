@@ -2,6 +2,10 @@
 @using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
 @inject IJSRuntime JSRuntime
 
+<head>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+
 <h3>Queue</h3>
 
 <div class="operation-selection">
@@ -56,14 +60,14 @@
     @* Render the queue here *@
 </div>
 
-<div>@resultMessage</div>
+<div>@messageOutput</div>
 
 @code {
     private QueueStructure<int> queue = new QueueStructure<int>();
-    private string selectedAction = "";
+    private string selectedAction = "Peek";
     private int inputValue;
     private string operation;
-    private string resultMessage;
+    private string messageOutput;
     private bool isOperationInProgress = false;
     Random rand = new Random();
 
@@ -110,10 +114,34 @@
         return nodes;
     }
 
-    private void CreateQueue(MouseEventArgs e)
+    private async Task CreateQueue(MouseEventArgs e)
     {
-        if (isOperationInProgress) return;
-        throw new NotImplementedException();
+        if (isOperationInProgress) return; // Prevent multiple operations
+
+        if (inputValue > queue.maxCapacity)
+        {
+            messageOutput = $"The singly linked list can have a maximum number of {queue.maxCapacity} nodes. Please enter a smaller value.";
+            return;
+        }
+        isOperationInProgress = true;
+        StateHasChanged();
+        try
+        {
+            queue = new QueueStructure<int>();
+
+            for (int i = 0; i < inputValue; i++)
+            {
+                queue.Add(rand.Next(1, 30));
+            }
+
+            await UpdateDisplay(queue);
+
+        }
+        finally
+        {
+            isOperationInProgress = false; // Reset flag after operation
+            StateHasChanged();
+        }
     }
 
     private void Dequeue(MouseEventArgs e)
@@ -139,5 +167,10 @@
         if (isOperationInProgress) return;
         throw new NotImplementedException();
     }
-}
 
+    private async Task UpdateDisplay(SinglyLinkedList<int> list)
+    {
+        var queueData = ConvertQueueToJavaScriptFormat(queue);
+        await JSRuntime.InvokeVoidAsync("drawLinkedList", queueData);
+    }
+}
