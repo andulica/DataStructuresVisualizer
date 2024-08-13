@@ -1,4 +1,6 @@
 ﻿@using DataStructuresVisualizer.DataStructures.Queue;
+@using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
+@inject IJSRuntime JSRuntime
 
 <h3>Queue</h3>
 
@@ -26,8 +28,7 @@
                 <label for="inputValue">Input Value</label>
                 <input type="number" id="inputValue" @bind="inputValue" placeholder="Enter Value" />
 
-
-                <button class="custom-button" @onclick="Enqueue" disabled="@isOperationInProgress">Prepend</button>
+                <button class="custom-button" @onclick="Enqueue" disabled="@isOperationInProgress">Enqueue</button>
             </div>
             break;
         case "Dequeue":
@@ -35,7 +36,7 @@
                 <label for="inputValue">Kx (Dequeue)</label>
                 <input type="number" id="inputValue" @bind="inputValue" placeholder="Enter Value" />
 
-                <button class="custom-button" @onclick="Dequeue" disabled="@isOperationInProgress">Append</button>
+                <button class="custom-button" @onclick="Dequeue" disabled="@isOperationInProgress">Dequeue</button>
             </div>
             break;
         case "Create":
@@ -43,7 +44,7 @@
                 <label for="inputValue">Input Value</label>
                 <input type="number" id="inputValue" @bind="inputValue" placeholder="Enter Value" />
 
-                <button class="custom-button" @onclick="CreateQueue" disabled="@isOperationInProgress">Search</button>
+                <button class="custom-button" @onclick="CreateQueue" disabled="@isOperationInProgress">Create</button>
             </div>
             break;
         default:
@@ -52,7 +53,7 @@
 </div>
 
 <div id="sll-display">
-    @* Render the linked list here *@
+    @* Render the queue here *@
 </div>
 
 <div>@resultMessage</div>
@@ -61,8 +62,6 @@
     private QueueStructure<int> queue = new QueueStructure<int>();
     private string selectedAction = "";
     private int inputValue;
-    private int nodesToDequeue;
-    private string[] operations = { "Peek", "Enqueue", "Dequeue", "Create" };
     private string operation;
     private string resultMessage;
     private bool isOperationInProgress = false;
@@ -70,38 +69,75 @@
 
     protected override void OnInitialized()
     {
-        queue = new QueueStructure<int>();
         queue.Enqueue(rand.Next(1, 30));
         queue.Enqueue(rand.Next(1, 30));
         queue.Enqueue(rand.Next(1, 30));
     }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var queueData = ConvertQueueToJavaScriptFormat(queue);
+            await JSRuntime.InvokeVoidAsync("drawLinkedList", queueData);
+        }
+    }
+
+    private object ConvertNodeToJavaScriptFormat(SinglyLinkedListNode<int> node)
+    {
+        return new
+        {
+            value = node._data,
+            next = node.Next != null ? node.Next.Id : (Guid?)null,
+            id = node.Id
+        };
+    }
+
+    private List<object> ConvertQueueToJavaScriptFormat(QueueStructure<int> queue)
+    {
+        var nodes = new List<object>();
+        var currentNode = queue.Head;
+        while (currentNode != null)
+        {
+            nodes.Add(new
+            {
+                value = currentNode._data,
+                next = currentNode.Next != null ? currentNode.Next.Id : (Guid?)null,
+                id = currentNode.Id
+            });
+            currentNode = currentNode.Next;
+        }
+        return nodes;
+    }
+
     private void CreateQueue(MouseEventArgs e)
     {
         if (isOperationInProgress) return;
         throw new NotImplementedException();
     }
+
     private void Dequeue(MouseEventArgs e)
     {
         if (isOperationInProgress) return;
-
         throw new NotImplementedException();
     }
+
     private void Enqueue(MouseEventArgs e)
     {
         if (isOperationInProgress) return;
-
         throw new NotImplementedException();
     }
+
     private void PeekBack(MouseEventArgs e)
     {
         if (isOperationInProgress) return;
-
         throw new NotImplementedException();
     }
+
     private void PeekFront(MouseEventArgs e)
     {
         if (isOperationInProgress) return;
-
         throw new NotImplementedException();
     }
 }
+

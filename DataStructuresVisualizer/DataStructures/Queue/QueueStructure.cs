@@ -5,12 +5,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-public class QueueStructure<T> : IEnumerable<T>
+public class QueueStructure<T> : SinglyLinkedList<T>, IEnumerable<T>
 {
-    /// <summary>
-    /// The internal singly linked list to store the elements of the queue.
-    /// </summary>
-    private SinglyLinkedList<T> list = new SinglyLinkedList<T>();
+    public QueueStructure() : base() { }
 
     /// <summary>
     /// Adds an item to the end of the queue.
@@ -18,7 +15,8 @@ public class QueueStructure<T> : IEnumerable<T>
     /// <param name="value">The item to add to the queue.</param>
     public void Enqueue(T value)
     {
-        list.Add(value);
+        // Add to the end of the linked list
+        Add(value);
     }
 
     /// <summary>
@@ -33,17 +31,16 @@ public class QueueStructure<T> : IEnumerable<T>
             throw new ArgumentOutOfRangeException(nameof(count), "Count must be greater than 0.");
         }
 
-        if (list.Count < count)
+        if (Count < count)
         {
             throw new InvalidOperationException("The queue does not have enough items.");
         }
 
         for (int i = 0; i < count; i++)
         {
-            list.DeleteHead();
+            DeleteHead();
         }
     }
-
 
     /// <summary>
     /// Returns the item at the front of the queue without removing it.
@@ -52,12 +49,12 @@ public class QueueStructure<T> : IEnumerable<T>
     /// <exception cref="InvalidOperationException">Thrown if the queue is empty.</exception>
     public T Peek()
     {
-        if (list.Count == 0)
+        if (Count == 0)
         {
             throw new InvalidOperationException("The queue is empty.");
         }
 
-        return list.Head._data;
+        return Head._data;
     }
 
     /// <summary>
@@ -66,7 +63,7 @@ public class QueueStructure<T> : IEnumerable<T>
     /// <returns>True if the queue is empty; otherwise, false.</returns>
     public bool IsEmpty()
     {
-        return list.Count == 0;
+        return Count == 0;
     }
 
     /// <summary>
@@ -75,7 +72,7 @@ public class QueueStructure<T> : IEnumerable<T>
     /// <returns>The number of items in the queue.</returns>
     public int Size()
     {
-        return list.Count;
+        return Count;
     }
 
     /// <summary>
@@ -84,7 +81,7 @@ public class QueueStructure<T> : IEnumerable<T>
     /// <returns>An IEnumerator of type T.</returns>
     public IEnumerator<T> GetEnumerator()
     {
-        SinglyLinkedListNode<T> current = list.Head;
+        SinglyLinkedListNode<T> current = Head;
         while (current != null)
         {
             yield return current._data;
@@ -101,4 +98,3 @@ public class QueueStructure<T> : IEnumerable<T>
         return this.GetEnumerator();
     }
 }
-
