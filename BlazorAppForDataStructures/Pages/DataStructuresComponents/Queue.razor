@@ -1,82 +1,73 @@
-﻿ @using DataStructuresVisualizer.DataStructures.Queue;
+﻿@using DataStructuresVisualizer.DataStructures.Queue;
 
 <h3>Queue</h3>
 
-<!-- Operation list selection -->
-<h5>Select Operation</h5>
-<select @bind="operation">
-    @foreach (var operation in operations)
-    {
-        <option value="@operation">@operation</option>
-    }
-</select>
-
-@if (operation == "Dequeue")
-{
-    <h5>Enter how many nodes you want to dequeue</h5>
-    <select @bind="nodesToDequeue">
-        @for (int i = 0; i <= queue.Size(); i++)
-        {
-            <option value="@i">@i</option>
-        }
+<div class="operation-selection">
+    <select @bind="selectedAction">
+        <option value="Peek">Peek</option>
+        <option value="Enqueue">Enqueue</option>
+        <option value="Dequeue">Dequeue</option>
+        <option value="Create">Create</option>
     </select>
-}
-
-<!-- Queue List Display -->
-<div id="queue-display">
-    @if (!queue.IsEmpty())
+    @switch (selectedAction)
     {
-        var items = queue.ToList();
-        for (int i = 0; i < items.Count; i++)
-        {
-            <div class="node">@items[i]</div>
-            if (i < items.Count - 1) // Check if it's not the last item
-            {
-                <div class="arrow">→</div>
-            }
-        }
+        case "Peek":
+            <div class="insertion-fields">
+                <label for="inputValue">Input Value</label>
+                <input type="number" id="inputValue" @bind="inputValue" placeholder="Enter Value" />
+
+                <button class="custom-button" @onclick="PeekFront" disabled="@isOperationInProgress">Peek Front</button>
+                <button class="custom-button" @onclick="PeekBack" disabled="@isOperationInProgress">Peek Back</button>
+
+            </div>
+            break;
+        case "Enqueue":
+            <div class="insertion-fields">
+                <label for="inputValue">Input Value</label>
+                <input type="number" id="inputValue" @bind="inputValue" placeholder="Enter Value" />
+
+
+                <button class="custom-button" @onclick="Enqueue" disabled="@isOperationInProgress">Prepend</button>
+            </div>
+            break;
+        case "Dequeue":
+            <div class="insertion-fields">
+                <label for="inputValue">Kx (Dequeue)</label>
+                <input type="number" id="inputValue" @bind="inputValue" placeholder="Enter Value" />
+
+                <button class="custom-button" @onclick="Dequeue" disabled="@isOperationInProgress">Append</button>
+            </div>
+            break;
+        case "Create":
+            <div class="insertion-fields">
+                <label for="inputValue">Input Value</label>
+                <input type="number" id="inputValue" @bind="inputValue" placeholder="Enter Value" />
+
+                <button class="custom-button" @onclick="CreateQueue" disabled="@isOperationInProgress">Search</button>
+            </div>
+            break;
+        default:
+            break;
     }
 </div>
 
-<Button class="btn btn-primary" @onclick="(() => buttonVisualize(operation))">Visualize</Button>
-<input @bind="inputData" type="text" placeholder="Enter node data" />
+<div id="sll-display">
+    @* Render the linked list here *@
+</div>
 
 <div>@resultMessage</div>
 
-
-<style>
-    #queue-display {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .node {
-        padding: 10px;
-        border: 2px solid black;
-        border-radius: 5px;
-        text-align: center;
-    }
-
-    .queue-empty {
-        padding: 10px;
-        font-style: italic;
-    }
-
-    .arrow {
-        font-size: 20px;
-    }
-</style>
 @code {
     private QueueStructure<int> queue = new QueueStructure<int>();
-    private int inputData;
+    private string selectedAction = "";
+    private int inputValue;
     private int nodesToDequeue;
     private string[] operations = { "Peek", "Enqueue", "Dequeue", "Create" };
     private string operation;
     private string resultMessage;
+    private bool isOperationInProgress = false;
     Random rand = new Random();
 
-    Stack<int> stack = new Stack<int>();
     protected override void OnInitialized()
     {
         queue = new QueueStructure<int>();
@@ -84,24 +75,33 @@
         queue.Enqueue(rand.Next(1, 30));
         queue.Enqueue(rand.Next(1, 30));
     }
-
-    void buttonVisualize(string operation)
+    private void CreateQueue(MouseEventArgs e)
     {
-        switch (operation)
-        {
-            case "Enqueue":
-                queue.Enqueue(inputData);
-                break;
-            case "Dequeue":
-                queue.Dequeue(nodesToDequeue);
-                break;
-            case "Peek":
-                queue.Peek();
-                break;
-            case "Create":
-                this.OnInitialized();
+        if (isOperationInProgress) return;
+        throw new NotImplementedException();
+    }
+    private void Dequeue(MouseEventArgs e)
+    {
+        if (isOperationInProgress) return;
 
-                break;
-        }
+        throw new NotImplementedException();
+    }
+    private void Enqueue(MouseEventArgs e)
+    {
+        if (isOperationInProgress) return;
+
+        throw new NotImplementedException();
+    }
+    private void PeekBack(MouseEventArgs e)
+    {
+        if (isOperationInProgress) return;
+
+        throw new NotImplementedException();
+    }
+    private void PeekFront(MouseEventArgs e)
+    {
+        if (isOperationInProgress) return;
+
+        throw new NotImplementedException();
     }
 }
