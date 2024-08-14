@@ -78,6 +78,7 @@
     private SinglyLinkedList<int> linkedList = new SinglyLinkedList<int>();
     private Random rand = new Random();
     private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+    const int delayStartOfAnimation = 1000;
 
     protected override void OnInitialized()
     {
@@ -95,7 +96,7 @@
             // Convert the linked list to a format suitable for JavaScript
             var linkedListData = ConvertListToJavaScriptFormat(linkedList);
             JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData);
-
+            Task.Delay(delayStartOfAnimation).Wait();
             // Start the insertion loop
             try
             {

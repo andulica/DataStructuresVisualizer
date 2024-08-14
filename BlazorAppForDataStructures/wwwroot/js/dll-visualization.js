@@ -1,6 +1,7 @@
 (function () {
     let svg, nodes;
     let margin = { top: 20, right: 30, bottom: 40, left: 50 };
+    const delayDrawLinks = 1000;
 
     function adjustLineEndpoints(x1, y1, x2, y2, radius, strokeWidth, direction) {
         const gap = 10;
@@ -176,8 +177,8 @@
         nodes.forEach((node, i) => {
             if (i < nodes.length - 1) {
                 let nextNode = nodes[i + 1];
-                drawLineWithArrow(node.x, node.y, nextNode.x, nextNode.y, 20, 2, `link-${node.id}-${nextNode.id}`, 'right', 1000);
-                drawLineWithArrow(nextNode.x, nextNode.y, node.x, node.y, 20, 2, `link-${nextNode.id}-${node.id}`, 'left', 1000);
+                drawLineWithArrow(node.x, node.y, nextNode.x, nextNode.y, 20, 2, `link-${node.id}-${nextNode.id}`, 'right', delayDrawLinks);
+                drawLineWithArrow(nextNode.x, nextNode.y, node.x, node.y, 20, 2, `link-${nextNode.id}-${node.id}`, 'left', delayDrawLinks);
             }
         });
     };
