@@ -70,6 +70,7 @@
     private string messageOutput;
     private bool isOperationInProgress = false;
     Random rand = new Random();
+    const int delayValueForAnimation = 1000;
 
     protected override void OnInitialized()
     {
@@ -114,13 +115,13 @@
         return nodes;
     }
 
-    private async Task CreateQueue(MouseEventArgs e)
+    private async Task CreateQueue()
     {
-        if (isOperationInProgress) return; // Prevent multiple operations
+        if (isOperationInProgress) return;
 
         if (inputValue > queue.maxCapacity)
         {
-            messageOutput = $"The singly linked list can have a maximum number of {queue.maxCapacity} nodes. Please enter a smaller value.";
+            messageOutput = $"The queue can have a maximum number of {queue.maxCapacity} nodes. Please enter a smaller value.";
             return;
         }
         isOperationInProgress = true;
@@ -139,15 +140,39 @@
         }
         finally
         {
-            isOperationInProgress = false; // Reset flag after operation
+            isOperationInProgress = false;
             StateHasChanged();
         }
     }
 
-    private void Dequeue(MouseEventArgs e)
+    private async Task Dequeue()
     {
         if (isOperationInProgress) return;
-        throw new NotImplementedException();
+
+        if (inputValue >= queue.Count)
+        {
+            messageOutput = $"The queue has {queue.Count} nodes. Please enter a smaller value to dequeue.";
+            return;
+        }
+
+        isOperationInProgress = true;
+        StateHasChanged();
+
+        try
+        {
+            for (int i = 1; i <= inputValue; i++)
+            {
+                var nodeRemoved = queue.Dequeue();
+                var nodeToBeRemovedFromSVG = ConvertNodeToJavaScriptFormat(nodeRemoved);
+                await JSRuntime.InvokeVoidAsync("removeValueInSll", nodeToBeRemovedFromSVG, delayValueForAnimation);
+                await Task.Delay(delayValueForAnimation); // Optional delay to ensure smooth transitions
+            }
+        }
+        finally
+        {
+            isOperationInProgress = false;
+            StateHasChanged();
+        }
     }
 
     private void Enqueue(MouseEventArgs e)

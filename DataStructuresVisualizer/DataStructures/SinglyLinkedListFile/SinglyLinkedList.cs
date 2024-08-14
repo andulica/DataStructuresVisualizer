@@ -324,17 +324,22 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     }
 
     /// <summary>
-    /// Deletes the head node of the list.
+    /// Removes and returns the head node of the singly linked list.
     /// </summary>
+    /// <returns>The node that was removed from the front of the list.</returns>
     /// <exception cref="InvalidOperationException">Thrown if the list is empty.</exception>
-    public void DeleteHead()
+    public SinglyLinkedListNode<T> DeleteHead()
     {
         if (_head == null)
         {
             throw new InvalidOperationException("List is empty.");
         }
+
+        SinglyLinkedListNode<T> deletedNode = _head;
         _head = _head.Next;
         count--;
+
+        return deletedNode;
     }
 
     /// <summary>

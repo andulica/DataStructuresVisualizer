@@ -20,26 +20,14 @@ public class QueueStructure<T> : SinglyLinkedList<T>, IEnumerable<T>
     }
 
     /// <summary>
-    /// Removes a specified number of items from the front of the queue.
+    /// Removes and returns the node at the front of the queue.
     /// </summary>
-    /// <param name="count">The number of items to remove.</param>
-    /// <exception cref="InvalidOperationException">Thrown if the queue does not have enough items.</exception>
-    public void Dequeue(int count)
+    /// <returns>The node that was removed from the front of the queue.</returns>
+    /// <exception cref="InvalidOperationException">Thrown if the queue is empty.</exception>
+    public SinglyLinkedListNode<T> Dequeue()
     {
-        if (count <= 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(count), "Count must be greater than 0.");
-        }
-
-        if (Count < count)
-        {
-            throw new InvalidOperationException("The queue does not have enough items.");
-        }
-
-        for (int i = 0; i < count; i++)
-        {
-            DeleteHead();
-        }
+        SinglyLinkedListNode<T> nodeToBeDeleted = DeleteHead();
+        return nodeToBeDeleted;
     }
 
     /// <summary>

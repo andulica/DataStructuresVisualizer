@@ -534,7 +534,7 @@
     window.removeValueInSll = function (nodeToBeRemoved, delay) {
         resetNodeColors();
         resetLinkColors();
-        removeNodeInSll(nodeToBeRemoved, delay);
+        return removeNodeInSll(nodeToBeRemoved, delay); // Return the promise
     };
 
     window.insertTailInSll = function (value, delay) {
