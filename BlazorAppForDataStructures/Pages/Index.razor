@@ -78,7 +78,9 @@
     private SinglyLinkedList<int> linkedList = new SinglyLinkedList<int>();
     private Random rand = new Random();
     private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+    private bool _isDisposed = false;
     const int delayStartOfAnimation = 1000;
+    const int delayBetweenOperations = 6500;
 
     protected override void OnInitialized()
     {
@@ -93,13 +95,13 @@
         {
             NavigationManager.LocationChanged += OnLocationChanged;
 
-            // Convert the linked list to a format suitable for JavaScript
             var linkedListData = ConvertListToJavaScriptFormat(linkedList);
-            JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData);
-            Task.Delay(delayStartOfAnimation).Wait();
-            // Start the insertion loop
+            await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData);
+
             try
             {
+                await Task.Delay(delayStartOfAnimation, _cancellationTokenSource.Token);
+
                 for (int i = 0; i < 3; i++)
                 {
                     int position = i % (linkedList.Count + 1);
@@ -108,27 +110,39 @@
 
                     await JSRuntime.InvokeVoidAsync("insertAtInSLL", jsNode, position, 1000);
                     await Task.Delay(6500, _cancellationTokenSource.Token);
+
+                    if (_cancellationTokenSource.Token.IsCancellationRequested)
+                    {
+                        break;
+                    }
                 }
             }
             catch (OperationCanceledException)
             {
-                // Handle the cancellation
                 Console.WriteLine("Operation was cancelled.");
             }
         }
     }
 
-    private void OnLocationChanged(object sender, LocationChangedEventArgs e)
+    private void OnLocationChanged(object sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
     {
-        _cancellationTokenSource?.Cancel();
+        if (!_isDisposed && _cancellationTokenSource != null)
+        {
+            _cancellationTokenSource.Cancel();
+            _cancellationTokenSource.Dispose();
+            _isDisposed = true;
+        }
     }
 
     public void Dispose()
     {
         NavigationManager.LocationChanged -= OnLocationChanged;
-        _cancellationTokenSource.Cancel();
-        _cancellationTokenSource.Dispose();
-        _cancellationTokenSource = null;
+        if (!_isDisposed)
+        {
+            _cancellationTokenSource.Cancel();
+            _cancellationTokenSource.Dispose();
+            _isDisposed = true;
+        }
     }
 
     private object ConvertNodeToJavaScriptFormat(SinglyLinkedListNode<int> node)
