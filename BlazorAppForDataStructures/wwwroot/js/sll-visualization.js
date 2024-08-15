@@ -537,6 +537,10 @@
         return removeNodeInSll(nodeToBeRemoved, delay); // Return the promise
     };
 
+    window.highlightTail = function () {
+        highlightTailNode();
+    }
+
     window.insertTailInSll = function (value, delay) {
         resetNodeColors();
         resetLinkColors();

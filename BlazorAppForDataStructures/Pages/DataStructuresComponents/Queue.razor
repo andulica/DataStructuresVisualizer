@@ -201,10 +201,32 @@
         }
     }
 
-    private void PeekBack(MouseEventArgs e)
+    private async Task PeekBack(MouseEventArgs e)
     {
         if (isOperationInProgress) return;
-        throw new NotImplementedException();
+
+        isOperationInProgress = true;
+        StateHasChanged();
+
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("highlightTail");
+        }
+        catch (JSException jsEx)
+        {
+            // Handle JavaScript-related exceptions
+            Console.Error.WriteLine($"JavaScript error: {jsEx.Message}");
+        }
+        catch (Exception ex)
+        {
+            // Handle any other exceptions
+            Console.Error.WriteLine($"Unexpected error: {ex.Message}");
+        }
+        finally
+        {
+            isOperationInProgress = false;
+            StateHasChanged();
+        }
     }
 
     private void PeekFront(MouseEventArgs e)
