@@ -25,15 +25,20 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     }
 
     /// <summary>
-    /// Adds a new node with the specified data to the end of the singly linked list.
+    /// Appends a new node containing the specified data to the end of the singly linked list and returns the newly created node.
     /// </summary>
-    /// <param name="data">The data to store in the new node.</param>
+    /// <param name="data">The data to be stored in the new node.</param>
+    /// <returns>
+    /// The newly created <see cref="SinglyLinkedListNode{T}"/> that was added to the list.
+    /// </returns>
     /// <remarks>
-    /// This method updates the tail of the list with the new node, making it the last node. If the list was previously empty,
-    /// the new node becomes both the head and the tail. This method throws an exception if the list has reached its maximum capacity.
+    /// This method sets the new node as the last node of the list by updating the tail. If the list is empty,
+    /// the new node will serve as both the head and tail. An exception is thrown if the list has already reached its maximum capacity.
     /// </remarks>
-    /// <exception cref="InvalidOperationException">Thrown when the list has reached its maximum capacity and cannot accept new nodes.</exception>
-    public void Add(T data)
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the list has reached its maximum capacity and cannot accommodate additional nodes.
+    /// </exception>
+    public SinglyLinkedListNode<T> Add(T data)
     {
         if (count >= maxCapacity)
         {
@@ -44,15 +49,16 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
 
         if (_head == null)
         {
-            _head = _tail = newNode; // If the list is empty, the new node becomes both head and tail.
+            _head = _tail = newNode; // If the list is empty, the new node becomes both the head and the tail.
         }
         else
         {
-            _tail.Next = newNode; // Append the new node to the end of the list.
-            _tail = newNode;      // Update the tail to the new node.
+            _tail.Next = newNode; // Link the new node to the current tail.
+            _tail = newNode;      // Update the tail reference to the new node.
         }
 
-        count++; // Increment the count of nodes in the list.
+        count++; // Increment the node count in the list.
+        return newNode;
     }
 
     /// <summary>

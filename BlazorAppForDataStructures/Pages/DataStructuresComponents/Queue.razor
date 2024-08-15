@@ -160,7 +160,7 @@
 
         try
         {
-            for (int i = 1; i <= inputValue; i++)
+            for (int i = 1; i <= inputValue; i++) // i starts from 1 to dequeue the number of nodes specified by the user
             {
                 var nodeRemoved = queue.Dequeue();
                 var nodeToBeRemovedFromSVG = ConvertNodeToJavaScriptFormat(nodeRemoved);
@@ -175,10 +175,30 @@
         }
     }
 
-    private void Enqueue(MouseEventArgs e)
+    private async Task Enqueue(MouseEventArgs e)
     {
         if (isOperationInProgress) return;
-        throw new NotImplementedException();
+
+        if (queue.Count == queue.maxCapacity)
+        {
+            messageOutput = $"The queue has reached maximum number of nodes. Please dequeue a value or create a smaller queue.";
+            return;
+        }
+
+        isOperationInProgress = true;
+        StateHasChanged();
+
+        try
+        {
+            var nodeToEnqueue = queue.Enqueue(inputValue);
+            var nodeToBeEnqueuedOnSVG = ConvertNodeToJavaScriptFormat(nodeToEnqueue);
+            await JSRuntime.InvokeVoidAsync("insertTailInSll", nodeToBeEnqueuedOnSVG, delayValueForAnimation);
+        }
+        finally
+        {
+            isOperationInProgress = false;
+            StateHasChanged();
+        }
     }
 
     private void PeekBack(MouseEventArgs e)
