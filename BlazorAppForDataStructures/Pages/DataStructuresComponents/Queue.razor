@@ -60,7 +60,13 @@
     @* Render the queue here *@
 </div>
 
-<div>@messageOutput</div>
+@if (!string.IsNullOrEmpty(messageOutput))
+{
+    <div class="notification-container">
+        <span class="notification-message">@messageOutput</span>
+        <button class="notification-close" @onclick="ClearMessage">✖</button>
+    </div>
+}
 
 @code {
     private QueueStructure<int> queue = new QueueStructure<int>();
@@ -261,5 +267,10 @@
     {
         var queueData = ConvertQueueToJavaScriptFormat(queue);
         await JSRuntime.InvokeVoidAsync("drawLinkedList", queueData);
+    }
+
+    private void ClearMessage()
+    {
+        messageOutput = "";
     }
 }
