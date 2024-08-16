@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="/css/styles.css" />
 </head>
 
+<div id="linked-list" class="container">
 <h3>Queue</h3>
 
 <div class="operation-selection">
@@ -67,12 +68,12 @@
         <button class="notification-close" @onclick="ClearMessage">✖</button>
     </div>
 }
+</div>
 
 @code {
     private QueueStructure<int> queue = new QueueStructure<int>();
     private string selectedAction = "Peek";
     private int inputValue;
-    private string operation;
     private string messageOutput;
     private bool isOperationInProgress = false;
     Random rand = new Random();

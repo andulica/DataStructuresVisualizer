@@ -1,88 +1,71 @@
 ﻿@inject NavigationManager NavigationManager
 @using DataStructuresVisualizer.DataStructures.Stack;
 
-<div id="stack-component">
+
+<head>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
+
+<div id="linked-list" class="container">
     <h3>Stack</h3>
 
     <!-- Operation list selection -->
-    <h5>Select Operation</h5>
-    <select @bind="operation">
-        @foreach (var op in operations)
+    <div class="operation-selection">
+        <select @bind="selectedAction">
+            <option value="Peek">Peek</option>
+            <option value="Enqueue">Enqueue</option>
+            <option value="Dequeue">Dequeue</option>
+            <option value="Create">Create</option>
+        </select>
+        @switch (selectedAction)
         {
-            <option value="@op">@op</option>
-        }
-    </select>
+            case "Peek":
+                <div class="insertion-fields">
+                    <label for="inputValue">Input Value</label>
+                    <input type="number" id="inputValue" @bind="inputValue" placeholder="Enter Value" />
 
-    <!-- Stack Display -->
-    <div class="stack-container">
-        @for (int i = stack.count - 1; i >= 0; i--)
-        {
-            <div class="stack-item">@stack.ElementAt(i)</div>
-            @if (i > 0) // Only add arrows between elements, not after the last element
-            {
-                <div class="stack-arrow">↓</div>
-            }
+                    <button class="custom-button" @onclick="Peek" disabled="@isOperationInProgress">Peek</button>
+                </div>
+                break;
+            case "Push":
+                <div class="insertion-fields">
+                    <label for="inputValue">Input Value</label>
+                    <input type="number" id="inputValue" @bind="inputValue" placeholder="Enter Value" />
+
+                    <button class="custom-button" @onclick="Push" disabled="@isOperationInProgress">Push</button>
+                </div>
+                break;
+            case "Pop":
+                <div class="insertion-fields">
+                    <label for="inputValue">Kx (Pop)</label>
+                    <input type="number" id="inputValue" @bind="inputValue" placeholder="Enter Value" />
+
+                    <button class="custom-button" @onclick="Pop" disabled="@isOperationInProgress">Pop</button>
+                </div>
+                break;
+            case "Create":
+                <div class="insertion-fields">
+                    <label for="inputValue">Input Value</label>
+                    <input type="number" id="inputValue" @bind="inputValue" placeholder="Enter Value" />
+
+                    <button class="custom-button" @onclick="CreateStack" disabled="@isOperationInProgress">Create</button>
+                </div>
+                break;
+            default:
+                break;
         }
     </div>
 
-    <Button class="btn btn-primary" @onclick="(() => buttonVisualize(operation))">Visualize</Button>
-    <input @bind="inputData" type="text" placeholder="Enter item" />
-
-    <div>@resultMessage</div>
+    <div>@messageOutput</div>
 </div>
 
 
-<style>
-    #stack-component {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .stack {
-        display: flex;
-        flex-direction: column-reverse; /* Stack items will be displayed from bottom to top */
-        align-items: center;
-    }
-
-    .stack-item {
-        padding: 10px;
-        border: 2px solid black;
-        border-radius: 5px;
-        text-align: center;
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    .stack-container {
-        display: flex;
-        flex-direction: column-reverse; /* Display elements from top to bottom */
-        align-items: center; /* Center-align the stack items */
-    }
-
-    .stack-base {
-        padding: 5px;
-        text-align: center;
-    }
-
-    .stack-arrow {
-        color: #666;
-        font-size: 20px;
-    }
-
-    .btn-primary {
-        margin-top: 10px;
-    }
-
-</style>
-
 @code {
     private StackStructure<int> stack = new StackStructure<int>();
-    private int inputData;
-    private string[] operations = { "Peak", "Pop", "Push", "Create"};
-    private string operation;
-    private string resultMessage;
+    private string selectedAction = "Peek";
+    private int inputValue;
+    private string messageOutput;
+    private bool isOperationInProgress = false;
     Random rand = new Random();
 
 
@@ -94,23 +77,27 @@
         stack.Push(rand.Next(1, 30));
     }
 
-    void buttonVisualize(string operation)
+    private void Peek()
     {
-        switch (operation)
-        {
-            case "Peak":               
-                resultMessage = $"{stack.Peek()} is the top value";
-                break;
-            case "Pop":
-                stack.Pop();
-                break;
-            case "Push":
-                stack.Push(inputData);
-                resultMessage = $"{inputData} was pushed on the stack";
-                break;
-            case "Create":
-                this.OnInitialized();
-                break;
-        }
+        messageOutput = $"Top element is {stack.Peek()}";
+    }
+
+    private void Push()
+    {
+        stack.Push(inputValue);
+        messageOutput = $"Element {inputValue} is pushed to the stack.";
+    }
+
+    private void Pop()
+    {
+
+        stack.Pop();
+        messageOutput = $"Element is popped from the stack.";
+    }
+
+    private void CreateStack()
+    {
+        stack = new StackStructure<int>();
+        messageOutput = "Stack is created.";
     }
 }
