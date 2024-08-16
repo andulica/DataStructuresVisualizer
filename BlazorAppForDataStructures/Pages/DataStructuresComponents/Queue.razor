@@ -175,7 +175,7 @@
         }
     }
 
-    private async Task Enqueue(MouseEventArgs e)
+    private async Task Enqueue()
     {
         if (isOperationInProgress) return;
 
@@ -201,7 +201,7 @@
         }
     }
 
-    private async Task PeekBack(MouseEventArgs e)
+    private async Task PeekBack()
     {
         if (isOperationInProgress) return;
 
@@ -229,10 +229,32 @@
         }
     }
 
-    private void PeekFront(MouseEventArgs e)
+    private async Task PeekFront()
     {
         if (isOperationInProgress) return;
-        throw new NotImplementedException();
+
+        isOperationInProgress = true;
+        StateHasChanged();
+
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("highlightHead");
+        }
+        catch (JSException jsEx)
+        {
+            // Handle JavaScript-related exceptions
+            Console.Error.WriteLine($"JavaScript error: {jsEx.Message}");
+        }
+        catch (Exception ex)
+        {
+            // Handle any other exceptions
+            Console.Error.WriteLine($"Unexpected error: {ex.Message}");
+        }
+        finally
+        {
+            isOperationInProgress = false;
+            StateHasChanged();
+        }
     }
 
     private async Task UpdateDisplay(SinglyLinkedList<int> list)

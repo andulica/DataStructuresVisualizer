@@ -237,6 +237,26 @@
         });
     }
 
+    function highlightHeadNode() {
+        return new Promise((resolve) => {
+            if (nodes.length === 0) {
+                resolve(); // No nodes to highlight, just resolve
+                return;
+            }
+
+            const headNode = nodes[0];
+
+            // Highlight only the head node in orange
+            svg.select(`#node-${headNode.id}`)
+                .transition().duration(1000)
+                .style('fill', 'orange');
+
+            setTimeout(() => {
+                resolve(); // Resolve after the highlight completes, without changing color to green
+            }, 1000);
+        });
+    }
+
     function clearTimeouts(timeouts) {
         timeouts.forEach(timeout => clearTimeout(timeout));
     }
@@ -538,7 +558,15 @@
     };
 
     window.highlightTail = function () {
+        resetNodeColors();
+        resetLinkColors();
         highlightTailNode();
+    }
+
+    window.highlightHead = function () {
+        resetNodeColors();
+        resetLinkColors();
+        highlightHeadNode();
     }
 
     window.insertTailInSll = function (value, delay) {
