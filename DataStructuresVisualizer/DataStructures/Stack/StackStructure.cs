@@ -1,6 +1,6 @@
 ﻿namespace DataStructuresVisualizer.DataStructures.Stack
 {
-    public class StackStructure <T> : IEnumerable<T>
+    public class StackStructure <T> : SinglyLinkedList<T>,IEnumerable<T>
     {
         // Internal linked list to store the elements of the stack.
         private LinkedList<T> list = new LinkedList<T>();

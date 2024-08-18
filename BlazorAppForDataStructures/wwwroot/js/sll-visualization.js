@@ -2,6 +2,7 @@
     let svg, nodes;
     let margin = { top: 20, right: 30, bottom: 40, left: 50 };
     const delayDrawLinks = 1000;
+    const gapBetweenNodeAndFirstElement = 200;
 
     // Helper function to adjust line endpoints to fit the arrowhead
     function adjustLineEndpoints(x1, y1, x2, y2, radius, strokeWidth) {
@@ -46,10 +47,11 @@
         return line;
     }
 
-    window.drawLinkedList = function (singlyLinkedList) {
+    window.drawLinkedList = function (singlyLinkedListOrStack, isStack = false) {
 
-        // Setup SVG dimensions
-        margin, width = 700 - margin.left - margin.right, height = 250 - margin.top - margin.bottom;
+        let margin = { top: 20, right: 20, bottom: 20, left: 20 };
+        let width = (isStack ? 200 : 700) - margin.left - margin.right; // Adjust width for stack or list
+        let height = (isStack ? 500 : 250) - margin.top - margin.bottom; // Adjust height for stack or list
 
         // Clear previous SVG and create a new one
         d3.select("#sll-display").select("svg").remove();
@@ -86,11 +88,12 @@
             .attr('d', 'M 0,-5 L 10 ,0 L 0,5')
             .attr('fill', 'orange');
 
-        // Prepare node data with positions
-        nodes = singlyLinkedList.map((d, i) => ({
+        // Prepare node data with positions based on isStack
+        let nodeSpacing = isStack ? 60 : 100; // Adjust spacing between nodes for stack or list
+        let nodes = singlyLinkedListOrStack.map((d, i) => ({
             ...d,
-            x: i * 100 + 50, // Calculate x based on index
-            y: height / 2 // Center y in the SVG
+            x: isStack ? width / 2 : i * nodeSpacing + 50,  // Center for stack, horizontal for list
+            y: isStack ? (i === 0 ? gapBetweenNodeAndFirstElement : gapBetweenNodeAndFirstElement + i * nodeSpacing) : height / 2  // Vertical for stack with gap, centered for list
         }));
 
         // Draw nodes and node values
@@ -122,6 +125,17 @@
                 drawLineWithArrow(node.x, node.y, nextNode.x, nextNode.y, 20, 2, `link-${node.id}-${nextNode.id}`, delayDrawLinks);
             }
         });
+
+
+        if (isStack) {
+            svg.append("text")
+                .attr("x", width / 4)
+                .attr("y", nodes[0].y)
+                .text("Top")
+                .attr("text-anchor", "middle")
+                .style("fill", "orange")
+                .style("font-weight", "bold");
+        }
     };
 
     async function highlightNodesForInsertion(position, delay) {

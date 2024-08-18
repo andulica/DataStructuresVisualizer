@@ -1,5 +1,7 @@
 ﻿@inject NavigationManager NavigationManager
 @using DataStructuresVisualizer.DataStructures.Stack;
+@using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
+@inject IJSRuntime JSRuntime
 
 
 <head>
@@ -13,8 +15,8 @@
     <div class="operation-selection">
         <select @bind="selectedAction">
             <option value="Peek">Peek</option>
-            <option value="Enqueue">Enqueue</option>
-            <option value="Dequeue">Dequeue</option>
+            <option value="Push">Push</option>
+            <option value="Pop">Pop</option>
             <option value="Create">Create</option>
         </select>
         @switch (selectedAction)
@@ -56,6 +58,10 @@
         }
     </div>
 
+    <div id="sll-display">
+        @* Render the linked list here *@
+    </div>
+
     <div>@messageOutput</div>
 </div>
 
@@ -71,10 +77,9 @@
 
     protected override void OnInitialized()
     {
-        stack = new StackStructure<int>();
-        stack.Push(rand.Next(1, 30));
-        stack.Push(rand.Next(1, 30));
-        stack.Push(rand.Next(1, 30));
+        stack.Add(rand.Next(1, 30));
+        stack.Add(rand.Next(1, 30));
+        stack.Add(rand.Next(1, 30));
     }
 
     private void Peek()
@@ -99,5 +104,42 @@
     {
         stack = new StackStructure<int>();
         messageOutput = "Stack is created.";
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Convert the linked list to a format suitable for JavaScript
+            var stackData = ConvertListToJavaScriptFormat(stack);
+            await JSRuntime.InvokeVoidAsync("drawLinkedList", stackData, true);
+        }
+    }
+
+    private object ConvertNodeToJavaScriptFormat(SinglyLinkedListNode<int> node)
+    {
+        return new
+        {
+            value = node._data,
+            next = node.Next != null ? node.Next.Id : (Guid?)null,
+            id = node.Id
+        };
+    }
+
+    private List<object> ConvertListToJavaScriptFormat(SinglyLinkedList<int> list)
+    {
+        var nodes = new List<object>();
+        var currentNode = list.Head;
+        while (currentNode != null)
+        {
+            nodes.Add(new
+            {
+                value = currentNode._data,
+                next = currentNode.Next != null ? currentNode.Next.Id : (Guid?)null,
+                id = currentNode.Id
+            });
+            currentNode = currentNode.Next;
+        }
+        return nodes;
     }
 }

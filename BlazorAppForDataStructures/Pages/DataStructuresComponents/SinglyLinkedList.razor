@@ -187,7 +187,7 @@
         {
             // Convert the linked list to a format suitable for JavaScript
             var linkedListData = ConvertListToJavaScriptFormat(linkedList);
-            await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData);
+            await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
         }
     }
 
@@ -405,7 +405,7 @@
     private async Task UpdateDisplay(SinglyLinkedList<int> list)
     {
         var linkedListData = ConvertListToJavaScriptFormat(list);
-        await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData);
+        await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
     }
 
     private object ConvertNodeToJavaScriptFormat(SinglyLinkedListNode<int> node)
