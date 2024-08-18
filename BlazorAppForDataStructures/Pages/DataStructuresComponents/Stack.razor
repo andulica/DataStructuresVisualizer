@@ -82,9 +82,32 @@
         stack.Add(rand.Next(1, 30));
     }
 
-    private void Peek()
+    private async Task Peek()
     {
-        messageOutput = $"Top element is {stack.Peek()}";
+        if (isOperationInProgress) return;
+
+        isOperationInProgress = true;
+        StateHasChanged();
+
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("highlightHead");
+        }
+        catch (JSException jsEx)
+        {
+            // Handle JavaScript-related exceptions
+            Console.Error.WriteLine($"JavaScript error: {jsEx.Message}");
+        }
+        catch (Exception ex)
+        {
+            // Handle any other exceptions
+            Console.Error.WriteLine($"Unexpected error: {ex.Message}");
+        }
+        finally
+        {
+            isOperationInProgress = false;
+            StateHasChanged();
+        }
     }
 
     private void Push()

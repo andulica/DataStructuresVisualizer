@@ -49,9 +49,9 @@
 
     window.drawLinkedList = function (singlyLinkedListOrStack, isStack = false) {
 
-        let margin = { top: 20, right: 20, bottom: 20, left: 20 };
-        let width = (isStack ? 200 : 700) - margin.left - margin.right; // Adjust width for stack or list
-        let height = (isStack ? 500 : 250) - margin.top - margin.bottom; // Adjust height for stack or list
+        margin = { top: 20, right: 20, bottom: 20, left: 20 };
+        width = (isStack ? 200 : 700) - margin.left - margin.right; // Adjust width for stack or list
+        height = (isStack ? 500 : 250) - margin.top - margin.bottom; // Adjust height for stack or list
 
         // Clear previous SVG and create a new one
         d3.select("#sll-display").select("svg").remove();
@@ -90,7 +90,7 @@
 
         // Prepare node data with positions based on isStack
         let nodeSpacing = isStack ? 60 : 100; // Adjust spacing between nodes for stack or list
-        let nodes = singlyLinkedListOrStack.map((d, i) => ({
+        nodes = singlyLinkedListOrStack.map((d, i) => ({
             ...d,
             x: isStack ? width / 2 : i * nodeSpacing + 50,  // Center for stack, horizontal for list
             y: isStack ? (i === 0 ? gapBetweenNodeAndFirstElement : gapBetweenNodeAndFirstElement + i * nodeSpacing) : height / 2  // Vertical for stack with gap, centered for list
