@@ -66,11 +66,12 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// </summary>
     /// <param name="newNode">The new node to append to the list.</param>
     /// <param name="delay">The delay in milliseconds before the node is visually appended, defaulting to 0 for no delay.</param>
+    /// <returns>The newly appended node.</returns>
     /// <remarks>
     /// This method triggers UI updates through highlighted code lines to visually represent each step of the append operation.
     /// </remarks>
     /// <exception cref="InvalidOperationException">Thrown if the list has reached its maximum capacity.</exception>
-    public async Task Append(SinglyLinkedListNode<T> newNode, int delay = 0)
+    public async Task<SinglyLinkedListNode<T>> AppendAsync(SinglyLinkedListNode<T> newNode, int delay = 0)
     {
         if (Count >= maxCapacity)
         {
@@ -79,7 +80,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
 
         // Invoke highlighting and delay for visual effect
         HighlightRequested?.Invoke(0); // "Vertex vtx = new Vertex(v)"
-        await Task.Delay(delay); 
+        await Task.Delay(delay);
 
         if (_head == null)
         {
@@ -92,14 +93,15 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
             HighlightRequested?.Invoke(1); // "tail.next = vtx"
             await Task.Delay(delay);
             _tail.Next = newNode;
-            _tail = newNode; 
+            _tail = newNode;
             HighlightRequested?.Invoke(2); // "tail = vtx"
             await Task.Delay(delay);
         }
 
         count++;
-    }
 
+        return newNode; // Return the newly appended node
+    }
 
     /// <summary>
     /// Prepends a new node with the specified data to the beginning of the list.

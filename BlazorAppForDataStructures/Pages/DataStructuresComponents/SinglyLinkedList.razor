@@ -288,7 +288,7 @@
             var tail = new SinglyLinkedListNode<int>(inputValue);
             var tailToInsert = ConvertNodeToJavaScriptFormat(tail);
 
-            var appendTask = linkedList.Append(tail, 2000);
+            var appendTask = linkedList.AppendAsync(tail, 2000);
             var jsTask = JSRuntime.InvokeVoidAsync("insertTailInSll", tailToInsert, 1500).AsTask();
 
             await Task.WhenAll(appendTask, jsTask); // Run both tasks concurrently
