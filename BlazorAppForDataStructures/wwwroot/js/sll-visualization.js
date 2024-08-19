@@ -127,15 +127,15 @@
         });
 
 
-        if (isStack) {
-            svg.append("text")
-                .attr("x", width / 4)
-                .attr("y", nodes[0].y)
-                .text("Top")
-                .attr("text-anchor", "middle")
-                .style("fill", "orange")
-                .style("font-weight", "bold");
-        }
+        //if (isStack) {
+        //    svg.append("text")
+        //        .attr("x", width / 4)
+        //        .attr("y", nodes[0].y)
+        //        .text("Top")
+        //        .attr("text-anchor", "middle")
+        //        .style("fill", "orange")
+        //        .style("font-weight", "bold");
+        //}
     };
 
     async function highlightNodesForInsertion(position, delay) {
@@ -344,7 +344,7 @@
         };
     }
 
-    async function insertNode(value, position, delay) {
+    async function insertNode(value, position, delay, isStack) {
         await highlightNodesForInsertion(position, delay); // Highlight nodes up to the position
 
         setTimeout(() => {
@@ -395,7 +395,7 @@
 
                     setTimeout(() => {
                         // Update the positions and redraw the links
-                        refreshSinglyLinkedList();
+                        refreshSinglyLinkedList(isStack);
 
                         // Reset node colors after a delay
                         setTimeout(() => {
@@ -407,8 +407,8 @@
         }, delay);
     }
 
-    function refreshSinglyLinkedList() {
-        updateNodePositions();
+    function refreshSinglyLinkedList(isStack) {
+        updateNodePositions(isStack);
         redrawLinks();
         repositionText();
     }
@@ -436,17 +436,31 @@
     }
 
 
-    function updateNodePositions() {
-        const nodeSpacing = 100;
-        nodes.forEach((node, index) => {
-            node.x = Math.round(index * nodeSpacing + 50);
-            node.y = Math.round(height / 2);
-            svg.select(`#node-${node.id}`)
-                .transition()
-                .duration(500)
-                .attr("cx", node.x)
-                .attr("cy", node.y);
-        });
+    function updateNodePositions(isStack) {
+        const nodeSpacing = 60;
+
+        if (isStack) {
+            nodes.forEach((node, index) => {
+                node.x = width / 2;
+                node.y = index * nodeSpacing + 50;
+                svg.select(`#node-${node.id}`)
+                    .transition()
+                    .duration(500)
+                    .attr("cx", node.x)
+                    .attr("cy", node.y);
+            });
+        }
+        else {
+            nodes.forEach((node, index) => {
+                node.x = Math.round(index * nodeSpacing + 50);
+                node.y = Math.round(height / 2);
+                svg.select(`#node-${node.id}`)
+                    .transition()
+                    .duration(500)
+                    .attr("cx", node.x)
+                    .attr("cy", node.y);
+            });
+        }
     }
 
     function redrawLinks() {
@@ -559,10 +573,10 @@
         highlightNodes(value, delay);
     };
 
-    window.insertAtInSLL = function (value, selectedIndex, delay) {
+    window.insertAtInSLL = function (value, selectedIndex, delay, isStack = false) {
         resetNodeColors();
         resetLinkColors();
-        insertNode(value, selectedIndex, delay);
+        insertNode(value, selectedIndex, delay, isStack);
     };
 
     window.removeValueInSll = function (nodeToBeRemoved, delay) {

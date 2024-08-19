@@ -6,9 +6,7 @@ namespace DataStructuresVisualizer.DataStructures.Stack
     {
         // Internal linked list to store the elements of the stack.
         private SinglyLinkedList<T> list = new SinglyLinkedList<T>();
-        // Count of nodes in the stack.
-        public int count => list.Count;
-
+        
         /// <summary>
         /// Adds an item to the top of the stack.
         /// </summary>

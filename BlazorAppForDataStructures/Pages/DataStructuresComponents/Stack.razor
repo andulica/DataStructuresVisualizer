@@ -72,6 +72,7 @@
     private int inputValue;
     private string messageOutput;
     private bool isOperationInProgress = false;
+    private bool isStack = true;
     Random rand = new Random();
 
 
@@ -116,7 +117,7 @@
 
         if (stack.Count == stack.maxCapacity)
         {
-            messageOutput = $"The stack has reached the maximum number of nodes. Please pop a value or create a smaller queue.";
+            messageOutput = $"The stack has reached the maximum number of nodes. Please pop a value or create a smaller stack.";
             return;
         }
 
@@ -125,9 +126,10 @@
 
         try
         {
+            stack.Add(inputValue);
             var nodeToEnqueue = await stack.PushAsync(inputValue); // Wait for the node to be pushed onto the stack
             var nodeToBeEnqueuedOnSVG = ConvertNodeToJavaScriptFormat(nodeToEnqueue);
-            await JSRuntime.InvokeVoidAsync("insertAtInSLL", nodeToBeEnqueuedOnSVG, 0, 1000); // Then update the UI
+            await JSRuntime.InvokeVoidAsync("insertAtInSLL", nodeToBeEnqueuedOnSVG, 0, 1000, isStack); // Then update the UI
         }
         finally
         {
