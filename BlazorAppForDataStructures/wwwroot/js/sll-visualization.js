@@ -2,7 +2,7 @@
     let svg, nodes;
     let margin = { top: 20, right: 30, bottom: 40, left: 50 };
     const delayDrawLinks = 1000;
-    const gapBetweenNodeAndFirstElement = 200;
+    const gapBetweenNodeAndFirstElement = 100;
 
     // Helper function to adjust line endpoints to fit the arrowhead
     function adjustLineEndpoints(x1, y1, x2, y2, radius, strokeWidth) {

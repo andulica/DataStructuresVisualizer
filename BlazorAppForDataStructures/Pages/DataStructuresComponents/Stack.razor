@@ -146,10 +146,40 @@
         messageOutput = $"Element is popped from the stack.";
     }
 
-    private void CreateStack()
+    private async Task CreateStack()
     {
-        stack = new StackStructure<int>();
-        messageOutput = "Stack is created.";
+        if (isOperationInProgress) return; // Prevent multiple operations
+
+        if (inputValue > stack.maxCapacity)
+        {
+            messageOutput = $"The stack can have a maximum number of {stack.maxCapacity} nodes. Please enter a smaller value.";
+            return;
+        }
+        isOperationInProgress = true;
+        StateHasChanged();
+        try
+        {
+            stack = new StackStructure<int>();
+
+            for (int i = 0; i < inputValue; i++)
+            {
+                stack.Add(rand.Next(1, 30));
+            }
+
+            await UpdateDisplay(stack);
+            await InvokeAsync(StateHasChanged);
+        }
+        finally
+        {
+            isOperationInProgress = false; // Reset flag after operation
+            StateHasChanged();
+        }
+    }
+
+    private async Task UpdateDisplay(SinglyLinkedList<int> stack)
+    {
+        var stackData = ConvertListToJavaScriptFormat(stack);
+        await JSRuntime.InvokeVoidAsync("drawLinkedList", stackData, true);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
