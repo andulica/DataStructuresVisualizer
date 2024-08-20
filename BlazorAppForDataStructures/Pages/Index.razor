@@ -121,6 +121,14 @@
             {
                 Console.WriteLine("Operation was cancelled.");
             }
+            catch (ObjectDisposedException)
+            {
+                Console.WriteLine("Cancellation token source was disposed.");
+            }
+            finally
+            {
+                _cancellationTokenSource.Dispose();
+            }
         }
     }
 

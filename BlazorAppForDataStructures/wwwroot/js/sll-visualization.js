@@ -347,65 +347,62 @@
     async function insertNode(value, position, delay, isStack) {
         await highlightNodesForInsertion(position, delay); // Highlight nodes up to the position
 
-        setTimeout(() => {
-            let newNode;
-            if (position === nodes.length) {
-                // Handle insertion at the tail
-                newNode = createTailNode(value);
-                nodes.push(newNode);
-            } else if (position === 0) {
-                // Handle insertion at the head
-                newNode = createNewNode(value, position);
-                nodes.splice(position, 0, newNode);
-            } else {
-                // Handle insertion at the specified position
-                newNode = createNewNode(value, position);
-                nodes.splice(position, 0, newNode);
-            }
-
-            let prevNode, nextNode, link1Id, link2Id;
-
-            if (position > 0) {
-                prevNode = nodes[position - 1];
-                link1Id = `link-${prevNode.id}-${newNode.id}`;
-            }
-
-            if (position < nodes.length - 1) {
-                nextNode = nodes[position + 1];
-                link2Id = `link-${newNode.id}-${nextNode.id}`;
-            }
-
-
-            // Draw new links with a delay
+        return new Promise((resolve) => {
             setTimeout(() => {
-                if (nextNode) {
-                    drawLineWithArrow(newNode.x, newNode.y, nextNode.x, nextNode.y, 20, 2, link2Id, delay);
+                let newNode;
+                if (position === nodes.length) {
+                    newNode = createTailNode(value);
+                    nodes.push(newNode);
+                } else if (position === 0) {
+                    newNode = createNewNode(value, position);
+                    nodes.splice(position, 0, newNode);
+                } else {
+                    newNode = createNewNode(value, position);
+                    nodes.splice(position, 0, newNode);
                 }
 
-                setTimeout(() => {
-                    if (prevNode) {
-                        drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, link1Id, delay);
-                    }
+                let prevNode, nextNode, link1Id, link2Id;
 
-                    if (prevNode && nextNode) {
-                        const existingLinkId = `link-${prevNode.id}-${nextNode.id}`;
-                        // Remove the existing link before creating new links
-                        svg.select(`#${existingLinkId}`).remove();
+                if (position > 0) {
+                    prevNode = nodes[position - 1];
+                    link1Id = `link-${prevNode.id}-${newNode.id}`;
+                }
+
+                if (position < nodes.length - 1) {
+                    nextNode = nodes[position + 1];
+                    link2Id = `link-${newNode.id}-${nextNode.id}`;
+                }
+
+                // Draw new links with a delay
+                setTimeout(() => {
+                    if (nextNode) {
+                        drawLineWithArrow(newNode.x, newNode.y, nextNode.x, nextNode.y, 20, 2, link2Id, delay);
                     }
 
                     setTimeout(() => {
-                        // Update the positions and redraw the links
-                        refreshSinglyLinkedList(isStack);
+                        if (prevNode) {
+                            drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, link1Id, delay);
+                        }
 
-                        // Reset node colors after a delay
+                        if (prevNode && nextNode) {
+                            const existingLinkId = `link-${prevNode.id}-${nextNode.id}`;
+                            svg.select(`#${existingLinkId}`).remove(); // Remove the existing link
+                        }
+
                         setTimeout(() => {
-                            resetNodeColors();
+                            refreshSinglyLinkedList(isStack); // Update the positions and redraw the links
+
+                            setTimeout(() => {
+                                resetNodeColors(); // Reset node colors after a delay
+                                resolve(); // Resolve the promise when all timeouts complete
+                            }, delay);
                         }, delay);
                     }, delay);
                 }, delay);
             }, delay);
-        }, delay);
+        });
     }
+
 
     function refreshSinglyLinkedList(isStack) {
         updateNodePositions(isStack);
@@ -574,9 +571,12 @@
     };
 
     window.insertAtInSLL = function (value, selectedIndex, delay, isStack = false) {
-        resetNodeColors();
-        resetLinkColors();
-        insertNode(value, selectedIndex, delay, isStack);
+        return new Promise(async (resolve) => {
+            resetNodeColors();
+            resetLinkColors();
+            await insertNode(value, selectedIndex, delay, isStack);
+            resolve(); // Resolve the promise when all async operations are done
+        });
     };
 
     window.removeValueInSll = function (nodeToBeRemoved, delay) {
