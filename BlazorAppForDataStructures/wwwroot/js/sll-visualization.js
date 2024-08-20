@@ -403,7 +403,6 @@
         });
     }
 
-
     function refreshSinglyLinkedList(isStack) {
         updateNodePositions(isStack);
         redrawLinks();
@@ -431,7 +430,6 @@
 
         }, 1000);
     }
-
 
     function updateNodePositions(isStack) {
         const nodeSpacing = 60;

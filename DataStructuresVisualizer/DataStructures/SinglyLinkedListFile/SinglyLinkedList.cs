@@ -196,54 +196,54 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         return newNode;
     }
 
-    /// <summary>
-    /// Deletes the first occurrence of a node with the specified data from the list asynchronously.
-    /// </summary>
-    /// <param name="data">The data of the node to delete.</param>
-    public async Task Delete(T data)
-    {
-        if (_head == null)
-        {
-            HighlightRequested?.Invoke(0); // "if empty, do nothing"
-            await Task.Delay(500);
-            return; // Check if the list is empty and exit
-        }
+    ///// <summary>
+    ///// Deletes the first occurrence of a node with the specified data from the list asynchronously.
+    ///// </summary>
+    ///// <param name="data">The data of the node to delete.</param>
+    //public async Task Delete(T data)
+    //{
+    //    if (_head == null)
+    //    {
+    //        HighlightRequested?.Invoke(0); // "if empty, do nothing"
+    //        await Task.Delay(500);
+    //        return; // Check if the list is empty and exit
+    //    }
 
-        HighlightRequested?.Invoke(1); // "Vertex pre = head"
-        await Task.Delay(500);
+    //    HighlightRequested?.Invoke(1); // "Vertex pre = head"
+    //    await Task.Delay(500);
 
-        SinglyLinkedListNode<T> current = _head;
-        if (EqualityComparer<T>.Default.Equals(current._data, data))
-        {
-            _head = _head.Next; // Move head to next node, effectively deleting it
-            count--;
-            HighlightRequested?.Invoke(6); // "delete del"
-            await Task.Delay(500);
-            return;
-        }
+    //    SinglyLinkedListNode<T> current = _head;
+    //    if (EqualityComparer<T>.Default.Equals(current._data, data))
+    //    {
+    //        _head = _head.Next; // Move head to next node, effectively deleting it
+    //        count--;
+    //        HighlightRequested?.Invoke(6); // "delete del"
+    //        await Task.Delay(500);
+    //        return;
+    //    }
 
-        while (current.Next != null)
-        {
-            HighlightRequested?.Invoke(2); // "for (k = 0; k<i-1; k++)"
-            await Task.Delay(500);
+    //    while (current.Next != null)
+    //    {
+    //        HighlightRequested?.Invoke(2); // "for (k = 0; k<i-1; k++)"
+    //        await Task.Delay(500);
 
-            if (EqualityComparer<T>.Default.Equals(current.Next._data, data))
-            {
-                current.Next = current.Next.Next; // Disconnect the node from the list
-                count--;
-                HighlightRequested?.Invoke(5); // "pre.next = after"
-                await Task.Delay(500);
-                return;
-            }
+    //        if (EqualityComparer<T>.Default.Equals(current.Next._data, data))
+    //        {
+    //            current.Next = current.Next.Next; // Disconnect the node from the list
+    //            count--;
+    //            HighlightRequested?.Invoke(5); // "pre.next = after"
+    //            await Task.Delay(500);
+    //            return;
+    //        }
 
-            current = current.Next;
-            HighlightRequested?.Invoke(3); // "pre = pre.next"
-            await Task.Delay(500);
-        }
+    //        current = current.Next;
+    //        HighlightRequested?.Invoke(3); // "pre = pre.next"
+    //        await Task.Delay(500);
+    //    }
 
-        HighlightRequested?.Invoke(4); // "Vertex del = pre.next, after = del.next"
-        await Task.Delay(500);
-    }
+    //    HighlightRequested?.Invoke(4); // "Vertex del = pre.next, after = del.next"
+    //    await Task.Delay(500);
+    //}
 
     /// <summary>
     /// Deletes a node at the specified index from the singly linked list asynchronously.
@@ -314,70 +314,6 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     }
 
     /// <summary>
-    /// Deletes the head node of the list and returns its data. Used for stack-like operations.
-    /// </summary>
-    /// <returns>The data of the deleted head node.</returns>
-    /// <exception cref="InvalidOperationException">Thrown if the list is empty.</exception>
-    public T DeleteHeadForStack()
-    {
-        if (_head == null)
-        {
-            throw new InvalidOperationException("The list is empty.");
-        }
-
-        T value = _head._data;
-        _head = _head.Next;
-        count--;
-        return value;
-    }
-
-    /// <summary>
-    /// Removes and returns the head node of the singly linked list.
-    /// </summary>
-    /// <returns>The node that was removed from the front of the list.</returns>
-    /// <exception cref="InvalidOperationException">Thrown if the list is empty.</exception>
-    public SinglyLinkedListNode<T> DeleteHead()
-    {
-        if (_head == null)
-        {
-            throw new InvalidOperationException("List is empty.");
-        }
-
-        SinglyLinkedListNode<T> deletedNode = _head;
-        _head = _head.Next;
-        count--;
-
-        return deletedNode;
-    }
-
-    /// <summary>
-    /// Deletes the last node of the list.
-    /// </summary>
-    /// <exception cref="InvalidOperationException">Thrown if the list is empty.</exception>
-    public void DeleteTail()
-    {
-        if (_head == null)
-        {
-            throw new InvalidOperationException("List is empty.");
-        }
-
-        if (_head.Next == null)
-        {
-            _head = null;
-            count--;
-            return;
-        }
-
-        SinglyLinkedListNode<T> current = _head;
-        while (current.Next.Next != null)
-        {
-            current = current.Next;
-        }
-        current.Next = null;
-        count--;
-    }
-
-    /// <summary>
     /// Searches for a node with the specified data and returns it.
     /// </summary>
     /// <param name="data">The data to search for in the list.</param>
@@ -429,110 +365,6 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         }
 
         return null;
-    }
-
-    /// <summary>
-    /// Searches for the first occurrence of the specified value within the linked list and returns its index.
-    /// </summary>
-    /// <param="data">The value to search for in the list.</param>
-    /// <returns>The zero-based index of the first occurrence of the value in the list, if found.</returns>
-    /// <exception cref="KeyNotFoundException">Thrown when the value is not present in the list.</exception>
-    public int FindIndexOf(T data)
-    {
-        SinglyLinkedListNode<T> current = _head;
-        int index = 0;
-
-        while (current != null)
-        {
-            if (EqualityComparer<T>.Default.Equals(current._data, data))
-            {
-                return index;
-            }
-            current = current.Next;
-            index++;
-        }
-        return -1;
-    }
-
-    /// <summary>
-    /// Returns a string representation of the linked list.
-    /// </summary>
-    /// <returns>A string representing the linked list.</returns>
-    public override string ToString()
-    {
-        string result = "";
-        SinglyLinkedListNode<T> current = _head;
-        while (current != null)
-        {
-            result += current._data + " -> ";
-            current = current.Next;
-        }
-        return result + "null";
-    }
-
-    /// <summary>
-    /// Determines whether the list contains a specific value.
-    /// </summary>
-    /// <param name="value">The value to locate in the list.</param>
-    /// <returns>True if the value is found; otherwise, false.</returns>
-    public bool Contains(T value)
-    {
-        SinglyLinkedListNode<T> current = _head;
-        while (current != null)
-        {
-            if (EqualityComparer<T>.Default.Equals(current._data, value))
-            {
-                return true;
-            }
-            current = current.Next;
-        }
-        return false;
-    }
-
-    /// <summary>
-    /// Returns the index of the head node in the linked list.
-    /// </summary>
-    /// <returns>The index of the head node, or -1 if the list is empty.</returns>
-    public int GetHeadIndex()
-    {
-        if (_head == null)
-        {
-            return -1;
-        }
-
-        int index = 0;
-        SinglyLinkedListNode<T> current = _head;
-        while (current != null)
-        {
-            if (current == _head)
-            {
-                return index;
-            }
-            current = current.Next;
-            index++;
-        }
-        return -1; // Head not found (should not happen in a valid list)
-    }
-
-    /// <summary>
-    /// Returns the index of the tail node in the linked list.
-    /// </summary>
-    /// <returns>The index of the tail node, or -1 if the list is empty.</returns>
-    public int GetTailIndex()
-    {
-        if (_head == null)
-        {
-            return -1;
-        }
-
-        int index = 0;
-        SinglyLinkedListNode<T> current = _head;
-        while (current.Next != null)
-        {
-            current = current.Next;
-            index++;
-        }
-        return index;
     }
 
     /// <summary>
