@@ -20,16 +20,6 @@ public class QueueStructure<T> : SinglyLinkedList<T>, IEnumerable<T>
         return nodeToBeEnqueued;
     }
 
-    /// <summary>
-    /// Removes and returns the node at the front of the queue.
-    /// </summary>
-    /// <returns>The node that was removed from the front of the queue.</returns>
-    /// <exception cref="InvalidOperationException">Thrown if the queue is empty.</exception>
-    public SinglyLinkedListNode<T> Dequeue()
-    {
-        SinglyLinkedListNode<T> nodeToBeDeleted = DeleteHead();
-        return nodeToBeDeleted;
-    }
 
     /// <summary>
     /// Returns the item at the front of the queue without removing it.

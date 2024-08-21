@@ -93,6 +93,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
             HighlightRequested?.Invoke(1); // "tail.next = vtx"
             await Task.Delay(delay);
             _tail.Next = newNode;
+         
             _tail = newNode;
             HighlightRequested?.Invoke(2); // "tail = vtx"
             await Task.Delay(delay);
@@ -102,6 +103,14 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
 
         return newNode; // Return the newly appended node
     }
+
+    //public class UiUpdate
+    //{
+    //    public int lineNumber;
+    //    public bool nodeadd;
+    //    public int delayMS;
+
+    //}
 
     /// <summary>
     /// Prepends a new node with the specified data to the beginning of the list.
@@ -365,6 +374,25 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Removes and returns the head node of the singly linked list.
+    /// </summary>
+    /// <returns>The node that was removed from the front of the list.</returns>
+    /// <exception cref="InvalidOperationException">Thrown if the list is empty.</exception>
+    public SinglyLinkedListNode<T> FindHead()
+    {
+        if (_head == null)
+        {
+            throw new InvalidOperationException("List is empty.");
+        }
+
+        SinglyLinkedListNode<T> deletedNode = _head;
+        _head = _head.Next;
+        count--;
+
+        return deletedNode;
     }
 
     /// <summary>

@@ -495,7 +495,7 @@
             .attr('marker-end', 'url(#arrowhead)'); // Default arrowhead, not the highlighted one
     }
 
-    function removeNodeInSll(nodeToBeRemoved, delay) {
+    function removeNodeInSll(nodeToBeRemoved, delay, isStack) {
         return new Promise((resolve) => {
             highlightNodes(nodeToBeRemoved.value, delay).then(() => {
                 setTimeout(() => {
@@ -515,7 +515,7 @@
                                     // Update links if necessary and resolve when complete
                                     updateLinksAfterRemoval(nodeToBeRemoved);
 
-                                    refreshSinglyLinkedList();
+                                    refreshSinglyLinkedList(isStack);
 
                                     resolve(); // Ensure all transitions have time to complete
                                 });
@@ -577,10 +577,10 @@
         });
     };
 
-    window.removeValueInSll = function (nodeToBeRemoved, delay) {
+    window.removeValueInSll = function (nodeToBeRemoved, delay, isStack) {
         resetNodeColors();
         resetLinkColors();
-        return removeNodeInSll(nodeToBeRemoved, delay); // Return the promise
+        return removeNodeInSll(nodeToBeRemoved, delay, isStack); // Return the promise
     };
 
     window.highlightTail = function () {

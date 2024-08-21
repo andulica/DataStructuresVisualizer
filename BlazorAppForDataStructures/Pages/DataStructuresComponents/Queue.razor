@@ -169,9 +169,11 @@
         {
             for (int i = 1; i <= inputValue; i++) // i starts from 1 to dequeue the number of nodes specified by the user
             {
-                var nodeRemoved = queue.Dequeue();
-                var nodeToBeRemovedFromSVG = ConvertNodeToJavaScriptFormat(nodeRemoved);
-                await JSRuntime.InvokeVoidAsync("removeValueInSll", nodeToBeRemovedFromSVG, delayValueForAnimation);
+                var nodeToRemove = queue.Head;
+                var nodeToBeRemovedFromSVG = ConvertNodeToJavaScriptFormat(nodeToRemove);
+                var removeTask = queue.DeleteAt(0, 0);
+                var jsTask = JSRuntime.InvokeVoidAsync("removeValueInSll", nodeToBeRemovedFromSVG, delayValueForAnimation).AsTask();
+                await Task.WhenAll(removeTask, jsTask); // Run both tasks concurrently      
                 await Task.Delay(delayValueForAnimation); // Optional delay to ensure smooth transitions
             }
         }
