@@ -109,7 +109,7 @@
                     var jsNode = ConvertNodeToJavaScriptFormat(newNode);
 
                     await JSRuntime.InvokeVoidAsync("insertAtInSLL", jsNode, position, 1000);
-                    await Task.Delay(6500, _cancellationTokenSource.Token);
+                    await Task.Delay(1000, _cancellationTokenSource.Token);
 
                     if (_cancellationTokenSource.Token.IsCancellationRequested)
                     {
@@ -134,9 +134,30 @@
 
     private void OnLocationChanged(object sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
     {
-        if (!_isDisposed && _cancellationTokenSource != null)
+        // Ensure that the CancellationTokenSource is not null and not already disposed
+        if (_cancellationTokenSource != null && !_isDisposed)
         {
-            _cancellationTokenSource.Cancel();
+            try
+            {
+                // Attempt to cancel the ongoing operation
+                _cancellationTokenSource.Cancel();
+            }
+            catch (ObjectDisposedException)
+            {
+                // Handle the case where the CancellationTokenSource is already disposed
+                Console.WriteLine("CancellationTokenSource was already disposed.");
+            }
+            finally
+            {
+                DisposeCancellationTokenSource();
+            }
+        }
+    }
+
+    private void DisposeCancellationTokenSource()
+    {
+        if (!_isDisposed)
+        {
             _cancellationTokenSource.Dispose();
             _isDisposed = true;
         }
@@ -145,12 +166,9 @@
     public void Dispose()
     {
         NavigationManager.LocationChanged -= OnLocationChanged;
-        if (!_isDisposed)
-        {
-            _cancellationTokenSource.Cancel();
-            _cancellationTokenSource.Dispose();
-            _isDisposed = true;
-        }
+
+        // Dispose of the CancellationTokenSource when the component is disposed
+        DisposeCancellationTokenSource();
     }
 
     private object ConvertNodeToJavaScriptFormat(SinglyLinkedListNode<int> node)
