@@ -12,12 +12,11 @@ namespace DataStructuresVisualizer.DataStructures.Stack
         /// </summary>
         /// <param name="node">The node to add to the stack.</param>
         /// <returns>The node that was added to the stack.</returns>
-        public async Task<SinglyLinkedListNode<T>> PushAsync(T value)
+        public async Task<SinglyLinkedListNode<T>> PushAsync(T value, int delay)
         {
             var nodeToPush = new SinglyLinkedListNode<T>(value);
-            return await list.AppendAsync(nodeToPush);
+            return await list.Prepend(nodeToPush, delay);
         }
-
 
         /// <summary>
         /// Removes and returns the item at the top of the stack.

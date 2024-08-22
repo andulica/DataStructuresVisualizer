@@ -116,7 +116,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// Prepends a new node with the specified data to the beginning of the list.
     /// </summary>
     /// <param name="data">The data to prepend to the list.</param>
-    public async Task Prepend(SinglyLinkedListNode<T> newNode, int delay = 0)
+    public async Task<SinglyLinkedListNode<T>> Prepend(SinglyLinkedListNode<T> newNode, int delay = 0)
     {
         if (count >= maxCapacity)
         {
@@ -136,6 +136,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         _head = newNode;
 
         count++;
+        return newNode;
     }
 
     /// <summary>
