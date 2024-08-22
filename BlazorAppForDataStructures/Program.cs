@@ -9,15 +9,20 @@ namespace BlazorAppForDataStructures
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-                        var connectionString = builder.Configuration.GetConnectionString("BlazorAppForDataStructuresContextConnection") ?? throw new InvalidOperationException("Connection string 'BlazorAppForDataStructuresContextConnection' not found.");
 
-                                    builder.Services.AddDbContext<BlazorAppForDataStructuresContext>(options =>
-                options.UseSqlServer(connectionString));
+            var connectionString = Environment.GetEnvironmentVariable("MYAPP_CONNECTION_STRING");
 
-                                                builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                throw new InvalidOperationException("Connection string not found. Please set the environment variable 'BlazorAppForDataStructuresContextConnection'.");
+            }
+
+            builder.Services.AddDbContext<BlazorAppForDataStructuresContext>(options =>
+                options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+
+            builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<BlazorAppForDataStructuresContext>();
 
-            // Add services to the container.
             builder.Services.AddRazorPages();
             builder.Services.AddServerSideBlazor();
 
@@ -31,14 +36,14 @@ namespace BlazorAppForDataStructures
             }
 
             app.UseHttpsRedirection();
-
             app.UseStaticFiles();
-
             app.UseRouting();
 
             app.MapBlazorHub();
             app.MapFallbackToPage("/_Host");
-                        app.UseAuthentication();;
+
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.Run();
         }
