@@ -1,4 +1,6 @@
 ﻿using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
+using DataStructuresVisualizer.DataStructures.Enums;
+using DataStructuresVisualizer.DataStructures;
 
 namespace DataStructuresVisualizer.DataStructures.Stack
 {
@@ -12,10 +14,10 @@ namespace DataStructuresVisualizer.DataStructures.Stack
         /// </summary>
         /// <param name="node">The node to add to the stack.</param>
         /// <returns>The node that was added to the stack.</returns>
-        public async Task<SinglyLinkedListNode<T>> PushAsync(T value, int delay)
+        public async Task<SinglyLinkedListNode<T>> PushAsync(T value, VisualizationTiming timing)
         {
             var nodeToPush = new SinglyLinkedListNode<T>(value);
-            return await list.Prepend(nodeToPush, delay);
+            return await list.Prepend(nodeToPush, timing);
         }
 
         /// <summary>

@@ -1,4 +1,6 @@
-﻿using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
+﻿using DataStructuresVisualizer.DataStructures.Enums;
+using DataStructuresVisualizer.DataStructures;
+using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
 using System.Collections;
 
 public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
@@ -6,6 +8,8 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     private SinglyLinkedListNode<T>? _head;
     private SinglyLinkedListNode<T>? _tail;
     public Action<int> HighlightRequested { get; set; }
+
+    public Action<PrependSteps, VisualizationTiming> HighlightRequested2 { get; set; }
 
     public SinglyLinkedListNode<T> Head => _head;
     public SinglyLinkedListNode<T> Tail => _tail;
@@ -23,6 +27,8 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     {
         HighlightRequested?.Invoke(lineNumber);
     }
+
+
 
     /// <summary>
     /// Appends a new node containing the specified data to the end of the singly linked list and returns the newly created node.
@@ -116,23 +122,24 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// Prepends a new node with the specified data to the beginning of the list.
     /// </summary>
     /// <param name="data">The data to prepend to the list.</param>
-    public async Task<SinglyLinkedListNode<T>> Prepend(SinglyLinkedListNode<T> newNode, int delay = 0)
+    public async Task<SinglyLinkedListNode<T>> Prepend(SinglyLinkedListNode<T> newNode, VisualizationTiming timing)
     {
         if (count >= maxCapacity)
         {
             throw new InvalidOperationException("List is full.");
         }
-        await Task.Delay(delay);
+        await Task.Delay(timing.HighlightDelay);
 
-        HighlightRequested?.Invoke(0); // "Vertex vtx = new Vertex(v)"
-        await Task.Delay(delay);
 
-        HighlightRequested?.Invoke(1); // "vtx.next = head"
-        await Task.Delay(delay);
+        HighlightRequested2?.Invoke(PrependSteps.CreateVertex, timing);
+        await Task.Delay(timing.HighlightDelay);
+
+        HighlightRequested2?.Invoke(PrependSteps.SetNextPointer, timing);
+        await Task.Delay(timing.HighlightDelay);
         newNode.Next = _head;
 
-        HighlightRequested?.Invoke(2); // "head = vtx"
-        await Task.Delay(delay);
+        HighlightRequested2?.Invoke(PrependSteps.SetHead, timing);
+        await Task.Delay(timing.HighlightDelay);
         _head = newNode;
 
         count++;

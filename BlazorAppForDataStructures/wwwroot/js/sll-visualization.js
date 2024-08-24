@@ -344,8 +344,11 @@
         };
     }
 
-    async function insertNode(value, position, delay, isStack) {
-        await highlightNodesForInsertion(position, delay); // Highlight nodes up to the position
+    async function insertNode(value, position, timing, isStack) {
+        console.log("Start insertNode:", value, position, timing);
+        console.log("timing.highlightDelay:", timing.highlightDelay);
+        await highlightNodesForInsertion(position, timing.highlightDelay);
+        console.log("Finished highlightNodesForInsertion");
 
         return new Promise((resolve) => {
             setTimeout(() => {
@@ -373,33 +376,37 @@
                     link2Id = `link-${newNode.id}-${nextNode.id}`;
                 }
 
-                // Draw new links with a delay
                 setTimeout(() => {
                     if (nextNode) {
-                        drawLineWithArrow(newNode.x, newNode.y, nextNode.x, nextNode.y, 20, 2, link2Id, delay);
+                        drawLineWithArrow(newNode.x, newNode.y, nextNode.x, nextNode.y, 20, 2, link2Id, timing.nodeMovementDelay);
+                        console.log("Line drawn to next node");
                     }
 
                     setTimeout(() => {
                         if (prevNode) {
-                            drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, link1Id, delay);
+                            drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, link1Id, timing.nodeMovementDelay);
+                            console.log("Line drawn to previous node");
                         }
 
                         if (prevNode && nextNode) {
                             const existingLinkId = `link-${prevNode.id}-${nextNode.id}`;
                             svg.select(`#${existingLinkId}`).remove(); // Remove the existing link
+                            console.log("Existing link removed");
                         }
 
                         setTimeout(() => {
                             refreshSinglyLinkedList(isStack); // Update the positions and redraw the links
+                            console.log("List refreshed");
 
                             setTimeout(() => {
                                 resetNodeColors(); // Reset node colors after a delay
+                                console.log("Node colors reset");
                                 resolve(); // Resolve the promise when all timeouts complete
-                            }, delay);
-                        }, delay);
-                    }, delay);
-                }, delay);
-            }, delay);
+                            }, timing.javaScriptDelay);
+                        }, timing.nodeMovementDelay);
+                    }, timing.nodeMovementDelay);
+                }, timing.nodeMovementDelay);
+            }, timing.highlightDelay);
         });
     }
 
@@ -410,7 +417,6 @@
     }
 
     async function insertNodeAtTail(value, delay) {
-
         setTimeout(() => {
             // Create the new node to be the new tail
             const newNode = createTailNode(value);
@@ -422,13 +428,12 @@
             if (prevNode) {
                 setTimeout(() => {
                     drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, `link-${prevNode.id}-${newNode.id}`, delay);
-                }, 1000);
+                }, delay);
             }
             setTimeout(() => {
                 resetNodeColors();
-            }, 1000);
-
-        }, 1000);
+            }, delay);
+        }, delay);
     }
 
     function updateNodePositions(isStack) {
@@ -568,11 +573,11 @@
         highlightNodes(value, delay);
     };
 
-    window.insertAtInSLL = function (value, selectedIndex, delay, isStack = false) {
+    window.insertAtInSLL = function (value, selectedIndex, timing, isStack = false) {
         return new Promise(async (resolve) => {
             resetNodeColors();
             resetLinkColors();
-            await insertNode(value, selectedIndex, delay, isStack);
+            await insertNode(value, selectedIndex, timing, isStack);
             resolve(); // Resolve the promise when all async operations are done
         });
     };

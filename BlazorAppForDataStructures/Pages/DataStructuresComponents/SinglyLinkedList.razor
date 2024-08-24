@@ -1,4 +1,6 @@
 ﻿@page "/visualize/SinglyLinkedList"
+@using DataStructuresVisualizer.DataStructures.Enums;
+@using DataStructuresVisualizer.DataStructures
 @using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
 @inject IJSRuntime JSRuntime
 
@@ -246,13 +248,20 @@
         StateHasChanged();
         try
         {
-            linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
+            linkedList.HighlightRequested2 += HandleHighlightRequest2; // Subscribe to highlight events
 
             var head = new SinglyLinkedListNode<int>(inputValue);
             var headToInsert = ConvertNodeToJavaScriptFormat(head);
 
-            var prependTask = linkedList.Prepend(head, 2000);
-            var jsTask = JSRuntime.InvokeVoidAsync("insertAtInSLL", headToInsert, 0, 2000).AsTask();
+            var timing = new VisualizationTiming
+                {
+                    HighlightDelay = 1000, // Set appropriate delay values
+                    NodeMovementDelay = 1000,
+                    JavaScriptDelay = 1000
+                };
+
+            var prependTask = linkedList.Prepend(head, timing);
+            var jsTask = JSRuntime.InvokeVoidAsync("insertAtInSLL", headToInsert, 0, timing).AsTask();
 
             await Task.WhenAll(prependTask, jsTask); // Run both tasks concurrently
         }
@@ -262,7 +271,7 @@
         }
         finally
         {
-            linkedList.HighlightRequested -= HandleHighlightRequest; // Clean up event subscription
+            linkedList.HighlightRequested2 -= HandleHighlightRequest2; // Clean up event subscription
             isOperationInProgress = false; // Reset flag after operation
             StateHasChanged();
         }
@@ -400,6 +409,16 @@
     {
         JSRuntime.InvokeVoidAsync("highlightLine", lineIndex);
     }
+
+    private void HandleHighlightRequest2(PrependSteps step, VisualizationTiming timing)
+    {
+        // Implement your logic here to highlight the specific line based on lineNumber
+        // Example: highlightCodeLine(lineNumber);
+
+        // Assuming you have a method to highlight the code
+        JSRuntime.InvokeVoidAsync("highlightLine", step);
+    }
+
 
     private async Task UpdateDisplay(SinglyLinkedList<int> list)
     {

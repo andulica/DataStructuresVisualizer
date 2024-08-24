@@ -1,6 +1,7 @@
 ﻿@inject NavigationManager NavigationManager
 @using DataStructuresVisualizer.DataStructures.Stack;
 @using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
+@using DataStructuresVisualizer.DataStructures;
 @inject IJSRuntime JSRuntime
 
 
@@ -127,7 +128,13 @@
 
             var head = new SinglyLinkedListNode<int>(inputValue);
 
-            var nodeToPush = await stack.Prepend(head, 0); // Wait for the node to be pushed onto the stack
+            var timing = new VisualizationTiming
+                {
+                    HighlightDelay = 1000, // Set appropriate delay values
+                    NodeMovementDelay = 1500,
+                    JavaScriptDelay = 2000
+                };
+            var nodeToPush = await stack.Prepend(head, timing); // Wait for the node to be pushed onto the stack
             var nodeToBePushedOnSVG = ConvertNodeToJavaScriptFormat(nodeToPush);
             await JSRuntime.InvokeVoidAsync("insertAtInSLL", nodeToBePushedOnSVG, 0, 1000, isStack); // Then update the UI
         }

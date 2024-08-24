@@ -10,7 +10,7 @@ namespace BlazorAppForDataStructures
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            var connectionString = Environment.GetEnvironmentVariable("MYAPP_CONNECTION_STRING");
+             var connectionString = Environment.GetEnvironmentVariable("MYAPP_CONNECTION_STRING");
 
             if (string.IsNullOrEmpty(connectionString))
             {
