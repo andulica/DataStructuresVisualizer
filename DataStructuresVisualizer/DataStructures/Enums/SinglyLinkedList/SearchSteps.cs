@@ -27,13 +27,19 @@ namespace DataStructuresVisualizer.DataStructures.Enums.SinglyLinkedList
         IncrementIndexAndMoveNext = 3,
 
         /// <summary>
-        /// Step where the current node is checked to see if it is null; if it is, return NOT_FOUND.
+        /// Step where the current node is checked to see if it is null.
         /// </summary>
         CheckIfNullReturnNotFound = 4,
+
+
+        /// <summary>
+        /// Step where the values is not found and null is returned.
+        /// </summary>
+        ReturnNull = 5,
 
         /// <summary>
         /// Step where the index of the found value is returned.
         /// </summary>
-        ReturnIndex = 5
+        ReturnIndex = 6
     }
 }

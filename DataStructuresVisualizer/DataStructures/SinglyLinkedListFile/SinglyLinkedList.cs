@@ -23,10 +23,6 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     // Public property to access the count.
     public int Count => count;
 
-    protected virtual void OnHighlightRequested(int lineNumber)
-    {
-        HighlightRequested?.Invoke(lineNumber);
-    }
 
     /// <summary>
     /// Appends a new node containing the specified data to the end of the singly linked list and returns the newly created node.
@@ -337,30 +333,30 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// </summary>
     /// <param name="data">The data to search for in the list.</param>
     /// <returns>The node containing the data if found in the list; otherwise, null.</returns>
-    public async Task<SinglyLinkedListNode<T>> Search(T data, int delay)
+    public async Task<SinglyLinkedListNode<T>> Search(T data, VisualizationTiming timing)
     {
         // Check if the list is empty and handle the first line of the script
         if (_head == null)
         {
-            OnHighlightRequested(0); // "if empty, return NOT_FOUND"
-            await Task.Delay(delay);
+            HighlightRequested2?.Invoke(SearchSteps.CheckEmptyReturnNotFound, timing); // "return NOT_FOUND."
+            await Task.Delay(timing.HighlightDelay);
             return null;
         }
-        OnHighlightRequested(1); // "index = 0, tmp = head"
-        await Task.Delay(delay / 4);
+        HighlightRequested2?.Invoke(SearchSteps.InitializeIndexAndHead, timing); // "index = 0, tmp = head"
+        await Task.Delay(timing.HighlightDelay);
 
         SinglyLinkedListNode<T> current = _head;
         int position = 0;
 
         while (current != null)
         {
-            OnHighlightRequested(2); // "while (tmp.item != v)"
-            await Task.Delay(delay);
+            HighlightRequested2?.Invoke(SearchSteps.LoopUntilFound, timing); // "while (tmp.item != v)"
+            await Task.Delay(timing.HighlightDelay);
 
             if (EqualityComparer<T>.Default.Equals(current._data, data))
             {
-                OnHighlightRequested(6); // "return index"
-                await Task.Delay(delay);
+                HighlightRequested2?.Invoke(SearchSteps.ReturnIndex, timing); // "return index"
+                await Task.Delay(timing.HighlightDelay);
                 return current;
             }
 
@@ -371,15 +367,15 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
             // Check if the next node is null to handle the last if condition
             if (current == null)
             {
-                OnHighlightRequested(4); // "if tmp == null"
-                await Task.Delay(delay);
-                OnHighlightRequested(5); // "return NOT_FOUND"
-                await Task.Delay(delay);
+                HighlightRequested2?.Invoke(SearchSteps.CheckIfNullReturnNotFound, timing); // "if tmp == null"
+                await Task.Delay(timing.HighlightDelay);
+                HighlightRequested2?.Invoke(SearchSteps.ReturnNull, timing); // "return null"
+                await Task.Delay(timing.HighlightDelay);
             }
             else
             {
-                OnHighlightRequested(3); // "index++, tmp = tmp.next"
-                await Task.Delay(delay);
+                HighlightRequested2?.Invoke(SearchSteps.IncrementIndexAndMoveNext, timing); // "index++, tmp = tmp.next"
+                await Task.Delay(timing.HighlightDelay);
             }
         }
 

@@ -211,7 +211,15 @@
                         highlightLinkAndArrowhead(nodes[index - 1].id, node.id);
                     }
 
-                    if (node.id === valueID) {
+                    if (node.value === valueID) {
+                        svg.select(`#node-${node.id}`)
+                            .transition().duration(delay)
+                            .style('fill', 'green');
+                        found = true;
+                        clearTimeouts(timeouts); // Clear all remaining timeouts
+                        resolve();
+                    }
+                    else if (node.id === valueID) {
                         svg.select(`#node-${node.id}`)
                             .transition().duration(delay)
                             .style('fill', 'red');
@@ -567,10 +575,10 @@
         highlightLine(lineNumber);
     };
 
-    window.searchValueInSLL = function (value, delay) {
+    window.searchValueInSLL = function (value, timing) {
         resetNodeColors();
         resetLinkColors();
-        highlightNodes(value, delay);
+        highlightNodes(value, timing.highlightDelay * 2);
     };
 
     window.insertAtInSLL = function (value, selectedIndex, timing, isStack = false) {
