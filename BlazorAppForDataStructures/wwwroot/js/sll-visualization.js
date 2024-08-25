@@ -191,7 +191,7 @@
         });
     }
 
-    function highlightNodes(value, delay) {
+    async function highlightNodes(valueID, delay) {
         return new Promise((resolve) => {
             let timeouts = []; // Array to store timeout IDs for potential clearing
             let found = false;
@@ -211,9 +211,9 @@
                         highlightLinkAndArrowhead(nodes[index - 1].id, node.id);
                     }
 
-                    if (node.value === value) {
+                    if (node.id === valueID) {
                         svg.select(`#node-${node.id}`)
-                            .transition().duration(500)
+                            .transition().duration(delay)
                             .style('fill', 'red');
                         found = true;
                         clearTimeouts(timeouts); // Clear all remaining timeouts
@@ -227,7 +227,7 @@
             // Ensure we resolve the promise if no node matches
             let finalTimeout = setTimeout(() => {
                 if (!found) resolve();
-            }, 1000 * nodes.length);
+            }, delay * nodes.length);
             timeouts.push(finalTimeout);
         });
     }
@@ -498,35 +498,37 @@
             .attr('marker-end', 'url(#arrowhead)'); // Default arrowhead, not the highlighted one
     }
 
-    function removeNodeInSll(nodeToBeRemoved, delay, isStack) {
-        return new Promise((resolve) => {
-            highlightNodes(nodeToBeRemoved.value, delay).then(() => {
-                setTimeout(() => {
-                    // Transition and then remove the node's visual elements
-                    svg.select(`#node-${nodeToBeRemoved.id}`)
-                        .transition().duration(delay)
-                        .style('opacity', 0) // Fade out effect
-                        .on('end', () => {
-                            svg.select(`#node-${nodeToBeRemoved.id}`).remove();
-                            // Proceed with text removal after node is removed
-                            svg.select(`#textId-${nodeToBeRemoved.id}`)
-                                .transition().duration(delay)
-                                .style('opacity', 0) // Fade out effect for text
-                                .on('end', () => {
-                                    svg.select(`#textId-${nodeToBeRemoved.id}`).remove();
+    async function removeNodeInSll(nodeToBeRemoved, timing, isStack) {
+        await onPurposeDelay(timing.highlightDelay);
 
-                                    // Update links if necessary and resolve when complete
-                                    updateLinksAfterRemoval(nodeToBeRemoved);
+        await highlightNodes(nodeToBeRemoved.id, timing.highlightDelay * 2);
+        await new Promise((resolve) => {
+            setTimeout(() => {
+                // Transition and then remove the node's visual elements
+                svg.select(`#node-${nodeToBeRemoved.id}`)
+                    .transition().duration(timing.highlightDelay)
+                    .style('opacity', 0) // Fade out effect
+                    .on('end', () => {
+                        svg.select(`#node-${nodeToBeRemoved.id}`).remove();
+                        // Proceed with text removal after node is removed
+                        svg.select(`#textId-${nodeToBeRemoved.id}`)
+                            .transition().duration(timing.highlightDelay)
+                            .style('opacity', 0) // Fade out effect for text
+                            .on('end', () => {
+                                svg.select(`#textId-${nodeToBeRemoved.id}`).remove();
 
-                                    refreshSinglyLinkedList(isStack);
+                                // Update links if necessary and resolve when complete
+                                updateLinksAfterRemoval(nodeToBeRemoved);
 
-                                    resolve(); // Ensure all transitions have time to complete
-                                });
-                        });
-                }, delay); // Delay before removing the node to allow for highlighting
-            });
+                                refreshSinglyLinkedList(isStack);
+
+                                resolve(); // Ensure all transitions have time to complete
+                            });
+                    });
+            }, timing.javaScriptDelay); // Delay before removing the node to allow for highlighting
         });
     }
+
 
     function updateLinksAfterRemoval(nodeToBeRemoved) {
         let nodeIndex = nodes.findIndex(node => node.id === nodeToBeRemoved.id);
@@ -580,10 +582,10 @@
         });
     };
 
-    window.removeValueInSll = function (nodeToBeRemoved, delay, isStack) {
+    window.removeValueInSll = function (nodeToBeRemoved, timing, isStack) {
         resetNodeColors();
         resetLinkColors();
-        return removeNodeInSll(nodeToBeRemoved, delay, isStack); // Return the promise
+        return removeNodeInSll(nodeToBeRemoved, timing, isStack); // Return the promise
     };
 
     window.highlightTail = function () {

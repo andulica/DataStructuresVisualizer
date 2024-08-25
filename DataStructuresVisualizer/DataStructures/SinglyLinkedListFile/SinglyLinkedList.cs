@@ -275,17 +275,19 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// <exception cref="IndexOutOfRangeException">
     /// Thrown when the specified index is less than 0 or greater than or equal to the size of the list.
     /// </exception>
-    public async Task DeleteAt(int index, int delay)
+    public async Task DeleteAt(int index, VisualizationTiming timing)
     {
         if (index < 0 || index >= count)
         {
             throw new IndexOutOfRangeException($"Index {index} is out of range for the linked list.");
         }
 
+        await Task.Delay(timing.HighlightDelay);
+
         if (_head == null)
         {
-            HighlightRequested?.Invoke(0); // "if empty, do nothing"
-            await Task.Delay(delay);
+            HighlightRequested2?.Invoke(RemoveSteps.CheckIfEmpty, timing); // "if empty, do nothing"
+            await Task.Delay(timing.HighlightDelay);
             return; // Check if the list is empty and exit
         }
 
@@ -293,41 +295,41 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
 
         if (index == 0)
         {
-            HighlightRequested?.Invoke(1); // "Vertex pre = head"
-            await Task.Delay(delay);
+            HighlightRequested2?.Invoke(RemoveSteps.InitializePreHead, timing); // "Vertex pre = head"
+            await Task.Delay(timing.HighlightDelay);
 
             _head = _head.Next; // Move head to next node, effectively deleting it
             count--;
-            HighlightRequested?.Invoke(6); // "delete del"
-            await Task.Delay(delay);
+            HighlightRequested2?.Invoke(RemoveSteps.DeleteDel, timing); // "delete del"
+            await Task.Delay(timing.HighlightDelay);
             return;
         }
 
-        HighlightRequested?.Invoke(1); // "Vertex pre = head"
-        await Task.Delay(delay / 4);
+        HighlightRequested2?.Invoke(RemoveSteps.InitializePreHead, timing); // "Vertex pre = head"
+        await Task.Delay(timing.HighlightDelay);
 
-        for (int i = 0; i < index - 1; i++)
+        for (int i = 0; i < index; i++)
         {
-            HighlightRequested?.Invoke(2); // "for (k = 0; k<i-1; k++)"
-            await Task.Delay(delay);
+            HighlightRequested2?.Invoke(RemoveSteps.LoopToPosition, timing); // "for (k = 0; k<i-1; k++)"
+            await Task.Delay(timing.HighlightDelay);
 
             current = current.Next;
 
-            HighlightRequested?.Invoke(3); // "pre = pre.next"
-            await Task.Delay(delay);
+            HighlightRequested2?.Invoke(RemoveSteps.MovePreToNext, timing); // "pre = pre.next"
+            await Task.Delay(timing.HighlightDelay);
         }
 
-        HighlightRequested?.Invoke(4); // "Vertex del = pre.next, after = del.next"
-        await Task.Delay(delay);
+        HighlightRequested2?.Invoke(RemoveSteps.SetDelAndAfter, timing); // "Vertex del = pre.next, after = del.next"
+        await Task.Delay(timing.HighlightDelay);
 
         current.Next = current.Next?.Next;
         count--;
 
-        HighlightRequested?.Invoke(5); // "pre.next = after"
-        await Task.Delay(delay);
+        HighlightRequested2?.Invoke(RemoveSteps.UpdatePreNextToAfter, timing); // "pre.next = after"
+        await Task.Delay(timing.HighlightDelay);
 
-        HighlightRequested?.Invoke(6); // "delete del"
-        await Task.Delay(delay);
+        HighlightRequested2?.Invoke(RemoveSteps.DeleteDel, timing); // "delete del"
+        await Task.Delay(timing.HighlightDelay);
     }
 
     /// <summary>

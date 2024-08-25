@@ -362,19 +362,26 @@
         StateHasChanged();
         try
         {
-            linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
+            linkedList.HighlightRequested2 += HandleHighlightRequest2; // Subscribe to highlight events
 
             var nodeToRemove = linkedList.FindNodeByIndex(inputValue);
             var nodeInfo = ConvertNodeToJavaScriptFormat(nodeToRemove);
 
-            var removeTask = linkedList.DeleteAt(inputValue, 1000);
-            var jsTask = JSRuntime.InvokeVoidAsync("removeValueInSll", nodeInfo, 1500).AsTask();
+            var timing = new VisualizationTiming
+                {
+                    HighlightDelay = 1000,
+                    NodeMovementDelay = 1000,
+                    JavaScriptDelay = 1000
+                };
+
+            var removeTask = linkedList.DeleteAt(inputValue, timing);
+            var jsTask = JSRuntime.InvokeVoidAsync("removeValueInSll", nodeInfo, timing).AsTask();
              
             await Task.WhenAll(removeTask, jsTask); // Run both tasks concurrently
         }
         finally
         {
-            linkedList.HighlightRequested -= HandleHighlightRequest; // Clean up event subscription
+            linkedList.HighlightRequested2 -= HandleHighlightRequest2; // Clean up event subscription
             isOperationInProgress = false; // Reset flag after operation
             StateHasChanged();
         }
