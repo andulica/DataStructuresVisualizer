@@ -126,7 +126,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         {
             throw new InvalidOperationException("List is full.");
         }
-        await Task.Delay(timing.HighlightDelay);
+        await Task.Delay(timing.HighlightDelay * 2);
 
 
         HighlightRequested2?.Invoke(PrependSteps.CreateVertex, timing);
@@ -155,61 +155,63 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// <exception cref="InvalidOperationException">
     /// Thrown if the list has reached its maximum capacity.
     /// </exception>
-    public async Task<SinglyLinkedListNode<T>> InsertAt(int index, SinglyLinkedListNode<T> newNode, int delay = 0)
+    public async Task<SinglyLinkedListNode<T>> InsertAt(int index, SinglyLinkedListNode<T> newNode, VisualizationTiming timing)
     {
         if (count >= maxCapacity)
         {
             throw new InvalidOperationException("List is full.");
         }
 
-        if (_head == null || index == 0)
+        if (_head == null && index == 0)
         {
             newNode.Next = _head;
             _head = newNode;
             count++;
-            HighlightRequested?.Invoke(0); // "head = vtx"
-            await Task.Delay(delay);
+            HighlightRequested2?.Invoke(InsertAtPositionSteps.SetPreNextToVertex, timing); // "head = vtx"
+            await Task.Delay(timing.HighlightDelay);
             return newNode;
         }
 
         SinglyLinkedListNode<T> current = _head;
         int currentIndex = 0;
 
-        HighlightRequested?.Invoke(0); // "Vertex pre = head"
-        await Task.Delay(delay / 6);
+        HighlightRequested2?.Invoke(InsertAtPositionSteps.InitializePreHead, timing); // "Vertex pre = head"
+        await Task.Delay(timing.HighlightDelay);
 
         // Traverse until the end of the list or the specified index
         while (current.Next != null && currentIndex < index)
         {
-            HighlightRequested?.Invoke(1); // "for (k = 0; k<i-1; k++)"
-            await Task.Delay(delay);
+            HighlightRequested2?.Invoke(InsertAtPositionSteps.LoopToPosition, timing); // "for (k = 0; k<i-1; k++)"
+            await Task.Delay(timing.HighlightDelay);
             current = current.Next;
             currentIndex++;
-            HighlightRequested?.Invoke(2); // "pre = pre.next"
-            await Task.Delay(delay);
+            HighlightRequested2?.Invoke(InsertAtPositionSteps.MovePreToNext, timing); // "pre = pre.next"
+            await Task.Delay(timing.HighlightDelay);
 
             if (currentIndex == index)
             {
-                HighlightRequested?.Invoke(3); // "Vertex aft = pre.next"
-                await Task.Delay(delay / 4);
+                HighlightRequested2?.Invoke(InsertAtPositionSteps.SetAftToPreNext, timing); // "Vertex aft = pre.next"
+                await Task.Delay(timing.HighlightDelay);
             }
         }
-        HighlightRequested?.Invoke(4); // "Vertex vtx = new Vertex(v)"
-        await Task.Delay(delay);
 
-        HighlightRequested?.Invoke(5); // "vtx.next = aft"
-        await Task.Delay(delay + 1000);
+        HighlightRequested2?.Invoke(InsertAtPositionSteps.CreateVertex, timing); // "Vertex vtx = new Vertex(v)"
+        await Task.Delay(timing.HighlightDelay);
+
+        HighlightRequested2?.Invoke(InsertAtPositionSteps.SetVertexNextToAft, timing); // "vtx.next = aft"
+        await Task.Delay(timing.HighlightDelay);
 
         // Insert the new node
         newNode.Next = current.Next;
         current.Next = newNode;
         count++;
 
-        HighlightRequested?.Invoke(6); // "pre.next = vtx"
-        await Task.Delay(delay);
+        HighlightRequested2?.Invoke(InsertAtPositionSteps.SetPreNextToVertex, timing); // "pre.next = vtx"
+        await Task.Delay(timing.HighlightDelay);
 
         return newNode;
     }
+
 
     ///// <summary>
     ///// Deletes the first occurrence of a node with the specified data from the list asynchronously.

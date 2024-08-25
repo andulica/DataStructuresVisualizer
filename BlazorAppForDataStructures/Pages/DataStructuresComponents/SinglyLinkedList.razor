@@ -203,22 +203,29 @@
             return;
         }
 
+        if (insertPosition <= 0 || insertPosition > linkedList.Count - 1)
+        {
+            messageOutput = $"The position to insert must be greater than 0 and no bigger than {linkedList.Count - 1}";
+            return;
+        }
+
         isOperationInProgress = true;
         StateHasChanged();
         try
         {
-            linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
-
-            if (insertPosition > linkedList.Count - 1)
-            {
-                insertPosition = linkedList.Count;
-            }
+            linkedList.HighlightRequested2 += HandleHighlightRequest2; // Subscribe to highlight events
 
             var newNode = new SinglyLinkedListNode<int>(inputValue);
             var insertedValue = ConvertNodeToJavaScriptFormat(newNode);
+            var timing = new VisualizationTiming
+                {
+                    HighlightDelay = 1000,
+                    NodeMovementDelay = 1000,
+                    JavaScriptDelay = 1000
+                };
 
-            var insertTask = linkedList.InsertAt(insertPosition, newNode, 1750);
-            var jsTask = JSRuntime.InvokeVoidAsync("insertAtInSLL", insertedValue, insertPosition, 2600).AsTask();
+            var insertTask = linkedList.InsertAt(insertPosition, newNode, timing);
+            var jsTask = JSRuntime.InvokeVoidAsync("insertAtInSLL", insertedValue, insertPosition, timing).AsTask();
 
             await Task.WhenAll(insertTask, jsTask); // Run both tasks concurrently
         }
@@ -228,7 +235,7 @@
         }
         finally
         {
-            linkedList.HighlightRequested -= HandleHighlightRequest;
+            linkedList.HighlightRequested2 -= HandleHighlightRequest2;
             isOperationInProgress = false; // Reset flag after operation
             StateHasChanged();
         }

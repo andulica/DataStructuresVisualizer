@@ -139,6 +139,7 @@
     };
 
     async function highlightNodesForInsertion(position, delay) {
+
         return new Promise((resolve) => {
             let timeouts = []; // Store timeout IDs for potential clearing
             let found = false;
@@ -344,11 +345,14 @@
         };
     }
 
+    function onPurposeDelay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
     async function insertNode(value, position, timing, isStack) {
-        console.log("Start insertNode:", value, position, timing);
-        console.log("timing.highlightDelay:", timing.highlightDelay);
-        await highlightNodesForInsertion(position, timing.highlightDelay);
-        console.log("Finished highlightNodesForInsertion");
+        await highlightNodesForInsertion(position, timing.highlightDelay * 2);
+
+        await onPurposeDelay(timing.highlightDelay);
 
         return new Promise((resolve) => {
             setTimeout(() => {
@@ -379,28 +383,23 @@
                 setTimeout(() => {
                     if (nextNode) {
                         drawLineWithArrow(newNode.x, newNode.y, nextNode.x, nextNode.y, 20, 2, link2Id, timing.nodeMovementDelay);
-                        console.log("Line drawn to next node");
                     }
 
                     setTimeout(() => {
                         if (prevNode) {
                             drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, link1Id, timing.nodeMovementDelay);
-                            console.log("Line drawn to previous node");
                         }
 
                         if (prevNode && nextNode) {
                             const existingLinkId = `link-${prevNode.id}-${nextNode.id}`;
-                            svg.select(`#${existingLinkId}`).remove(); // Remove the existing link
-                            console.log("Existing link removed");
+                            svg.select(`#${existingLinkId}`).remove();
                         }
 
                         setTimeout(() => {
-                            refreshSinglyLinkedList(isStack); // Update the positions and redraw the links
-                            console.log("List refreshed");
+                            refreshSinglyLinkedList(isStack);
 
                             setTimeout(() => {
-                                resetNodeColors(); // Reset node colors after a delay
-                                console.log("Node colors reset");
+                                resetNodeColors();
                                 resolve(); // Resolve the promise when all timeouts complete
                             }, timing.javaScriptDelay);
                         }, timing.nodeMovementDelay);
