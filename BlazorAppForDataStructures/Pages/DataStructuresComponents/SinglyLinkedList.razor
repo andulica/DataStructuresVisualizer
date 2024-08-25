@@ -2,6 +2,7 @@
 @using DataStructuresVisualizer.DataStructures.Enums.SinglyLinkedList;
 @using DataStructuresVisualizer.DataStructures
 @using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
+@using DataStructuresVisualizer.Snapshot;
 @inject IJSRuntime JSRuntime
 
 <head>
@@ -84,6 +85,9 @@
 
     <CodeDisplay CodeLines="@currentCode" OnHighlightRequest="HandleHighlightRequest" />
 
+    <ProgressBar MaxValue="@snapshots.Count" CurrentValue="@currentSnapshotIndex" OnValueChanged="RewindToSnapshot" />
+
+
     @if (!string.IsNullOrEmpty(messageOutput))
     {
         <div class="notification-container">
@@ -104,6 +108,8 @@
     private IEnumerable<string> currentCode = Enumerable.Empty<string>();
     private string? currentOperation = " ";
     private bool isOperationInProgress = false; // Flag to track operation state
+    private List<Snapshot> snapshots = new();
+    private int currentSnapshotIndex = 0;
 
     VisualizationTiming timing = new VisualizationTiming
         {
@@ -133,6 +139,30 @@
         linkedList.Add(rand.Next(1, 30));
         linkedList.Add(rand.Next(1, 30));
         currentCode = GetCodeByOperation(_selectedAction);
+    }
+
+    // private void CaptureSnapshot()
+    // {
+    //     var nodes = linkedList.Nodes.Select(node => new NodeState(node.Id, node.Value, node.X, node.Y, node.FillColor)).ToList();
+    //     var links = linkedList.Links.Select(link => new LinkState(link.Id, link.StartX, link.StartY, link.EndX, link.EndY)).ToList();
+
+    //     Guid? highlightedNodeId = linkedList.HighlightedNode?.Id;
+    //     Guid? highlightedLinkId = linkedList.HighlightedLink?.Id;
+
+    //     var snapshot = new Snapshot(nodes, links, highlightedNodeId, highlightedLinkId);
+    //     snapshots.Add(snapshot);
+    // }
+
+
+    private void RewindToSnapshot(int snapshotIndex)
+    {
+        currentSnapshotIndex = snapshotIndex;
+        RenderSnapshot(snapshots[snapshotIndex]);
+    }
+
+    private void RenderSnapshot(Snapshot snapshot)
+    {
+        // Render the linked list based on the snapshot state
     }
 
     private IEnumerable<string> GetCodeByOperation(string operation)

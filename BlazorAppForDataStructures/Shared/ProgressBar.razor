@@ -1,0 +1,39 @@
+﻿@inject IJSRuntime JSRuntime
+
+<div id="progress-bar" class="media-control-button ui-slider ui-corner-all ui-slider-horizontal ui-widget ui-widget-content">
+    <div class="ui-slider-range ui-corner-all ui-widget-header ui-slider-range-min"
+         style="width: @(MaxValue > 0 ? (CurrentValue * 100 / MaxValue) : 0)%; background-color: rgb(254, 197, 21);"></div>
+    <span tabindex="0" class="ui-slider-handle ui-corner-all ui-state-default"
+          style="left: @(MaxValue > 0 ? (CurrentValue * 100 / MaxValue) : 0)%;"></span>
+</div>
+
+@code {
+    [Parameter]
+    public int MaxValue { get; set; } = 100;
+
+    [Parameter]
+    public int CurrentValue { get; set; } = 0;
+
+    [Parameter]
+    public EventCallback<int> OnValueChanged { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("initializeProgressBar", "progress-bar", MaxValue, CurrentValue, DotNetObjectReference.Create(this));
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("updateProgressBar", "progress-bar", MaxValue, CurrentValue);
+        }
+    }
+
+    [JSInvokable]
+    public Task HandleValueChanged(int newValue)
+    {
+        CurrentValue = newValue;
+        return OnValueChanged.InvokeAsync(newValue);
+    }
+
+}
