@@ -1,7 +1,7 @@
-﻿using DataStructuresVisualizer.DataStructures.Enums;
-using DataStructuresVisualizer.DataStructures;
+﻿using DataStructuresVisualizer.DataStructures;
 using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
 using System.Collections;
+using DataStructuresVisualizer.DataStructures.Enums.SinglyLinkedList;
 
 public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
 {
@@ -27,8 +27,6 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     {
         HighlightRequested?.Invoke(lineNumber);
     }
-
-
 
     /// <summary>
     /// Appends a new node containing the specified data to the end of the singly linked list and returns the newly created node.
