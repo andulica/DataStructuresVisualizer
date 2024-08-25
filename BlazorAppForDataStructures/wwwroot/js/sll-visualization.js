@@ -416,24 +416,23 @@
         repositionText();
     }
 
-    async function insertNodeAtTail(value, delay) {
-        setTimeout(() => {
-            // Create the new node to be the new tail
-            const newNode = createTailNode(value);
-            nodes.push(newNode);  // Append the new node to the end of the list
+    async function insertNodeAtTail(value, timing) {
 
-            // Get the previous tail to draw the link
-            const prevNode = nodes[nodes.length - 2];
+        // Create the new node to be the new tail
+        const newNode = createTailNode(value);
+        nodes.push(newNode);  // Append the new node to the end of the list
 
-            if (prevNode) {
-                setTimeout(() => {
-                    drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, `link-${prevNode.id}-${newNode.id}`, delay);
-                }, delay);
-            }
+        // Get the previous tail to draw the link
+        const prevNode = nodes[nodes.length - 2];
+
+        if (prevNode) {
             setTimeout(() => {
-                resetNodeColors();
-            }, delay);
-        }, delay);
+                drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, `link-${prevNode.id}-${newNode.id}`, timing.javaScriptDelay);
+            }, timing.javaScriptDelay);
+        }
+        setTimeout(() => {
+            resetNodeColors();
+        }, timing.nodeMovementDelay);
     }
 
     function updateNodePositions(isStack) {
@@ -600,10 +599,10 @@
         highlightHeadNode();
     }
 
-    window.insertTailInSll = function (value, delay) {
+    window.insertTailInSll = function (value, timing) {
         resetNodeColors();
         resetLinkColors();
-        insertNodeAtTail(value, delay);
+        insertNodeAtTail(value, timing);
     }
 
     window.resetSllColours = function () {

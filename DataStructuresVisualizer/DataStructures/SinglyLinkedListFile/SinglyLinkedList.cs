@@ -9,7 +9,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     private SinglyLinkedListNode<T>? _tail;
     public Action<int> HighlightRequested { get; set; }
 
-    public Action<PrependSteps, VisualizationTiming> HighlightRequested2 { get; set; }
+    public Action<Enum, VisualizationTiming> HighlightRequested2 { get; set; }
 
     public SinglyLinkedListNode<T> Head => _head;
     public SinglyLinkedListNode<T> Tail => _tail;
@@ -75,7 +75,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// This method triggers UI updates through highlighted code lines to visually represent each step of the append operation.
     /// </remarks>
     /// <exception cref="InvalidOperationException">Thrown if the list has reached its maximum capacity.</exception>
-    public async Task<SinglyLinkedListNode<T>> AppendAsync(SinglyLinkedListNode<T> newNode, int delay = 0)
+    public async Task<SinglyLinkedListNode<T>> AppendAsync(SinglyLinkedListNode<T> newNode, VisualizationTiming timing)
     {
         if (Count >= maxCapacity)
         {
@@ -83,24 +83,24 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         }
 
         // Invoke highlighting and delay for visual effect
-        HighlightRequested?.Invoke(0); // "Vertex vtx = new Vertex(v)"
-        await Task.Delay(delay);
+        HighlightRequested2?.Invoke(AppendSteps.CreateVertex, timing); // "Vertex vtx = new Vertex(v)"
+        await Task.Delay(timing.HighlightDelay);
 
         if (_head == null)
         {
             _head = _tail = newNode; // Set both head and tail to the new node if list was empty
-            HighlightRequested?.Invoke(1); // "tail.next = vtx"
-            await Task.Delay(delay);
+            HighlightRequested2?.Invoke(AppendSteps.UpdateTailNextPointer, timing); // "tail.next = vtx"
+            await Task.Delay(timing.HighlightDelay);
         }
         else
         {
-            HighlightRequested?.Invoke(1); // "tail.next = vtx"
-            await Task.Delay(delay);
+            HighlightRequested2?.Invoke(AppendSteps.UpdateTailNextPointer, timing); // "tail.next = vtx"
+            await Task.Delay(timing.HighlightDelay);
             _tail.Next = newNode;
          
             _tail = newNode;
-            HighlightRequested?.Invoke(2); // "tail = vtx"
-            await Task.Delay(delay);
+            HighlightRequested2?.Invoke(AppendSteps.UpdateTail, timing); // "tail = vtx"
+            await Task.Delay(timing.HighlightDelay);
         }
 
         count++;
