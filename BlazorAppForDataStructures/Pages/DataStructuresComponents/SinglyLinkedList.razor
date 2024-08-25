@@ -105,6 +105,13 @@
     private string? currentOperation = " ";
     private bool isOperationInProgress = false; // Flag to track operation state
 
+    VisualizationTiming timing = new VisualizationTiming
+        {
+            HighlightDelay = 1000,
+            NodeMovementDelay = 1000,
+            JavaScriptDelay = 1000
+        };
+
     public string selectedAction
     {
         get => _selectedAction;
@@ -217,12 +224,6 @@
 
             var newNode = new SinglyLinkedListNode<int>(inputValue);
             var insertedValue = ConvertNodeToJavaScriptFormat(newNode);
-            var timing = new VisualizationTiming
-                {
-                    HighlightDelay = 1000,
-                    NodeMovementDelay = 1000,
-                    JavaScriptDelay = 1000
-                };
 
             var insertTask = linkedList.InsertAt(insertPosition, newNode, timing);
             var jsTask = JSRuntime.InvokeVoidAsync("insertAtInSLL", insertedValue, insertPosition, timing).AsTask();
@@ -260,13 +261,6 @@
             var head = new SinglyLinkedListNode<int>(inputValue);
             var headToInsert = ConvertNodeToJavaScriptFormat(head);
 
-            var timing = new VisualizationTiming
-                {
-                    HighlightDelay = 1000, // Set appropriate delay values
-                    NodeMovementDelay = 1000,
-                    JavaScriptDelay = 1000
-                };
-
             var prependTask = linkedList.Prepend(head, timing);
             var jsTask = JSRuntime.InvokeVoidAsync("insertAtInSLL", headToInsert, 0, timing).AsTask();
 
@@ -303,13 +297,6 @@
             var tail = new SinglyLinkedListNode<int>(inputValue);
             var tailToInsert = ConvertNodeToJavaScriptFormat(tail);
 
-            var timing = new VisualizationTiming
-                {
-                    HighlightDelay = 1000, // Set appropriate delay values
-                    NodeMovementDelay = 1000,
-                    JavaScriptDelay = 1000
-                };
-
             var appendTask = linkedList.AppendAsync(tail, timing);
             var jsTask = JSRuntime.InvokeVoidAsync("insertTailInSll", tailToInsert, timing).AsTask();
 
@@ -336,12 +323,6 @@
         {
             linkedList.HighlightRequested2 += HandleHighlightRequest2; // Subscribe to highlight events
 
-            var timing = new VisualizationTiming
-                {
-                    HighlightDelay = 1000,
-                    NodeMovementDelay = 1000,
-                    JavaScriptDelay = 1000
-                };
             var searchTask = linkedList.Search(inputValue, timing);
             var jsTask = JSRuntime.InvokeVoidAsync("searchValueInSLL", inputValue, timing).AsTask();
 
@@ -372,13 +353,6 @@
 
             var nodeToRemove = linkedList.FindNodeByIndex(inputValue);
             var nodeInfo = ConvertNodeToJavaScriptFormat(nodeToRemove);
-
-            var timing = new VisualizationTiming
-                {
-                    HighlightDelay = 1000,
-                    NodeMovementDelay = 1000,
-                    JavaScriptDelay = 1000
-                };
 
             var removeTask = linkedList.DeleteAt(inputValue, timing);
             var jsTask = JSRuntime.InvokeVoidAsync("removeValueInSll", nodeInfo, timing).AsTask();
