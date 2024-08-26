@@ -1,14 +1,5 @@
 ﻿@code {
     [Parameter] public IEnumerable<string> CodeLines { get; set; }
-    [Parameter] public EventCallback<int> OnHighlightRequest { get; set; }
-
-    public async Task HighlightLine(int lineNumber)
-    {
-        if (OnHighlightRequest.HasDelegate)
-        {
-            await OnHighlightRequest.InvokeAsync(lineNumber);
-        }
-    }
 }
 
 @if (CodeLines != null)

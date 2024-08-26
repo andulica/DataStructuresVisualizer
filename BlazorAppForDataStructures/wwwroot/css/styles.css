@@ -111,3 +111,15 @@ svg {
     justify-content: center;
     margin-top: 100px;
 }
+
+.ui-slider-handle {
+    width: 20px;
+    height: 20px;
+    background-color: #fff;
+    border-radius: 50%;
+    position: absolute;
+    top: -5px;
+    z-index: 2;
+    cursor: pointer;
+    border: 2px solid #000;
+}

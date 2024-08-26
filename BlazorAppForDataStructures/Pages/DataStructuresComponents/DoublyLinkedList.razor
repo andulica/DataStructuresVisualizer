@@ -1,6 +1,8 @@
 ﻿@page "/doublyLinkedList"
 @inject IJSRuntime JSRuntime
+@using DataStructuresVisualizer.DataStructures;
 @using DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
+@using DataStructuresVisualizer.DataStructures.Enums.DoublyLinkedList
 
 <head>
     <link rel="stylesheet" href="/css/styles.css" />
@@ -53,14 +55,14 @@
                 break;
             case "remove":
                 <div class="insertion-fields">
-                    <label>Input Value:</label>
-                    <input type="number" @bind="inputValue" placeholder="Enter Value" />
+                    <label>Input Index:</label>
+                    <input type="number" @bind="inputValue" placeholder="Enter Index" />
                     <button class="custom-button" @onclick="RemoveValue" disabled="@isOperationInProgress">Remove</button>
                 </div>
                 break;
             case "create":
                 <div class="create-fields">
-                    <label>Input Value:</label>
+                    <label>Number of Nodes:</label>
                     <input type="number" @bind="inputValue" placeholder="Enter Value" />
                     <button class="custom-button" @onclick="CreateDoublyLinkedList" disabled="@isOperationInProgress">Create List</button>
                 </div>
@@ -79,18 +81,35 @@
     </div>
 
     <div id="dll-display"></div>
+
+    <CodeDisplay CodeLines="@currentCode" />
 </div>
 
 @code {
-    private string selectedAction = "create";
+    private CodeDisplay? CodeDisplay;
+    private string _selectedAction = "search";
     private int inputValue;
     private int insertPosition;
     private bool isOperationInProgress = false;
     private Random rand = new Random();
     private string messageOutput = "";
-
-
+    private IEnumerable<string> currentCode = Enumerable.Empty<string>();
+    private VisualizationTiming timing = new VisualizationTiming { HighlightDelay = 1000, NodeMovementDelay = 1000, JavaScriptDelay = 1000 };
     private DoublyLinkedList<int> doublyLinkedList = new DoublyLinkedList<int>();
+
+    public string selectedAction
+    {
+        get => _selectedAction;
+        set
+        {
+            if (_selectedAction != value)
+            {
+                _selectedAction = value;
+                currentCode = GetCodeByOperation(value);
+                StateHasChanged();
+            }
+        }
+    }
 
     protected override void OnInitialized()
     {
@@ -108,6 +127,62 @@
         }
     }
 
+    private IEnumerable<string> GetCodeByOperation(string operation)
+    {
+        Dictionary<string, IEnumerable<string>> codeSnippets = new Dictionary<string, IEnumerable<string>>
+            {
+                ["search"] = new List<string>
+                {
+                    "if empty, return NOT_FOUND",
+                    "index = 0, tmp = head",
+                    "while (tmp.item != v)",
+                    "  index++, tmp = tmp.next",
+                    "  if tmp == null",
+                    "    return NOT_FOUND",
+                    "return index"
+                },
+                ["prepend"] = new List<string>
+                {
+                    "Vertex vtx = new Vertex(v)",
+                    "if (head != null) head.prev = vtx",
+                    "vtx.next = head",
+                    "head = vtx"
+                },
+                ["append"] = new List<string>
+                {
+                    "Vertex vtx = new Vertex(v)",
+                    "tail.next = vtx, vtx.prev = tail",
+                    "tail = vtx"
+                },
+                ["insertAtPosition"] = new List<string>
+                {
+                    "Vertex pre = head",
+                    "for (k = 0; k<i-1; k++)",
+                    "  pre = pre.next",
+                    "Vertex aft = pre.next",
+                    "Vertex vtx = new Vertex(v)",
+                    "vtx.next = aft, aft.prev = vtx",
+                    "pre.next = vtx, vtx.prev = pre"
+                },
+                ["remove"] = new List<string>
+                {
+                    "if empty, do nothing",
+                    "Vertex pre = head",
+                    "for (k = 0; k<i-1; k++)",
+                    "  pre = pre.next",
+                    "Vertex del = pre.next, after = del.next",
+                    "pre.next = aft, aft.prev = pre",
+                    "delete del"
+                }
+            };
+
+        if (codeSnippets.TryGetValue(operation, out var code))
+        {
+            return code;
+        }
+        return new List<string> { "Select an operation to view the code." };
+    }
+
     private async Task PerformInsertion()
     {
         if (isOperationInProgress) return;
@@ -122,10 +197,15 @@
 
         try
         {
-            await Task.Delay(500);
-            var nodeToInsert = doublyLinkedList.InsertAt(inputValue, insertPosition);
+            doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
+
+            var nodeToInsert = new DoublyLinkedListNode<int>(inputValue);
             var dllData = ConvertNodeToJavaScriptFormat(nodeToInsert);
-            await JSRuntime.InvokeVoidAsync("insertAtInDll", dllData, insertPosition, 1000);
+
+            var insertTask = doublyLinkedList.InsertAtAsync(nodeToInsert, insertPosition, timing);
+            var jsTask = JSRuntime.InvokeVoidAsync("insertAtInDll", dllData, insertPosition, timing.JavaScriptDelay).AsTask();
+
+            await Task.WhenAll(insertTask, jsTask); // Run both tasks concurrently
         }
         catch (Exception ex)
         {
@@ -133,6 +213,7 @@
         }
         finally
         {
+            doublyLinkedList.HighlightRequested -= HandleHighlightRequest; // Unsubscribe from highlight events
             isOperationInProgress = false;
         }
     }
@@ -147,14 +228,15 @@
             return;
         }
 
-        StateHasChanged();
         isOperationInProgress = true;
 
         try
         {
-            var nodeToInsert = doublyLinkedList.Prepend(inputValue);
+            doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
+
+            var nodeToInsert = await doublyLinkedList.PrependAsync(inputValue, timing);
             var dllData = ConvertNodeToJavaScriptFormat(nodeToInsert);
-            await JSRuntime.InvokeVoidAsync("insertAtInDll", dllData, 0, 1000);
+            await JSRuntime.InvokeVoidAsync("insertAtInDll", dllData, 0, timing.JavaScriptDelay);
         }
         catch (Exception ex)
         {
@@ -162,6 +244,7 @@
         }
         finally
         {
+            doublyLinkedList.HighlightRequested -= HandleHighlightRequest; // Unsubscribe from highlight events
             isOperationInProgress = false;
         }
     }
@@ -180,10 +263,11 @@
 
         try
         {
-            await Task.Delay(500);
-            var nodeToInsert = doublyLinkedList.Append(inputValue);
+            doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
+
+            var nodeToInsert = await doublyLinkedList.AppendAsync(inputValue, timing);
             var dllData = ConvertNodeToJavaScriptFormat(nodeToInsert);
-            await JSRuntime.InvokeVoidAsync("insertTailInDll", dllData, 2000);
+            await JSRuntime.InvokeVoidAsync("insertTailInDll", dllData, timing.JavaScriptDelay);
         }
         catch (Exception ex)
         {
@@ -191,6 +275,7 @@
         }
         finally
         {
+            doublyLinkedList.HighlightRequested -= HandleHighlightRequest; // Unsubscribe from highlight events
             isOperationInProgress = false;
         }
     }
@@ -198,12 +283,15 @@
     private async Task SearchValue()
     {
         if (isOperationInProgress) return;
+
         isOperationInProgress = true;
-        StateHasChanged();
 
         try
         {
-            await JSRuntime.InvokeVoidAsync("searchValueInDLL", inputValue, 1000);
+            doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
+
+            int index = await doublyLinkedList.SearchAsync(inputValue, timing);
+            await JSRuntime.InvokeVoidAsync("searchValueInDLL", index, timing.JavaScriptDelay);
         }
         catch (Exception ex)
         {
@@ -211,6 +299,7 @@
         }
         finally
         {
+            doublyLinkedList.HighlightRequested -= HandleHighlightRequest; // Unsubscribe from highlight events
             isOperationInProgress = false;
         }
     }
@@ -226,15 +315,48 @@
         }
 
         isOperationInProgress = true;
-        StateHasChanged();
 
         try
         {
-            var nodeToRemove = doublyLinkedList.FindNodeByIndex(inputValue);
-            var nodeInfo = ConvertNodeToJavaScriptFormat(nodeToRemove);
+            doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
-            doublyLinkedList.DeleteAt(inputValue);
-            await JSRuntime.InvokeVoidAsync("removeValueInDll", nodeInfo, 1000);
+            await doublyLinkedList.DeleteAtAsync(inputValue, timing);
+            await JSRuntime.InvokeVoidAsync("removeValueInDll", inputValue, timing.JavaScriptDelay);
+        }
+        catch (Exception ex)
+        {
+            // Handle exception
+        }
+        finally
+        {
+            doublyLinkedList.HighlightRequested -= HandleHighlightRequest; // Unsubscribe from highlight events
+            isOperationInProgress = false;
+        }
+    }
+
+    private async Task CreateDoublyLinkedList()
+    {
+        if (isOperationInProgress) return;
+
+        if (inputValue > doublyLinkedList.maxCapacity)
+        {
+            messageOutput = $"The doubly linked list can have a maximum number of {doublyLinkedList.maxCapacity} nodes. Please enter a smaller value.";
+            return;
+        }
+
+        isOperationInProgress = true;
+
+        try
+        {
+            doublyLinkedList = new DoublyLinkedList<int>();
+
+            for (int i = 0; i < inputValue; i++)
+            {
+                await doublyLinkedList.AppendAsync(rand.Next(1, 30), timing);
+            }
+
+            var dllData = ConvertListToJavaScriptFormat(doublyLinkedList);
+            await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", dllData);
         }
         catch (Exception ex)
         {
@@ -246,36 +368,9 @@
         }
     }
 
-    private async Task CreateDoublyLinkedList()
+    private void HandleHighlightRequest(int step, VisualizationTiming timing)
     {
-        if (inputValue > doublyLinkedList.maxCapacity)
-        {
-            messageOutput = "The doubly linked list can have a maximum number of 6 nodes. Please enter a smaller value.";
-            return;
-        }
-
-        isOperationInProgress = true;
-        StateHasChanged();
-
-        try
-        {
-            doublyLinkedList = new DoublyLinkedList<int>();
-            for (int i = 0; i < inputValue; i++)
-            {
-                doublyLinkedList.Append(rand.Next(1, 30));
-            }
-
-            var linkedListData = ConvertListToJavaScriptFormat(doublyLinkedList);
-            await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", linkedListData);
-        }
-        catch (Exception ex)
-        {
-            // Handle exception
-        }
-        finally
-        {
-            isOperationInProgress = false;
-        }
+        JSRuntime.InvokeVoidAsync("highlightLine", step);
     }
 
     private object ConvertNodeToJavaScriptFormat(DoublyLinkedListNode<int> node)

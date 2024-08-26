@@ -83,7 +83,7 @@
         @* Render the linked list here *@
     </div>
 
-    <CodeDisplay CodeLines="@currentCode" OnHighlightRequest="HandleHighlightRequest" />
+    <CodeDisplay CodeLines="@currentCode" />
 
     <ProgressBar MaxValue="@snapshots.Count" CurrentValue="@currentSnapshotIndex" OnValueChanged="RewindToSnapshot" />
 
@@ -101,7 +101,7 @@
     private CodeDisplay? CodeDisplay;
     private SinglyLinkedList<int> linkedList = new SinglyLinkedList<int>();
     private Random rand = new Random();
-    private string _selectedAction = "search";
+    private string _selectedAction = "create";
     private int insertPosition;
     private int inputValue;
     private string messageOutput = "";
@@ -134,11 +134,9 @@
 
     protected override void OnInitialized()
     {
-        linkedList.HighlightRequested += HandleHighlightRequest;
         linkedList.Add(rand.Next(1, 30));
         linkedList.Add(rand.Next(1, 30));
         linkedList.Add(rand.Next(1, 30));
-        currentCode = GetCodeByOperation(_selectedAction);
     }
 
     // private void CaptureSnapshot()
@@ -250,7 +248,7 @@
         StateHasChanged();
         try
         {
-            linkedList.HighlightRequested2 += HandleHighlightRequest2; // Subscribe to highlight events
+            linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
             var newNode = new SinglyLinkedListNode<int>(inputValue);
             var insertedValue = ConvertNodeToJavaScriptFormat(newNode);
@@ -266,7 +264,7 @@
         }
         finally
         {
-            linkedList.HighlightRequested2 -= HandleHighlightRequest2;
+            linkedList.HighlightRequested -= HandleHighlightRequest;
             isOperationInProgress = false; // Reset flag after operation
             StateHasChanged();
         }
@@ -286,7 +284,7 @@
         StateHasChanged();
         try
         {
-            linkedList.HighlightRequested2 += HandleHighlightRequest2; // Subscribe to highlight events
+            linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
             var head = new SinglyLinkedListNode<int>(inputValue);
             var headToInsert = ConvertNodeToJavaScriptFormat(head);
@@ -302,7 +300,7 @@
         }
         finally
         {
-            linkedList.HighlightRequested2 -= HandleHighlightRequest2; // Clean up event subscription
+            linkedList.HighlightRequested -= HandleHighlightRequest; // Clean up event subscription
             isOperationInProgress = false; // Reset flag after operation
             StateHasChanged();
         }
@@ -322,7 +320,7 @@
         StateHasChanged();
         try
         {
-            linkedList.HighlightRequested2 += HandleHighlightRequest2; // Subscribe to highlight events
+            linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
             var tail = new SinglyLinkedListNode<int>(inputValue);
             var tailToInsert = ConvertNodeToJavaScriptFormat(tail);
@@ -338,7 +336,7 @@
         }
         finally
         {
-            linkedList.HighlightRequested2 -= HandleHighlightRequest2; // Clean up event subscription
+            linkedList.HighlightRequested -= HandleHighlightRequest; // Clean up event subscription
             isOperationInProgress = false; // Reset flag after operation
             StateHasChanged();
         }
@@ -351,7 +349,7 @@
         StateHasChanged();
         try
         {
-            linkedList.HighlightRequested2 += HandleHighlightRequest2; // Subscribe to highlight events
+            linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
             var searchTask = linkedList.Search(inputValue, timing);
             var jsTask = JSRuntime.InvokeVoidAsync("searchValueInSLL", inputValue, timing).AsTask();
@@ -360,7 +358,7 @@
         }
         finally
         {
-            linkedList.HighlightRequested2 -= HandleHighlightRequest2; // Clean up event subscription
+            linkedList.HighlightRequested -= HandleHighlightRequest; // Clean up event subscription
             isOperationInProgress = false; // Reset flag after operation
             StateHasChanged();
         }
@@ -370,7 +368,7 @@
     {
         if (isOperationInProgress) return; // Prevent multiple operations
 
-        if (inputValue > linkedList.Count)
+        if (inputValue >= linkedList.Count)
         {
             messageOutput = $"The index {inputValue} you are trying to delete does not exist. Please enter a smaller value.";
             return;
@@ -379,7 +377,7 @@
         StateHasChanged();
         try
         {
-            linkedList.HighlightRequested2 += HandleHighlightRequest2; // Subscribe to highlight events
+            linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
             var nodeToRemove = linkedList.FindNodeByIndex(inputValue);
             var nodeInfo = ConvertNodeToJavaScriptFormat(nodeToRemove);
@@ -391,7 +389,7 @@
         }
         finally
         {
-            linkedList.HighlightRequested2 -= HandleHighlightRequest2; // Clean up event subscription
+            linkedList.HighlightRequested -= HandleHighlightRequest; // Clean up event subscription
             isOperationInProgress = false; // Reset flag after operation
             StateHasChanged();
         }
@@ -410,16 +408,8 @@
         StateHasChanged();
         try
         {
-            if (linkedList != null)
-            {
-                // Optionally clear existing event subscriptions to prevent memory leaks
-                linkedList.HighlightRequested -= HandleHighlightRequest;
-            }
-
             linkedList = new SinglyLinkedList<int>();
 
-            // Re-subscribe to the event
-            linkedList.HighlightRequested += HandleHighlightRequest;
 
             for (int i = 0; i < inputValue; i++)
             {
@@ -436,20 +426,10 @@
         }
     }
 
-    private void HandleHighlightRequest(int lineIndex)
+    private void HandleHighlightRequest(Enum step, VisualizationTiming timing)
     {
-        JSRuntime.InvokeVoidAsync("highlightLine", lineIndex);
-    }
-
-    private void HandleHighlightRequest2(Enum step, VisualizationTiming timing)
-    {
-        // Implement your logic here to highlight the specific line based on lineNumber
-        // Example: highlightCodeLine(lineNumber);
-
-        // Assuming you have a method to highlight the code
         JSRuntime.InvokeVoidAsync("highlightLine", step);
     }
-
 
     private async Task UpdateDisplay(SinglyLinkedList<int> list)
     {

@@ -225,8 +225,14 @@
         });
     }
 
+    function onPurposeDelay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
     async function insertNode(value, position, delay) {
-        await highlightNodesForInsertion(position, delay);
+        await highlightNodesForInsertion(position, delay * 2);
+
+        await onPurposeDelay(delay);
 
         await new Promise((resolve) => {
             setTimeout(async () => {
