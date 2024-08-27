@@ -11,14 +11,16 @@ namespace DataStructuresVisualizer.DataStructures.Enums.DoublyLinkedList
         /// </summary>
         CreateVertex = 0,
 
+        SetPreviousPointer = 1,
+
         /// <summary>
         /// Step where the new vertex's next pointer is set to the current head of the list.
         /// </summary>
-        SetNextPointer = 1,
+        SetNextPointer = 2,
 
         /// <summary>
         /// Step where the head of the list is updated to point to the new vertex.
         /// </summary>
-        SetHead = 2
+        SetHead = 3
     }
 }

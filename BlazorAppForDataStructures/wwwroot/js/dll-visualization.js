@@ -542,6 +542,64 @@
         };
     }
 
+    function createHeadNode(node) {
+        let headNode = nodes[0];
+        let targetX = headNode.x;
+        let targetY = headNode.y - 65
+
+        // Create the new node circle
+        svg.append("circle")
+            .attr("id", `node-${node.id}`)
+            .attr("class", "node")
+            .attr("cx", targetX)
+            .attr("cy", targetY)
+            .attr("r", 20)
+            .style("fill", "orange")
+            .style("stroke", "black")
+            .style("stroke-width", 2);
+
+        // Add the value text
+        svg.append("text")
+            .attr("id", `textId-${node.id}`)
+            .attr("x", targetX)
+            .attr("y", targetY + 5)
+            .text(node.value)
+            .attr("text-anchor", "middle")
+            .style("fill", "black");
+
+        return {
+            id: node.id,
+            x: targetX,
+            y: targetY,
+            value: node.value
+        }
+    }
+
+    function setColoursForNode(node, colour, delay) {
+        svg.select(`#node-${node.id}`)
+        .transition()
+            .duration(delay)
+            .style('fill', colour);
+    }
+
+    async function insertNodeAtHead(value, delay) {
+        const newNode = createHeadNode(value);
+        await onPurposeDelay(delay);
+
+        const headNode = nodes[0];
+
+        if (headNode) {
+            drawLineWithArrow(newNode.x, newNode.y, headNode.x, headNode.y, 20, 2, `link-${headNode.id}-${newNode.id}`, 'right', delay);
+            await onPurposeDelay(delay);
+            drawLineWithArrow(headNode.x, headNode.y, newNode.x, newNode.y, 20, 2, `link-${newNode.id}-${headNode.id}`, 'left', delay);
+            await onPurposeDelay(delay);
+        }
+
+        nodes.splice(0, 0, newNode);
+        setColoursForNode(newNode, 'green', delay);
+        await onPurposeDelay(delay);
+    }
+
     function highlightLinkAndArrowhead(sourceNodeId, targetNodeId, direction, delay) {
         let linkId = `#link-${sourceNodeId}-${targetNodeId}`;
         return new Promise((resolve) => {
@@ -568,6 +626,12 @@
         refreshDoublyLinkedList();
     };
 
+    window.insertHeadInDll = async function (value, delay) {
+        await insertNodeAtHead(value, delay)
+        refreshDoublyLinkedList();
+        await onPurposeDelay(delay);
+        resetNodeColors();
+    };
     window.insertAtInDll = async function (dllData, position, delay) {
         await insertNode(dllData, position, delay);
     };

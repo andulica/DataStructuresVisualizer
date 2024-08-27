@@ -233,10 +233,13 @@
         try
         {
             doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
-
-            var nodeToInsert = await doublyLinkedList.PrependAsync(inputValue, timing);
+            var nodeToInsert = new DoublyLinkedListNode<int>(inputValue);
             var dllData = ConvertNodeToJavaScriptFormat(nodeToInsert);
-            await JSRuntime.InvokeVoidAsync("insertAtInDll", dllData, 0, timing.JavaScriptDelay);
+
+            var insertTask = doublyLinkedList.PrependAsync(nodeToInsert, timing);
+            var jsTask = JSRuntime.InvokeVoidAsync("insertHeadInDll", dllData, timing.JavaScriptDelay).AsTask();
+
+            await Task.WhenAll(insertTask, jsTask); // Run both tasks concurrently
         }
         catch (Exception ex)
         {
@@ -352,7 +355,7 @@
 
             for (int i = 0; i < inputValue; i++)
             {
-                await doublyLinkedList.AppendAsync(rand.Next(1, 30), timing);
+                doublyLinkedList.Append(rand.Next(1, 30));
             }
 
             var dllData = ConvertListToJavaScriptFormat(doublyLinkedList);

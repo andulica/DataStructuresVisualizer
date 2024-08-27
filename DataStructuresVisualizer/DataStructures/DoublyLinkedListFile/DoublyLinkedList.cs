@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using DataStructuresVisualizer.DataStructures.Enums.DoublyLinkedList;
+using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
 
 namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
 {
@@ -142,10 +143,9 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         /// <summary>
         /// Prepends a new node with specified data at the start of the list.
         /// </summary>
-        /// <param name="data">_data for the new node.</param>
-        public async Task<DoublyLinkedListNode<T>> PrependAsync(T data, VisualizationTiming timing)
+        /// <param name="newNode">_data for the new node.</param>
+        public async Task PrependAsync(DoublyLinkedListNode <T> newNode, VisualizationTiming timing)
         {
-            var newNode = new DoublyLinkedListNode<T>(data);
 
             HighlightRequested?.Invoke(Convert.ToInt32(PrependSteps.CreateVertex), timing);
             await Task.Delay(timing.HighlightDelay);
@@ -158,6 +158,8 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
             {
                 head.Prev = newNode;
                 newNode.Next = head;
+                HighlightRequested?.Invoke(Convert.ToInt32(PrependSteps.SetPreviousPointer), timing);
+                await Task.Delay(timing.HighlightDelay);
 
                 HighlightRequested?.Invoke(Convert.ToInt32(PrependSteps.SetNextPointer), timing);
                 await Task.Delay(timing.HighlightDelay);
@@ -169,7 +171,6 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
             await Task.Delay(timing.HighlightDelay);
 
             count++;
-            return newNode;
         }
 
         /// <summary>
