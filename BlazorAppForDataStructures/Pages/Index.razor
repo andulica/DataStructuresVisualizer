@@ -7,14 +7,13 @@
 <PageTitle>Home</PageTitle>
 
 <div class="page-container">
-    <div class="card">
-        <p>Click the button below to start exploring various data structures and their operations.</p>
-        <button class="btn-explorer" @onclick="NavigateToPage">Explore Data Structures</button>
-    </div>
+    <div class="card" style="width: 18rem;">
 
-    <div id="sll-display">
-        @* Render the linked list here *@
+        <p class="fw-bolder">Click the button below to start exploring various data structures and their operations.</p>
+        <a href="#" class="btn btn-primary" @onclick="NavigateToPage">Explore Data Structures</a>
     </div>
+    <div id="sll-display" class="shadow-none p-3 mb-5 bg-light rounded">
+        </div>
 </div>
 
 <style>
