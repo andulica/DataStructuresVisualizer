@@ -509,7 +509,7 @@
     async function removeNodeInSll(nodeToBeRemoved, timing, isStack) {
         await onPurposeDelay(timing.highlightDelay);
 
-        await highlightNodes(nodeToBeRemoved.id, timing.highlightDelay * 2);
+        await highlightNodes(nodeToBeRemoved.id, timing.highlightDelay * 2); // Double the delay for highlighting
         await new Promise((resolve) => {
             setTimeout(() => {
                 // Transition and then remove the node's visual elements
@@ -578,7 +578,7 @@
     window.searchValueInSLL = function (value, timing) {
         resetNodeColors();
         resetLinkColors();
-        highlightNodes(value, timing.highlightDelay * 2);
+        highlightNodes(value, timing.highlightDelay * 2); // Double the delay for highlighting
     };
 
     window.insertAtInSLL = function (value, selectedIndex, timing, isStack = false) {

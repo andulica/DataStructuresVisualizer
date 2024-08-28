@@ -265,7 +265,7 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         /// </summary>
         /// <param name="data">The data to locate in the list.</param>
         /// <returns>The zero-based index of the first occurrence of the data, if found; otherwise, -1.</returns>
-        public async Task<int> SearchAsync(T data, VisualizationTiming timing)
+        public async Task SearchAsync(T data, VisualizationTiming timing)
         {
             int index = 0;
             DoublyLinkedListNode<T> current = head;
@@ -275,7 +275,7 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
             {
                 HighlightRequested?.Invoke(Convert.ToInt32(SearchSteps.CheckEmptyReturnNotFound), timing); // "List is empty"
                 await Task.Delay(timing.HighlightDelay);
-                return -1;
+                return;
             }
 
             // Step 2: Traverse the list to find the data
@@ -291,7 +291,7 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
                 {
                     HighlightRequested?.Invoke(Convert.ToInt32(SearchSteps.ReturnIndex), timing); // Return index
                     await Task.Delay(timing.HighlightDelay);
-                    return index;
+                    return;
                 }
 
                 // Move to the next node
@@ -313,7 +313,7 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
 
             HighlightRequested?.Invoke(Convert.ToInt32(SearchSteps.ReturnNull), timing); // Return -1 if not found
             await Task.Delay(timing.HighlightDelay);
-            return -1; // Data not found
+            return; // Data not found
         }  
 
         /// <summary>

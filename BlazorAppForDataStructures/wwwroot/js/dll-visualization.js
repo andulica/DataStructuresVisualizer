@@ -183,7 +183,8 @@
         });
     };
 
-    function highlightNodes(value, delay) {
+    async function highlightNodes(value, delay) {
+
         return new Promise((resolve) => {
             let timeouts = [];
             let found = false;
@@ -195,19 +196,16 @@
                         return;
                     }
 
-                    svg.select(`#node-${node.id}`)
-                        .transition().duration(delay)
-                        .style('fill', 'orange');
+                    svg.select(`#node-${node.id}`).transition().duration(delay).style('fill', 'orange');
 
                     if (index > 0) {
                         highlightLinkAndArrowhead(nodes[index - 1].id, node.id, 'right', delay);
                     }
 
                     if (node.value === value) {
-                        svg.select(`#node-${node.id}`)
-                            .transition().duration(500)
-                            .style('fill', 'green');
+                        svg.select(`#node-${node.id}`).transition().duration(delay).style('fill', 'green');
                         found = true;
+                        clearTimeouts(timeouts);
                         resolve();
                     }
                 }, delay * index);
@@ -217,12 +215,13 @@
 
             let finalTimeout = setTimeout(() => {
                 if (!found) resolve();
-            }, 1000 * nodes.length);
+            }, delay * nodes.length);
             timeouts.push(finalTimeout);
-        }).then(() => {
-            resetNodeColors();
-            resetLinkColors();
-        });
+        })
+
+        function clearTimeouts(timeouts) {
+            timeouts.forEach(timeoutId => clearTimeout(timeoutId));
+        }
     }
 
     function onPurposeDelay(ms) {
@@ -618,8 +617,9 @@
     };
 
     window.searchValueInDLL = function (value, delay) {
-        highlightNodes(value, delay);
-        refreshDoublyLinkedList();
+        resetNodeColors();
+        resetLinkColors();
+        highlightNodes(value, delay * 2); //double the delay for search
     };
 
     window.insertHeadInDll = async function (value, delay) {

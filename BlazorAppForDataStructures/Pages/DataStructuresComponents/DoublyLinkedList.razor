@@ -87,7 +87,7 @@
 
 @code {
     private CodeDisplay? CodeDisplay;
-    private string _selectedAction = "search";
+    private string _selectedAction = "";
     private int inputValue;
     private int insertPosition;
     private bool isOperationInProgress = false;
@@ -296,9 +296,11 @@
         try
         {
             doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
+            
+            var searchTask = doublyLinkedList.SearchAsync(inputValue, timing);
+            var jsTask = JSRuntime.InvokeVoidAsync("searchValueInDLL", inputValue, timing.JavaScriptDelay).AsTask();
 
-            int index = await doublyLinkedList.SearchAsync(inputValue, timing);
-            await JSRuntime.InvokeVoidAsync("searchValueInDLL", index, timing.JavaScriptDelay);
+            await Task.WhenAll(searchTask, jsTask); // Run both tasks concurrently
         }
         catch (Exception ex)
         {
