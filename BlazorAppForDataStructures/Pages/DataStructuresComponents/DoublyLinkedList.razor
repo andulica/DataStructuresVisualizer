@@ -268,9 +268,13 @@
         {
             doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
-            var nodeToInsert = await doublyLinkedList.AppendAsync(inputValue, timing);
+            var nodeToInsert = new DoublyLinkedListNode<int>(inputValue);
             var dllData = ConvertNodeToJavaScriptFormat(nodeToInsert);
-            await JSRuntime.InvokeVoidAsync("insertTailInDll", dllData, timing.JavaScriptDelay);
+
+            var appendTask = doublyLinkedList.AppendAsync(inputValue, timing);        
+            var jsTask = JSRuntime.InvokeVoidAsync("insertTailInDll", dllData, timing.JavaScriptDelay).AsTask();
+
+            await Task.WhenAll(appendTask, jsTask); // Run both tasks concurrently
         }
         catch (Exception ex)
         {

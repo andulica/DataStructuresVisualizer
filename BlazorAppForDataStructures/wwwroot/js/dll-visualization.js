@@ -413,23 +413,19 @@
 
     async function insertNodeAtTail(value, delay) {
 
+        const newNode = createTailNode(value);
+        nodes.push(newNode);
+
+        const prevNode = nodes[nodes.length - 2];
+
+        if (prevNode) {
+            await onPurposeDelay(delay);
+            drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, `link-${prevNode.id}-${newNode.id}`, 'right', delay);
+            drawLineWithArrow(newNode.x, newNode.y, prevNode.x, prevNode.y, 20, 2, `link-${newNode.id}-${prevNode.id}`, 'left', delay);
+        }
         setTimeout(() => {
-            const newNode = createTailNode(value);
-            nodes.push(newNode);
-
-            const prevNode = nodes[nodes.length - 2];
-
-            if (prevNode) {
-                setTimeout(() => {
-                    drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, `link-${prevNode.id}-${newNode.id}`, 'right', delay);
-                    drawLineWithArrow(newNode.x, newNode.y, prevNode.x, prevNode.y, 20, 2, `link-${newNode.id}-${prevNode.id}`, 'left', delay);
-                }, 1000);
-            }
-            setTimeout(() => {
-                resetNodeColors();
-            }, 1000);
-
-        }, 1000);
+            resetNodeColors();
+        }, delay);
     }
 
     function removeNode(nodeToBeRemoved, delay) {
@@ -577,7 +573,7 @@
 
     function setColoursForNode(node, colour, delay) {
         svg.select(`#node-${node.id}`)
-        .transition()
+            .transition()
             .duration(delay)
             .style('fill', colour);
     }
