@@ -78,20 +78,20 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         {
 
             // Invoke highlighting for visual effect
-            await HighlightRequested?.Invoke(AppendSteps.CreateVertex); // "Vertex vtx = new Vertex(v)"
+            await HighlightRequested.Invoke(AppendSteps.CreateVertex); // "Vertex vtx = new Vertex(v)"
 
             if (_head == null)
             {
                 _head = _tail = newNode; // Set both head and tail to the new node if list was empty
-                await HighlightRequested?.Invoke(AppendSteps.UpdateTailNextPointer); // "tail.next = vtx"
+                await HighlightRequested.Invoke(AppendSteps.UpdateTailNextPointer); // "tail.next = vtx"
             }
             else
             {
-                await HighlightRequested?.Invoke(AppendSteps.UpdateTailNextPointer); // "tail.next = vtx"
+                await HighlightRequested.Invoke(AppendSteps.UpdateTailNextPointer); // "tail.next = vtx"
                 _tail.Next = newNode;
 
                 _tail = newNode;
-                await HighlightRequested?.Invoke(AppendSteps.UpdateTail); // "tail = vtx"
+                await HighlightRequested.Invoke(AppendSteps.UpdateTail); // "tail = vtx"
             }
         }
         count++;
@@ -112,12 +112,12 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// <param name="data">The data to prepend to the list.</param>
     public async Task Prepend(SinglyLinkedListNode<T> newNode)
     {
-        await HighlightRequested?.Invoke(PrependSteps.CreateVertex);
+        await HighlightRequested.Invoke(PrependSteps.CreateVertex);
 
-        await HighlightRequested?.Invoke(PrependSteps.SetNextPointer);
+        await HighlightRequested.Invoke(PrependSteps.SetNextPointer);
         newNode.Next = _head;
 
-        await HighlightRequested?.Invoke(PrependSteps.SetHead);
+        await HighlightRequested.Invoke(PrependSteps.SetHead);
         _head = newNode;
 
         count++;
@@ -142,38 +142,38 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
             newNode.Next = _head;
             _head = newNode;
             count++;
-            await HighlightRequested?.Invoke(InsertAtPositionSteps.SetPreNextToVertex); // "head = vtx"
+            await HighlightRequested.Invoke(InsertAtPositionSteps.SetPreNextToVertex); // "head = vtx"
         }
 
         SinglyLinkedListNode<T> current = _head;
         int currentIndex = 0;
 
-        await HighlightRequested?.Invoke(InsertAtPositionSteps.InitializePreHead); // "Vertex pre = head"
+        await HighlightRequested.Invoke(InsertAtPositionSteps.InitializePreHead); // "Vertex pre = head"
 
         // Traverse until the end of the list or the specified index
         while (current.Next != null && currentIndex < index)
         {
-            await HighlightRequested?.Invoke(InsertAtPositionSteps.LoopToPosition); // "for (k = 0; k<i-1; k++)"
+            await HighlightRequested.Invoke(InsertAtPositionSteps.LoopToPosition); // "for (k = 0; k<i-1; k++)"
             current = current.Next;
             currentIndex++;
-            await HighlightRequested?.Invoke(InsertAtPositionSteps.MovePreToNext); // "pre = pre.next"
+            await HighlightRequested.Invoke(InsertAtPositionSteps.MovePreToNext); // "pre = pre.next"
 
             if (currentIndex == index)
             {
-                await HighlightRequested?.Invoke(InsertAtPositionSteps.SetAftToPreNext); // "Vertex aft = pre.next"
+                await HighlightRequested.Invoke(InsertAtPositionSteps.SetAftToPreNext); // "Vertex aft = pre.next"
             }
         }
 
-        await HighlightRequested?.Invoke(InsertAtPositionSteps.CreateVertex); // "Vertex vtx = new Vertex(v)"
+        await HighlightRequested.Invoke(InsertAtPositionSteps.CreateVertex); // "Vertex vtx = new Vertex(v)"
 
-        await HighlightRequested?.Invoke(InsertAtPositionSteps.SetVertexNextToAft); // "vtx.next = aft"
+        await HighlightRequested.Invoke(InsertAtPositionSteps.SetVertexNextToAft); // "vtx.next = aft"
 
         // Insert the new node
         newNode.Next = current.Next;
         current.Next = newNode;
         count++;
 
-        await HighlightRequested?.Invoke(InsertAtPositionSteps.SetPreNextToVertex); // "pre.next = vtx"
+        await HighlightRequested.Invoke(InsertAtPositionSteps.SetPreNextToVertex); // "pre.next = vtx"
     }
 
     ///// <summary>
@@ -238,19 +238,11 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// <exception cref="IndexOutOfRangeException">
     /// Thrown when the specified index is less than 0 or greater than or equal to the size of the list.
     /// </exception>
-    public async Task DeleteAt(int index, VisualizationTiming timing)
+    public async Task DeleteAt(int index)
     {
-        if (index < 0 || index >= count)
-        {
-            throw new IndexOutOfRangeException($"Index {index} is out of range for the linked list.");
-        }
-
-        await Task.Delay(timing.HighlightDelay);
-
         if (_head == null)
         {
-            HighlightRequested2?.Invoke(RemoveSteps.CheckIfEmpty, timing); // "if empty, do nothing"
-            await Task.Delay(timing.HighlightDelay);
+            await HighlightRequested.Invoke(RemoveSteps.CheckIfEmpty); // "if empty, do nothing"
             return; // Check if the list is empty and exit
         }
 
@@ -258,41 +250,33 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
 
         if (index == 0)
         {
-            HighlightRequested2?.Invoke(RemoveSteps.InitializePreHead, timing); // "Vertex pre = head"
-            await Task.Delay(timing.HighlightDelay);
+            await HighlightRequested.Invoke(RemoveSteps.InitializePreHead); // "Vertex pre = head"
 
             _head = _head.Next; // Move head to next node, effectively deleting it
             count--;
-            HighlightRequested2?.Invoke(RemoveSteps.DeleteDel, timing); // "delete del"
-            await Task.Delay(timing.HighlightDelay);
+            await HighlightRequested.Invoke(RemoveSteps.DeleteDel); // "delete del"
             return;
         }
 
-        HighlightRequested2?.Invoke(RemoveSteps.InitializePreHead, timing); // "Vertex pre = head"
-        await Task.Delay(timing.HighlightDelay);
+        await HighlightRequested.Invoke(RemoveSteps.InitializePreHead); // "Vertex pre = head"
 
         for (int i = 0; i < index; i++)
         {
-            HighlightRequested2?.Invoke(RemoveSteps.LoopToPosition, timing); // "for (k = 0; k<i-1; k++)"
-            await Task.Delay(timing.HighlightDelay);
+            await HighlightRequested.Invoke(RemoveSteps.LoopToPosition); // "for (k = 0; k<i-1; k++)"
 
             current = current.Next;
 
-            HighlightRequested2?.Invoke(RemoveSteps.MovePreToNext, timing); // "pre = pre.next"
-            await Task.Delay(timing.HighlightDelay);
+            await HighlightRequested.Invoke(RemoveSteps.MovePreToNext); // "pre = pre.next"
         }
 
-        HighlightRequested2?.Invoke(RemoveSteps.SetDelAndAfter, timing); // "Vertex del = pre.next, after = del.next"
-        await Task.Delay(timing.HighlightDelay);
+        await HighlightRequested.Invoke(RemoveSteps.SetDelAndAfter); // "Vertex del = pre.next, after = del.next"
 
         current.Next = current.Next?.Next;
         count--;
 
-        HighlightRequested2?.Invoke(RemoveSteps.UpdatePreNextToAfter, timing); // "pre.next = after"
-        await Task.Delay(timing.HighlightDelay);
+        await HighlightRequested.Invoke(RemoveSteps.UpdatePreNextToAfter); // "pre.next = after"
 
-        HighlightRequested2?.Invoke(RemoveSteps.DeleteDel, timing); // "delete del"
-        await Task.Delay(timing.HighlightDelay);
+        await HighlightRequested.Invoke(RemoveSteps.DeleteDel); // "delete del"
     }
 
     /// <summary>
