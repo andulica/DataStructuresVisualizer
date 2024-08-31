@@ -349,16 +349,16 @@
         StateHasChanged();
         try
         {
-            linkedList.HighlightRequested2 += HandleHighlightRequest; // Subscribe to highlight events
+            linkedList.HighlightRequested += HandleHighlightRequest2; // Subscribe to highlight events
 
-            var searchTask = linkedList.Search(inputValue, timing);
+            var searchTask = linkedList.SearchByValue(inputValue);
             var jsTask = JSRuntime.InvokeVoidAsync("searchValueInSLL", inputValue, timing).AsTask();
 
             await Task.WhenAll(searchTask, jsTask); // Run both tasks concurrently
         }
         finally
         {
-            linkedList.HighlightRequested2 -= HandleHighlightRequest; // Clean up event subscription
+            linkedList.HighlightRequested -= HandleHighlightRequest2; // Clean up event subscription
             isOperationInProgress = false; // Reset flag after operation
             StateHasChanged();
         }

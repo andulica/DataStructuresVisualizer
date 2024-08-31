@@ -226,18 +226,16 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     //}
 
     /// <summary>
-    /// Deletes a node at the specified index from the singly linked list asynchronously.
+    /// Asynchronously deletes the node at the specified index from the singly linked list.
     /// </summary>
     /// <remarks>
-    /// This method allows for deletion of nodes at any position within the list.
-    /// It can handle deletion of the head or tail nodes, as well as any node in between.
-    /// The list is zero-indexed.
+    /// This method handles the deletion of nodes from any position within the list, including 
+    /// the head, tail, or any node in between. It updates the links between nodes to maintain 
+    /// the list structure after deletion. The method also integrates asynchronous highlight steps 
+    /// to visually represent the deletion process, aiding in UI visualization without coupling 
+    /// business logic with the UI code.
     /// </remarks>
     /// <param name="index">The zero-based index of the node to be deleted.</param>
-    /// <param name="delay">The delay in milliseconds for visualizing the steps.</param>
-    /// <exception cref="IndexOutOfRangeException">
-    /// Thrown when the specified index is less than 0 or greater than or equal to the size of the list.
-    /// </exception>
     public async Task DeleteAt(int index)
     {
         if (_head == null)
@@ -280,35 +278,39 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     }
 
     /// <summary>
-    /// Searches for a node with the specified data and returns it.
+    /// Asynchronously searches for the first node containing the specified data in the singly linked list.
     /// </summary>
-    /// <param name="data">The data to search for in the list.</param>
-    /// <returns>The node containing the data if found in the list; otherwise, null.</returns>
-    public async Task<SinglyLinkedListNode<T>> Search(T data, VisualizationTiming timing)
+    /// <remarks>
+    /// This method traverses the linked list, starting from the head, to find the first occurrence of the specified data.
+    /// It integrates asynchronous highlight steps to visually represent each phase of the search operation, supporting
+    /// external visualization and clear separation of concerns between business logic and UI.
+    /// </remarks>
+    /// <param name="data">The data to search for within the list nodes.</param>
+    /// <returns>
+    /// The task completes when the search is done, and the highlights are triggered at each step. 
+    /// If the data is found, the node is returned via the highlights; otherwise, the search ends, indicating not found.
+    /// </returns>
+    public async Task SearchByValue(T data)
     {
         // Check if the list is empty and handle the first line of the script
         if (_head == null)
         {
-            HighlightRequested2?.Invoke(SearchSteps.CheckEmptyReturnNotFound, timing); // "return NOT_FOUND."
-            await Task.Delay(timing.HighlightDelay);
-            return null;
+            await HighlightRequested.Invoke(SearchSteps.CheckEmptyReturnNotFound); // "return NOT_FOUND."
+            return;
         }
-        HighlightRequested2?.Invoke(SearchSteps.InitializeIndexAndHead, timing); // "index = 0, tmp = head"
-        await Task.Delay(timing.HighlightDelay);
+        await HighlightRequested.Invoke(SearchSteps.InitializeIndexAndHead); // "index = 0, tmp = head"
 
         SinglyLinkedListNode<T> current = _head;
         int position = 0;
 
         while (current != null)
         {
-            HighlightRequested2?.Invoke(SearchSteps.LoopUntilFound, timing); // "while (tmp.item != v)"
-            await Task.Delay(timing.HighlightDelay);
+            await HighlightRequested.Invoke(SearchSteps.LoopUntilFound); // "while (tmp.item != v)"
 
             if (EqualityComparer<T>.Default.Equals(current._data, data))
             {
-                HighlightRequested2?.Invoke(SearchSteps.ReturnIndex, timing); // "return index"
-                await Task.Delay(timing.HighlightDelay);
-                return current;
+                await HighlightRequested.Invoke(SearchSteps.ReturnIndex); // "return index"
+                return;
             }
 
             // Update the tmp and index for the next loop iteration
@@ -318,19 +320,14 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
             // Check if the next node is null to handle the last if condition
             if (current == null)
             {
-                HighlightRequested2?.Invoke(SearchSteps.CheckIfNullReturnNotFound, timing); // "if tmp == null"
-                await Task.Delay(timing.HighlightDelay);
-                HighlightRequested2?.Invoke(SearchSteps.ReturnNull, timing); // "return null"
-                await Task.Delay(timing.HighlightDelay);
+                await HighlightRequested.Invoke(SearchSteps.CheckIfNullReturnNotFound); // "if tmp == null"
+                await HighlightRequested.Invoke(SearchSteps.ReturnNull); // "return null"
             }
             else
             {
-                HighlightRequested2?.Invoke(SearchSteps.IncrementIndexAndMoveNext, timing); // "index++, tmp = tmp.next"
-                await Task.Delay(timing.HighlightDelay);
+                await HighlightRequested.Invoke(SearchSteps.IncrementIndexAndMoveNext); // "index++, tmp = tmp.next"
             }
         }
-
-        return null;
     }
 
     /// <summary>
