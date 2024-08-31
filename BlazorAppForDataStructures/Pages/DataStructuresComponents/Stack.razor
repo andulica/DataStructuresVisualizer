@@ -134,8 +134,8 @@
                     NodeMovementDelay = 1500,
                     JavaScriptDelay = 2000
                 };
-            var nodeToPush = await stack.Prepend(head, timing); // Wait for the node to be pushed onto the stack
-            var nodeToBePushedOnSVG = ConvertNodeToJavaScriptFormat(nodeToPush);
+            await stack.Prepend(head); // Wait for the node to be pushed onto the stack
+            var nodeToBePushedOnSVG = ConvertNodeToJavaScriptFormat(head);
             await JSRuntime.InvokeVoidAsync("insertAtInSLL", nodeToBePushedOnSVG, 0, 1000, isStack); // Then update the UI
         }
         finally

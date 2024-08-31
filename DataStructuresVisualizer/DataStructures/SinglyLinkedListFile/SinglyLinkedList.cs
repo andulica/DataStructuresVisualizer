@@ -100,31 +100,27 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     }
 
     /// <summary>
-    /// Prepends a new node with the specified data to the beginning of the list.
+    /// Prepends a new node to the beginning of the singly linked list.
     /// </summary>
+    /// <param name="newNode">The new node to prepend to the list.</param>
+    /// <remarks>
+    /// This method inserts a new node at the start of the list, updating the head pointer
+    /// and linking the new node to the current head. It manages the addition by invoking asynchronous 
+    /// highlight operations, which are used for visualizing each step of the prepend process externally.
+    /// This separation of business logic from UI allows for clear and maintainable code structure.
+    /// </remarks>
     /// <param name="data">The data to prepend to the list.</param>
-    public async Task<SinglyLinkedListNode<T>> Prepend(SinglyLinkedListNode<T> newNode, VisualizationTiming timing)
+    public async Task Prepend(SinglyLinkedListNode<T> newNode)
     {
-        if (count >= maxCapacity)
-        {
-            throw new InvalidOperationException("List is full.");
-        }
-        await Task.Delay(timing.HighlightDelay * 2);
+        await HighlightRequested?.Invoke(PrependSteps.CreateVertex);
 
-
-        HighlightRequested2?.Invoke(PrependSteps.CreateVertex, timing);
-        await Task.Delay(timing.HighlightDelay);
-
-        HighlightRequested2?.Invoke(PrependSteps.SetNextPointer, timing);
-        await Task.Delay(timing.HighlightDelay);
+        await HighlightRequested?.Invoke(PrependSteps.SetNextPointer);
         newNode.Next = _head;
 
-        HighlightRequested2?.Invoke(PrependSteps.SetHead, timing);
-        await Task.Delay(timing.HighlightDelay);
+        await HighlightRequested?.Invoke(PrependSteps.SetHead);
         _head = newNode;
 
         count++;
-        return newNode;
     }
 
     /// <summary>
