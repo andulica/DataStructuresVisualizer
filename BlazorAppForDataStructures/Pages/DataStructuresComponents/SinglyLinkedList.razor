@@ -248,12 +248,12 @@
         StateHasChanged();
         try
         {
-            linkedList.HighlightRequested2 += HandleHighlightRequest; // Subscribe to highlight events
+            linkedList.HighlightRequested += HandleHighlightRequest2; // Subscribe to highlight events
 
             var newNode = new SinglyLinkedListNode<int>(inputValue);
             var insertedValue = ConvertNodeToJavaScriptFormat(newNode);
 
-            var insertTask = linkedList.InsertAt(insertPosition, newNode, timing);
+            var insertTask = linkedList.InsertAt(insertPosition, newNode);
             var jsTask = JSRuntime.InvokeVoidAsync("insertAtInSLL", insertedValue, insertPosition, timing).AsTask();
 
             await Task.WhenAll(insertTask, jsTask); // Run both tasks concurrently
@@ -264,7 +264,7 @@
         }
         finally
         {
-            linkedList.HighlightRequested2 -= HandleHighlightRequest;
+            linkedList.HighlightRequested -= HandleHighlightRequest2;
             isOperationInProgress = false; // Reset flag after operation
             StateHasChanged();
         }
