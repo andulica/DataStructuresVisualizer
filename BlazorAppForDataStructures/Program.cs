@@ -10,7 +10,6 @@ namespace BlazorAppForDataStructures
         {
             var builder = WebApplication.CreateBuilder(args);
 
-           // var connectionString = "Server=mysql-200-124.mysql.prositehosting.net;Port=3306;Database=BlazorAppDB;Uid=AndreiBalan;Pwd=SofiaIoana2020;";// Environment.GetEnvironmentVariable("MYAPP_CONNECTION_STRING");
             var connectionString = Environment.GetEnvironmentVariable("MYAPP_CONNECTION_STRING");
 
             if (string.IsNullOrEmpty(connectionString))
