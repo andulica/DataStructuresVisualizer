@@ -538,33 +538,29 @@
     }
 
     async function removeNodeInSll(nodeToBeRemoved, timing, isStack) {
-        await onPurposeDelay(timing.highlightDelay);
 
         await highlightNodes(nodeToBeRemoved.id, timing.highlightDelay * 2); // Double the delay for highlighting
         await new Promise((resolve) => {
-            setTimeout(() => {
-                // Transition and then remove the node's visual elements
-                svg.select(`#node-${nodeToBeRemoved.id}`)
-                    .transition().duration(timing.highlightDelay)
-                    .style('opacity', 0) // Fade out effect
-                    .on('end', () => {
-                        svg.select(`#node-${nodeToBeRemoved.id}`).remove();
-                        // Proceed with text removal after node is removed
-                        svg.select(`#textId-${nodeToBeRemoved.id}`)
-                            .transition().duration(timing.highlightDelay)
-                            .style('opacity', 0) // Fade out effect for text
-                            .on('end', () => {
-                                svg.select(`#textId-${nodeToBeRemoved.id}`).remove();
+            // Transition and then remove the node's visual elements
+            svg.select(`#node-${nodeToBeRemoved.id}`)
+                .transition().duration(timing.highlightDelay)
+                .style('opacity', 0) // Fade out effect
 
-                                // Update links if necessary and resolve when complete
-                                updateLinksAfterRemoval(nodeToBeRemoved);
+            svg.select(`#node-${nodeToBeRemoved.id}`).remove();
+            // Proceed with text removal after node is removed
+            svg.select(`#textId-${nodeToBeRemoved.id}`)
+                .transition().duration(timing.highlightDelay)
+                .style('opacity', 0) // Fade out effect for text
+                .on('end', () => {
+                    svg.select(`#textId-${nodeToBeRemoved.id}`).remove();
 
-                                refreshSinglyLinkedList(isStack);
+                    // Update links if necessary and resolve when complete
+                    updateLinksAfterRemoval(nodeToBeRemoved);
 
-                                resolve(); // Ensure all transitions have time to complete
-                            });
-                    });
-            }, timing.javaScriptDelay); // Delay before removing the node to allow for highlighting
+                    refreshSinglyLinkedList(isStack);
+
+                    resolve(); // Ensure all transitions have time to complete
+                });
         });
     }
 
