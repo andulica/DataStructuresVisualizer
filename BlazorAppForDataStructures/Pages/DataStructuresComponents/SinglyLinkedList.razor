@@ -173,8 +173,7 @@
                     "if empty, return NOT_FOUND",
                     "index = 0, tmp = head",
                     "while (tmp.item != v)",
-                    "  index++, tmp = tmp.next",
-                    "  if tmp == null",
+                    "index++, tmp = tmp.next,\n if tmp == null,",
                     "    return NOT_FOUND",
                     "return index"
                 },
@@ -249,7 +248,7 @@
         StateHasChanged();
         try
         {
-            linkedList.HighlightRequested += HandleHighlightRequest2; // Subscribe to highlight events
+            linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
             var newNode = new SinglyLinkedListNode<int>(inputValue);
             var insertedValue = ConvertNodeToJavaScriptFormat(newNode);
@@ -265,7 +264,7 @@
         }
         finally
         {
-            linkedList.HighlightRequested -= HandleHighlightRequest2;
+            linkedList.HighlightRequested -= HandleHighlightRequest;
             isOperationInProgress = false; // Reset flag after operation
             StateHasChanged();
         }
@@ -285,7 +284,7 @@
         StateHasChanged();
         try
         {
-            linkedList.HighlightRequested += HandleHighlightRequest2; // Subscribe to highlight events
+            linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
             var head = new SinglyLinkedListNode<int>(inputValue);
             var headForJSInsertion = ConvertNodeToJavaScriptFormat(head);
@@ -301,7 +300,7 @@
         }
         finally
         {
-            linkedList.HighlightRequested -= HandleHighlightRequest2; // Clean up event subscription
+            linkedList.HighlightRequested -= HandleHighlightRequest; // Clean up event subscription
             isOperationInProgress = false; // Reset flag after operation
             StateHasChanged();
         }
@@ -321,7 +320,7 @@
         StateHasChanged();
         try
         {
-            linkedList.HighlightRequested += HandleHighlightRequest2; // Subscribe to highlight events
+            linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
             var tail = new SinglyLinkedListNode<int>(inputValue);
             var tailToInsert = ConvertNodeToJavaScriptFormat(tail);
@@ -337,7 +336,7 @@
         }
         finally
         {
-            linkedList.HighlightRequested -= HandleHighlightRequest2; // Clean up event subscription
+            linkedList.HighlightRequested -= HandleHighlightRequest; // Clean up event subscription
             isOperationInProgress = false; // Reset flag after operation
             StateHasChanged();
         }
@@ -350,7 +349,7 @@
         StateHasChanged();
         try
         {
-            linkedList.HighlightRequested += HandleHighlightRequest2; // Subscribe to highlight events
+            linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
             var searchTask = linkedList.SearchByValue(inputValue);
             var jsTask = JSRuntime.InvokeVoidAsync("searchValueInSLL", inputValue, timing).AsTask();
@@ -359,7 +358,7 @@
         }
         finally
         {
-            linkedList.HighlightRequested -= HandleHighlightRequest2; // Clean up event subscription
+            linkedList.HighlightRequested -= HandleHighlightRequest; // Clean up event subscription
             isOperationInProgress = false; // Reset flag after operation
             StateHasChanged();
         }
@@ -378,7 +377,7 @@
         StateHasChanged();
         try
         {
-            linkedList.HighlightRequested += HandleHighlightRequest2; // Subscribe to highlight events
+            linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
             var nodeToRemove = linkedList.FindNodeByIndex(inputValue);
             var nodeToBeDeleted = ConvertNodeToJavaScriptFormat(nodeToRemove);
@@ -390,7 +389,7 @@
         }
         finally
         {
-            linkedList.HighlightRequested -= HandleHighlightRequest2; // Clean up event subscription
+            linkedList.HighlightRequested -= HandleHighlightRequest; // Clean up event subscription
             isOperationInProgress = false; // Reset flag after operation
             StateHasChanged();
         }
@@ -427,15 +426,9 @@
         }
     }
 
-    private async Task HandleHighlightRequest2(Enum step)
+    private async Task HandleHighlightRequest(Enum step)
     {
-        JSRuntime.InvokeVoidAsync("highlightLine", step);
-        await Task.Delay(timing.HighlightDelay);
-    }
-
-    private async Task HandleHighlightRequest(Enum step, VisualizationTiming timing)
-    {
-        JSRuntime.InvokeVoidAsync("highlightLine", step);
+        await JSRuntime.InvokeVoidAsync("highlightLine", step);
         await Task.Delay(timing.HighlightDelay);
     }
 

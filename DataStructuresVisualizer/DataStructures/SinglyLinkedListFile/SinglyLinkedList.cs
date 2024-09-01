@@ -9,8 +9,6 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     private SinglyLinkedListNode<T>? _tail;
 
     public Func<Enum, Task> HighlightRequested;
-
-    public Func<Enum, VisualizationTiming, Task> HighlightRequested2;
     public SinglyLinkedListNode<T> Head => _head;
     public SinglyLinkedListNode<T> Tail => _tail;
 
@@ -320,7 +318,6 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
             // Check if the next node is null to handle the last if condition
             if (current == null)
             {
-                await HighlightRequested.Invoke(SearchSteps.CheckIfNullReturnNotFound); // "if tmp == null"
                 await HighlightRequested.Invoke(SearchSteps.ReturnNull); // "return null"
             }
             else
