@@ -110,6 +110,7 @@
     private bool isOperationInProgress = false; // Flag to track operation state
     private List<Snapshot> snapshots = new();
     private int currentSnapshotIndex = 0;
+    private bool isStack= false;
 
     VisualizationTiming timing = new VisualizationTiming
         {
@@ -290,7 +291,7 @@
             var headForJSInsertion = ConvertNodeToJavaScriptFormat(head);
 
             var prependTask = linkedList.Prepend(head);
-            var jsTask = JSRuntime.InvokeVoidAsync("insertAtInSLL", headForJSInsertion, 0, timing).AsTask();
+            var jsTask = JSRuntime.InvokeVoidAsync("insertHeadInSll", headForJSInsertion, timing, isStack = false).AsTask();
 
             await Task.WhenAll(prependTask, jsTask); // Run both tasks concurrently
         }

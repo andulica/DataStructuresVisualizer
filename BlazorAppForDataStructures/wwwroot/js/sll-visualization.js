@@ -299,7 +299,7 @@
             .attr("cx", targetX)
             .attr("cy", targetY)
             .attr("r", 20)
-            .style("fill", "green")
+            .style("fill", "orange")
             .style("stroke", "black")
             .style("stroke-width", 2);
 
@@ -421,6 +421,34 @@
         updateNodePositions(isStack);
         redrawLinks();
         repositionText();
+    }
+
+    async function insertNodeAtHead(value, timing, isStack) {
+        const newNode = createNewNode(value, 0);
+        nodes.unshift(newNode); // Add the new node to the beginning of the list
+
+        await onPurposeDelay(timing.highlightDelay);
+        if (nodes.length > 1) {
+            const nextNode = nodes[1];
+            drawLineWithArrow(newNode.x, newNode.y, nextNode.x, nextNode.y, 20, 2, `link-${newNode.id}-${nextNode.id}`, timing.javaScriptDelay);
+        }
+        await onPurposeDelay(timing.highlightDelay);
+
+        setNodeColor('green', newNode);
+        setTimeout(() => {
+            refreshSinglyLinkedList(isStack);
+
+            setTimeout(() => {
+                resetNodeColors();
+                resolve(); // Resolve the promise when all timeouts complete
+            }, timing.javaScriptDelay);
+        }, timing.nodeMovementDelay);
+    }
+
+    function setNodeColor(color, node) {
+        svg.select(`#node-${node.id}`).
+            transition().duration(500).
+            style('fill', color);
     }
 
     async function insertNodeAtTail(value, timing) {
@@ -612,6 +640,10 @@
         resetNodeColors();
         resetLinkColors();
         insertNodeAtTail(value, timing);
+    }
+
+    window.insertHeadInSll = function (value, timing, isStack) {
+        insertNodeAtHead(value, timing, isStack);
     }
 
     window.resetSllColours = function () {
