@@ -332,7 +332,7 @@
             .attr("cx", targetX)
             .attr("cy", targetY)
             .attr("r", 20)
-            .style("fill", "green")
+            .style("fill", "orange")
             .style("stroke", "black")
             .style("stroke-width", 2);
 
@@ -461,13 +461,16 @@
         const prevNode = nodes[nodes.length - 2];
 
         if (prevNode) {
-            setTimeout(() => {
-                drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, `link-${prevNode.id}-${newNode.id}`, timing.javaScriptDelay);
-            }, timing.javaScriptDelay);
+            await onPurposeDelay(timing.javaScriptDelay);
+
+            drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, `link-${prevNode.id}-${newNode.id}`, timing.javaScriptDelay);
+
         }
-        setTimeout(() => {
-            resetNodeColors();
-        }, timing.nodeMovementDelay);
+        await onPurposeDelay(timing.javaScriptDelay);
+
+        setNodeColor('green', newNode);
+        await onPurposeDelay(timing.javaScriptDelay);
+        resetNodeColors();
     }
 
     function updateNodePositions(isStack) {
