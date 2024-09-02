@@ -133,7 +133,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// The method asynchronously triggers highlight steps for each significant operation, such as node 
     /// creation and pointer updates, allowing the UI to visualize the insertion process. 
     /// </remarks>
-    public async Task InsertAt(int index, SinglyLinkedListNode<T> newNode)
+    public async Task InsertAt(int index, SinglyLinkedListNode<T> newNode, CancellationToken cancellationToken)
     {
         if (_head == null && index == 0)
         {
@@ -141,30 +141,42 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
             _head = newNode;
             count++;
             await HighlightRequested.Invoke(InsertAtPositionSteps.SetPreNextToVertex); // "head = vtx"
+            cancellationToken.ThrowIfCancellationRequested();
         }
 
         SinglyLinkedListNode<T> current = _head;
         int currentIndex = 0;
 
         await HighlightRequested.Invoke(InsertAtPositionSteps.InitializePreHead); // "Vertex pre = head"
+        cancellationToken.ThrowIfCancellationRequested();
 
         // Traverse until the end of the list or the specified index
         while (current.Next != null && currentIndex < index)
         {
             await HighlightRequested.Invoke(InsertAtPositionSteps.LoopToPosition); // "for (k = 0; k<i-1; k++)"
+            cancellationToken.ThrowIfCancellationRequested();
+
             current = current.Next;
             currentIndex++;
             await HighlightRequested.Invoke(InsertAtPositionSteps.MovePreToNext); // "pre = pre.next"
+            cancellationToken.ThrowIfCancellationRequested();
+
 
             if (currentIndex == index)
             {
                 await HighlightRequested.Invoke(InsertAtPositionSteps.SetAftToPreNext); // "Vertex aft = pre.next"
+                cancellationToken.ThrowIfCancellationRequested();
+
             }
         }
 
         await HighlightRequested.Invoke(InsertAtPositionSteps.CreateVertex); // "Vertex vtx = new Vertex(v)"
+        cancellationToken.ThrowIfCancellationRequested();
+
 
         await HighlightRequested.Invoke(InsertAtPositionSteps.SetVertexNextToAft); // "vtx.next = aft"
+        cancellationToken.ThrowIfCancellationRequested();
+
 
         // Insert the new node
         newNode.Next = current.Next;
@@ -172,6 +184,8 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         count++;
 
         await HighlightRequested.Invoke(InsertAtPositionSteps.SetPreNextToVertex); // "pre.next = vtx"
+        cancellationToken.ThrowIfCancellationRequested();
+
     }
 
     ///// <summary>

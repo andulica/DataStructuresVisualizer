@@ -13,7 +13,7 @@
     <h3>Singly Linked List Operations</h3>
 
     <div class="operation-selection">
-        <select @bind="selectedAction">
+    <select @onchange="OnActionChanged">
             <option value="insertAtPosition">Insert At Position</option>
             <option value="prepend">Prepend</option>
             <option value="append">Append</option>
@@ -111,6 +111,7 @@
     private List<Snapshot> snapshots = new();
     private int currentSnapshotIndex = 0;
     private bool isStack= false;
+    private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
     VisualizationTiming timing = new VisualizationTiming
         {
@@ -131,6 +132,19 @@
                 StateHasChanged();
             }
         }
+    }
+
+    private void InitializeNewOperation()
+    {
+        // Cancel the ongoing operation if any
+        _cancellationTokenSource.Cancel();
+        _cancellationTokenSource = new CancellationTokenSource();
+    }
+
+    private void OnActionChanged(ChangeEventArgs e)
+    {
+        selectedAction = e.Value.ToString();
+        InitializeNewOperation(); // Cancel the ongoing operation when a new action is selected
     }
 
     protected override void OnInitialized()
@@ -230,6 +244,9 @@
 
     private async Task PerformInsertion()
     {
+
+        InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
+
         if (isOperationInProgress) return;  // Prevent multiple operations
 
         if (linkedList.IsFull())
@@ -253,14 +270,14 @@
             var newNode = new SinglyLinkedListNode<int>(inputValue);
             var insertedValue = ConvertNodeToJavaScriptFormat(newNode);
 
-            var insertTask = linkedList.InsertAt(insertPosition, newNode);
+            var insertTask = linkedList.InsertAt(insertPosition, newNode, _cancellationTokenSource.Token);
             var jsTask = JSRuntime.InvokeVoidAsync("insertAtInSLL", insertedValue, insertPosition, timing).AsTask();
 
             await Task.WhenAll(insertTask, jsTask); // Run both tasks concurrently
         }
-        catch (InvalidOperationException ex)
+        catch (OperationCanceledException)
         {
-            messageOutput = ex.Message;
+            messageOutput = "Operation was canceled.";
         }
         finally
         {
