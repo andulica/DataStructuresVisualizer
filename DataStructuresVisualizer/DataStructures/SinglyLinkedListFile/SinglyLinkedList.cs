@@ -2,6 +2,7 @@
 using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
 using System.Collections;
 using DataStructuresVisualizer.DataStructures.Enums.SinglyLinkedList;
+using System.Threading;
 
 public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
 {
@@ -21,6 +22,20 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     // Public property to access the count.
     public int Count => count;
 
+
+    public void PrependInstant(SinglyLinkedListNode<T> newNode)
+    {
+        if (_head == null)
+        {
+            _head = _tail = newNode;
+        }
+        else
+        {
+            newNode.Next = _head;
+            _head = newNode;
+        }
+        count++;
+    }
 
     /// <summary>
     /// Appends a new node containing the specified data to the end of the singly linked list and returns the newly created node.
@@ -108,14 +123,17 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// This separation of business logic from UI allows for clear and maintainable code structure.
     /// </remarks>
     /// <param name="data">The data to prepend to the list.</param>
-    public async Task Prepend(SinglyLinkedListNode<T> newNode)
+    public async Task Prepend(SinglyLinkedListNode<T> newNode, CancellationToken cancellationToken)
     {
         await HighlightRequested.Invoke(PrependSteps.CreateVertex);
+        cancellationToken.ThrowIfCancellationRequested();
 
         await HighlightRequested.Invoke(PrependSteps.SetNextPointer);
+        cancellationToken.ThrowIfCancellationRequested();
         newNode.Next = _head;
 
         await HighlightRequested.Invoke(PrependSteps.SetHead);
+        cancellationToken.ThrowIfCancellationRequested();
         _head = newNode;
 
         count++;

@@ -3,6 +3,15 @@
     let margin = { top: 20, right: 30, bottom: 40, left: 50 };
     const delayDrawLinks = 1000;
     const gapBetweenNodeAndFirstElement = 100;
+    let isCancelled = false;
+
+    function resetCancellationFlag() {
+        isCancelled = false;
+    }
+
+    window.setIsCancelled = function () {
+        isCancelled = true;
+    };
 
     // Helper function to adjust line endpoints to fit the arrowhead
     function adjustLineEndpoints(x1, y1, x2, y2, radius, strokeWidth) {
@@ -424,26 +433,53 @@
     }
 
     async function insertNodeAtHead(value, timing, isStack) {
-        const newNode = createNewNode(value, 0);
-        nodes.unshift(newNode); // Add the new node to the beginning of the list
+        // Return a new promise to ensure resolve and reject are correctly scoped
+        return new Promise((resolve, reject) => {
+            // Start the asynchronous operation
+            const newNode = createNewNode(value, 0);
+            nodes.unshift(newNode); // Add the new node to the beginning of the list
 
-        await onPurposeDelay(timing.highlightDelay);
-        if (nodes.length > 1) {
-            const nextNode = nodes[1];
-            drawLineWithArrow(newNode.x, newNode.y, nextNode.x, nextNode.y, 20, 2, `link-${newNode.id}-${nextNode.id}`, timing.javaScriptDelay);
-        }
-        await onPurposeDelay(timing.highlightDelay);
+            try {
+                onPurposeDelay(timing.highlightDelay).then(() => {
+                    if (isCancelled) {
+                        resolve(); // Resolve early if canceled
+                        return;
+                    }
 
-        setNodeColor('green', newNode);
-        setTimeout(() => {
-            refreshSinglyLinkedList(isStack);
+                    if (nodes.length > 1) {
+                        const nextNode = nodes[1];
+                        drawLineWithArrow(newNode.x, newNode.y, nextNode.x, nextNode.y, 20, 2, `link-${newNode.id}-${nextNode.id}`, timing.javaScriptDelay);
+                    }
 
-            setTimeout(() => {
-                resetNodeColors();
-                resolve(); // Resolve the promise when all timeouts complete
-            }, timing.javaScriptDelay);
-        }, timing.nodeMovementDelay);
+                    return onPurposeDelay(timing.highlightDelay);
+                }).then(() => {
+                    if (isCancelled) {
+                        resolve(); // Resolve if operation was canceled
+                        return;
+                    }
+
+                    setNodeColor('green', newNode);
+
+                    setTimeout(() => {
+                        refreshSinglyLinkedList(isStack);
+
+                        setTimeout(() => {
+                            resetNodeColors();
+                            resolve(); // Ensure resolve is called after completing the operation
+                        }, timing.javaScriptDelay);
+                    }, timing.nodeMovementDelay);
+                }).catch((error) => {
+                    reject(error); // Reject the promise in case of an error
+                });
+            } catch (error) {
+                // Handle synchronous errors
+                reject(error);
+            } finally {
+                resetCancellationFlag();
+            }
+        });
     }
+
 
     function setNodeColor(color, node) {
         svg.select(`#node-${node.id}`).
@@ -489,7 +525,7 @@
         }
         else {
             nodes.forEach((node, index) => {
-                node.x = Math.round(index * nodeSpacing + 50);
+                node.x = Math.round(index * nodeSpacing + 100);
                 node.y = Math.round(height / 2);
                 svg.select(`#node-${node.id}`)
                     .transition()

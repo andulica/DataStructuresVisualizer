@@ -3,6 +3,7 @@
 @using DataStructuresVisualizer.DataStructures
 @using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
 @using DataStructuresVisualizer.Snapshot;
+@using BlazorAppForDataStructures.Shared;
 @inject IJSRuntime JSRuntime
 
 <head>
@@ -13,7 +14,7 @@
     <h3>Singly Linked List Operations</h3>
 
     <div class="operation-selection">
-    <select @onchange="OnActionChanged">
+        <select @onchange="OnActionChanged">
             <option value="insertAtPosition">Insert At Position</option>
             <option value="prepend">Prepend</option>
             <option value="append">Append</option>
@@ -110,7 +111,7 @@
     private bool isOperationInProgress = false; // Flag to track operation state
     private List<Snapshot> snapshots = new();
     private int currentSnapshotIndex = 0;
-    private bool isStack= false;
+    private bool isStack = false;
     private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
     VisualizationTiming timing = new VisualizationTiming
@@ -136,7 +137,6 @@
 
     private void InitializeNewOperation()
     {
-        // Cancel the ongoing operation if any
         _cancellationTokenSource.Cancel();
         _cancellationTokenSource = new CancellationTokenSource();
     }
@@ -263,21 +263,22 @@
 
         isOperationInProgress = true;
         StateHasChanged();
+
+        linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
+
+        var newNode = new SinglyLinkedListNode<int>(inputValue);
+        var insertedValue = ConvertNodeToJavaScriptFormat(newNode);
+
+        var insertTask = linkedList.InsertAt(insertPosition, newNode, _cancellationTokenSource.Token);
+        var jsTask = JSRuntime.InvokeVoidAsync("insertAtInSLL", insertedValue, insertPosition, timing).AsTask();
+
         try
         {
-            linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
-
-            var newNode = new SinglyLinkedListNode<int>(inputValue);
-            var insertedValue = ConvertNodeToJavaScriptFormat(newNode);
-
-            var insertTask = linkedList.InsertAt(insertPosition, newNode, _cancellationTokenSource.Token);
-            var jsTask = JSRuntime.InvokeVoidAsync("insertAtInSLL", insertedValue, insertPosition, timing).AsTask();
-
-            await Task.WhenAll(insertTask, jsTask); // Run both tasks concurrently
+            await Task.WhenAll(insertTask, jsTask);
         }
         catch (OperationCanceledException)
         {
-            messageOutput = "Operation was canceled.";
+            messageOutput = "Operation was cancelled.";
         }
         finally
         {
@@ -289,6 +290,8 @@
 
     private async Task PrependValue()
     {
+        InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
+
         if (isOperationInProgress) return; // Prevent multiple operations
 
         if (linkedList.IsFull())
@@ -306,18 +309,26 @@
             var head = new SinglyLinkedListNode<int>(inputValue);
             var headForJSInsertion = ConvertNodeToJavaScriptFormat(head);
 
-            var prependTask = linkedList.Prepend(head);
+            var prependTask = linkedList.Prepend(head, _cancellationTokenSource.Token);
             var jsTask = JSRuntime.InvokeVoidAsync("insertHeadInSll", headForJSInsertion, timing, isStack = false).AsTask();
 
             await Task.WhenAll(prependTask, jsTask); // Run both tasks concurrently
         }
-        catch (InvalidOperationException ex)
+        catch (OperationCanceledException)
         {
-            messageOutput = ex.Message;
+            await JSRuntime.InvokeVoidAsync("setIsCancelled");
+
+            var head = new SinglyLinkedListNode<int>(inputValue);
+            linkedList.PrependInstant(head); // Insert the node instantly in case of an exception)
+            var linkedListData = ConvertListToJavaScriptFormat(linkedList);
+
+            await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
+
+            messageOutput = "Visual cancelled.";
         }
         finally
         {
-            linkedList.HighlightRequested -= HandleHighlightRequest; // Clean up event subscription
+            linkedList.HighlightRequested -= HandleHighlightRequest;
             isOperationInProgress = false; // Reset flag after operation
             StateHasChanged();
         }
@@ -401,7 +412,7 @@
 
             var removeTask = linkedList.DeleteAt(inputValue);
             var jsTask = JSRuntime.InvokeVoidAsync("removeValueInSll", nodeToBeDeleted, timing).AsTask();
-             
+
             await Task.WhenAll(removeTask, jsTask); // Run both tasks concurrently
         }
         finally

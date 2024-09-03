@@ -29,14 +29,14 @@
                     <button class="custom-button" @onclick="Peek" disabled="@isOperationInProgress">Peek</button>
                 </div>
                 break;
-            case "Push":
-                <div class="insertion-fields">
-                    <label for="inputValue">Input Value</label>
-                    <input type="number" id="inputValue" @bind="inputValue" placeholder="Enter Value" />
+@*              case "Push":
+                 <div class="insertion-fields">
+                     <label for="inputValue">Input Value</label>
+                     <input type="number" id="inputValue" @bind="inputValue" placeholder="Enter Value" />
 
-                    <button class="custom-button" @onclick="Push" disabled="@isOperationInProgress">Push</button>
-                </div>
-                break;
+                     <button class="custom-button" @onclick="Push" disabled="@isOperationInProgress">Push</button>
+                 </div>
+                break; *@
             case "Pop":
                 <div class="insertion-fields">
                     <label for="inputValue">Kx (Pop)</label>
@@ -110,40 +110,40 @@
         }
     }
 
-    private async Task Push()
-    {
-        if (isOperationInProgress) return;
+    // private async Task Push()
+    // {
+    //     if (isOperationInProgress) return;
 
-        if (stack.Count == stack.maxCapacity)
-        {
-            messageOutput = $"The stack has reached the maximum number of nodes. Please pop a value or create a smaller stack.";
-            return;
-        }
+    //     if (stack.Count == stack.maxCapacity)
+    //     {
+    //         messageOutput = $"The stack has reached the maximum number of nodes. Please pop a value or create a smaller stack.";
+    //         return;
+    //     }
 
-        isOperationInProgress = true;
-        StateHasChanged();
+    //     isOperationInProgress = true;
+    //     StateHasChanged();
 
-        try
-        {
+    //     try
+    //     {
 
-            var head = new SinglyLinkedListNode<int>(inputValue);
+    //         var head = new SinglyLinkedListNode<int>(inputValue);
 
-            var timing = new VisualizationTiming
-                {
-                    HighlightDelay = 1000, // Set appropriate delay values
-                    NodeMovementDelay = 1500,
-                    JavaScriptDelay = 2000
-                };
-            await stack.Prepend(head); // Wait for the node to be pushed onto the stack
-            var nodeToBePushedOnSVG = ConvertNodeToJavaScriptFormat(head);
-            await JSRuntime.InvokeVoidAsync("insertAtInSLL", nodeToBePushedOnSVG, 0, 1000, isStack); // Then update the UI
-        }
-        finally
-        {
-            isOperationInProgress = false;
-            StateHasChanged();
-        }
-    }
+    //         var timing = new VisualizationTiming
+    //             {
+    //                 HighlightDelay = 1000, // Set appropriate delay values
+    //                 NodeMovementDelay = 1500,
+    //                 JavaScriptDelay = 2000
+    //             };
+    //         await stack.Prepend(head); // Wait for the node to be pushed onto the stack
+    //         var nodeToBePushedOnSVG = ConvertNodeToJavaScriptFormat(head);
+    //         await JSRuntime.InvokeVoidAsync("insertAtInSLL", nodeToBePushedOnSVG, 0, 1000, isStack); // Then update the UI
+    //     }
+    //     finally
+    //     {
+    //         isOperationInProgress = false;
+    //         StateHasChanged();
+    //     }
+    // }
 
     private async Task Pop()
     {
