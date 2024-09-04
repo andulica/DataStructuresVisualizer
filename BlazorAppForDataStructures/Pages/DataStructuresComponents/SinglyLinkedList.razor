@@ -289,6 +289,7 @@
         {
             linkedList.HighlightRequested -= HandleHighlightRequest;
             isOperationInProgress = false; // Reset flag after operation
+            JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
             StateHasChanged();
         }
     }
@@ -335,6 +336,7 @@
         {
             linkedList.HighlightRequested -= HandleHighlightRequest;
             isOperationInProgress = false; // Reset flag after operation
+            JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
             StateHasChanged();
         }
     }

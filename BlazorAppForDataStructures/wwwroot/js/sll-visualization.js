@@ -723,6 +723,16 @@
         });
     }
 
+    function resetHighlight() {
+        const lines = document.querySelectorAll('.code-line');
+        lines.forEach((line) => {
+            line.classList.remove('highlight'); // Remove the highlight class to reset color
+        });
+    }
+
+    window.resetCodeLineHighlight = function () {
+        resetHighlight();
+    };
 
     window.highlightLine = function (lineNumber) {
         highlightLine(lineNumber);
@@ -765,10 +775,6 @@
             resetCancellationFlag(); // Reset the cancellation flag
         }
     }
-
-
-
-
 
 window.removeValueInSll = function (nodeToBeRemoved, timing, isStack) {
     resetNodeColors();
