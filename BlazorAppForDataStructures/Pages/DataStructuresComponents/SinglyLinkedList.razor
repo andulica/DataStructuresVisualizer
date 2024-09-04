@@ -343,6 +343,8 @@
 
     private async Task AppendValue()
     {
+        InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
+
         if (isOperationInProgress) return; // Prevent multiple operations
 
         if (linkedList.IsFull())
@@ -353,26 +355,34 @@
 
         isOperationInProgress = true;
         StateHasChanged();
+
+        var tail = new SinglyLinkedListNode<int>(inputValue);
+        var tailToInsert = ConvertNodeToJavaScriptFormat(tail);
         try
         {
             linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
-            var tail = new SinglyLinkedListNode<int>(inputValue);
-            var tailToInsert = ConvertNodeToJavaScriptFormat(tail);
-
-            var appendTask = linkedList.AppendAsync(tail);
+            var appendTask = linkedList.AppendAsync(tail, _cancellationTokenSource.Token);
             var jsTask = JSRuntime.InvokeVoidAsync("insertTailInSll", tailToInsert, timing).AsTask();
 
             await Task.WhenAll(appendTask, jsTask); // Run both tasks concurrently
         }
-        catch (InvalidOperationException ex)
+        catch (OperationCanceledException)
         {
-            messageOutput = ex.Message;
+            await JSRuntime.InvokeVoidAsync("setIsCancelled");
+
+            linkedList.AppendInstant(tail); // Insert the node instantly in case of an exception)
+            var linkedListData = ConvertListToJavaScriptFormat(linkedList);
+
+            await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
+
+            messageOutput = $"Visual cancelled. Value {inputValue} appended.";
         }
         finally
         {
             linkedList.HighlightRequested -= HandleHighlightRequest; // Clean up event subscription
             isOperationInProgress = false; // Reset flag after operation
+            JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
             StateHasChanged();
         }
     }

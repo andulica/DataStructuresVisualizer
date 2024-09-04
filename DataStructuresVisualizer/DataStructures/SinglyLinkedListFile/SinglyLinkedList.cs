@@ -59,6 +59,20 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         count++;
     }
 
+    public void AppendInstant(SinglyLinkedListNode<T> newNode)
+    {
+        if (_head == null)
+        {
+            _head = _tail = newNode;
+        }
+        else
+        {
+            _tail.Next = newNode;
+            _tail = newNode;
+        }
+        count++;
+    }
+
     /// <summary>
     /// Appends a new node containing the specified data to the end of the singly linked list and returns the newly created node.
     /// </summary>
@@ -107,26 +121,30 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// represent each step of the append operation. Highlighting steps are managed externally, 
     /// allowing for clear separation of business logic from UI visualization concerns.
     /// </remarks>
-    public async Task<SinglyLinkedListNode<T>> AppendAsync(SinglyLinkedListNode<T> newNode)
+    public async Task<SinglyLinkedListNode<T>> AppendAsync(SinglyLinkedListNode<T> newNode, CancellationToken cancellationToken)
     {
         if (HighlightRequested != null)
         {
 
             // Invoke highlighting for visual effect
             await HighlightRequested.Invoke(AppendSteps.CreateVertex); // "Vertex vtx = new Vertex(v)"
+            cancellationToken.ThrowIfCancellationRequested();
 
             if (_head == null)
             {
                 _head = _tail = newNode; // Set both head and tail to the new node if list was empty
                 await HighlightRequested.Invoke(AppendSteps.UpdateTailNextPointer); // "tail.next = vtx"
+                cancellationToken.ThrowIfCancellationRequested();
             }
             else
             {
                 await HighlightRequested.Invoke(AppendSteps.UpdateTailNextPointer); // "tail.next = vtx"
+                cancellationToken.ThrowIfCancellationRequested();
                 _tail.Next = newNode;
 
                 _tail = newNode;
                 await HighlightRequested.Invoke(AppendSteps.UpdateTail); // "tail = vtx"
+                cancellationToken.ThrowIfCancellationRequested();
             }
         }
         count++;

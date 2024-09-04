@@ -571,6 +571,14 @@
         });
     }
 
+    // Utility function to check if the operation is cancelled and handle early resolution
+    function checkCancellationAndExit() {
+        if (isCancelled) {
+            resetCancellationFlag();
+            return true;
+        }
+        return false;
+    }
 
     function setNodeColor(color, node) {
         svg.select(`#node-${node.id}`).
@@ -579,25 +587,44 @@
     }
 
     async function insertNodeAtTail(value, timing) {
-
-        // Create the new node to be the new tail
         const newNode = createTailNode(value);
-        nodes.push(newNode);  // Append the new node to the end of the list
+        nodes.push(newNode);
 
-        // Get the previous tail to draw the link
-        const prevNode = nodes[nodes.length - 2];
+        try {
+            if (checkCancellationAndExit()) return;
 
-        if (prevNode) {
+            const prevNode = nodes[nodes.length - 2];
+
+            if (prevNode) {
+                await onPurposeDelay(timing.javaScriptDelay);
+
+                drawLineWithArrow(
+                    prevNode.x,
+                    prevNode.y,
+                    newNode.x,
+                    newNode.y,
+                    20,
+                    2,
+                    `link-${prevNode.id}-${newNode.id}`,
+                    timing.javaScriptDelay
+                );
+
+                if (checkCancellationAndExit()) return;
+            }
+
             await onPurposeDelay(timing.javaScriptDelay);
 
-            drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, `link-${prevNode.id}-${newNode.id}`, timing.javaScriptDelay);
+            if (checkCancellationAndExit()) return;
 
+            setNodeColor('green', newNode);
+            await onPurposeDelay(timing.javaScriptDelay);
+            resetNodeColors();
+
+            if (checkCancellationAndExit()) return;
+        } catch (error) {
+        } finally {
+            resetCancellationFlag();
         }
-        await onPurposeDelay(timing.javaScriptDelay);
-
-        setNodeColor('green', newNode);
-        await onPurposeDelay(timing.javaScriptDelay);
-        resetNodeColors();
     }
 
     function updateNodePositions(isStack) {
@@ -748,7 +775,6 @@
         resetCancellationFlag(); // Reset the cancellation flag before starting the operation
         console.log("isCancelled in insertAtInSLL: " + isCancelled);
         try {
-            // Reset visuals; these should be quick operations
             resetNodeColors();
             resetLinkColors();
 
