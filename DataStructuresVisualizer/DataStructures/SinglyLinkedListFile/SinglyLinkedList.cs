@@ -22,6 +22,28 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     // Public property to access the count.
     public int Count => count;
 
+    public void InsertAtInstant (int index, SinglyLinkedListNode<T> newNode)
+    {
+        if (_head == null && index == 0)
+        {
+            newNode.Next = _head;
+            _head = newNode;
+            count++;
+        }
+
+        SinglyLinkedListNode<T> current = _head;
+        int currentIndex = 0;
+
+        while (current.Next != null && currentIndex < index)
+        {
+            current = current.Next;
+            currentIndex++;
+        }
+
+        newNode.Next = current.Next;
+        current.Next = newNode;
+        count++;
+    }
 
     public void PrependInstant(SinglyLinkedListNode<T> newNode)
     {

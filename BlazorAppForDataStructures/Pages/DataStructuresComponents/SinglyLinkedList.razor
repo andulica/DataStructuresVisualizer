@@ -264,21 +264,26 @@
         isOperationInProgress = true;
         StateHasChanged();
 
-        linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
-
         var newNode = new SinglyLinkedListNode<int>(inputValue);
         var insertedValue = ConvertNodeToJavaScriptFormat(newNode);
 
-        var insertTask = linkedList.InsertAt(insertPosition, newNode, _cancellationTokenSource.Token);
-        var jsTask = JSRuntime.InvokeVoidAsync("insertAtInSLL", insertedValue, insertPosition, timing).AsTask();
-
         try
         {
+            linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
+
+            var insertTask = linkedList.InsertAt(insertPosition, newNode, _cancellationTokenSource.Token);
+            var jsTask = JSRuntime.InvokeVoidAsync("insertAtInSLL", insertedValue, insertPosition, timing).AsTask();
             await Task.WhenAll(insertTask, jsTask);
         }
         catch (OperationCanceledException)
         {
-            messageOutput = "Operation was cancelled.";
+            await JSRuntime.InvokeVoidAsync("setIsCancelled");
+            linkedList.InsertAtInstant(insertPosition, newNode);
+
+            var linkedListData = ConvertListToJavaScriptFormat(linkedList);
+            await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
+
+            messageOutput = $"Visual cancelled. Value {inputValue} inserted at index {insertPosition}.";
         }
         finally
         {
@@ -302,12 +307,13 @@
 
         isOperationInProgress = true;
         StateHasChanged();
+
+        var head = new SinglyLinkedListNode<int>(inputValue);
+        var headForJSInsertion = ConvertNodeToJavaScriptFormat(head);
+
         try
         {
             linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
-
-            var head = new SinglyLinkedListNode<int>(inputValue);
-            var headForJSInsertion = ConvertNodeToJavaScriptFormat(head);
 
             var prependTask = linkedList.Prepend(head, _cancellationTokenSource.Token);
             var jsTask = JSRuntime.InvokeVoidAsync("insertHeadInSll", headForJSInsertion, timing, isStack = false).AsTask();
@@ -318,13 +324,12 @@
         {
             await JSRuntime.InvokeVoidAsync("setIsCancelled");
 
-            var head = new SinglyLinkedListNode<int>(inputValue);
             linkedList.PrependInstant(head); // Insert the node instantly in case of an exception)
             var linkedListData = ConvertListToJavaScriptFormat(linkedList);
 
             await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
 
-            messageOutput = "Visual cancelled.";
+            messageOutput = $"Visual cancelled. Value {inputValue} prepended.";
         }
         finally
         {
