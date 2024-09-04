@@ -34,7 +34,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         SinglyLinkedListNode<T> current = _head;
         int currentIndex = 0;
 
-        while (current.Next != null && currentIndex < index)
+        while (current.Next != null && currentIndex < index - 1) // -1 to stop at the node before the target index
         {
             current = current.Next;
             currentIndex++;
@@ -191,7 +191,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         cancellationToken.ThrowIfCancellationRequested();
 
         // Traverse until the end of the list or the specified index
-        while (current.Next != null && currentIndex < index)
+        while (current.Next != null && currentIndex < index - 1) // -1 to stop at the node before the target index
         {
             await HighlightRequested.Invoke(InsertAtPositionSteps.LoopToPosition); // "for (k = 0; k<i-1; k++)"
             cancellationToken.ThrowIfCancellationRequested();
