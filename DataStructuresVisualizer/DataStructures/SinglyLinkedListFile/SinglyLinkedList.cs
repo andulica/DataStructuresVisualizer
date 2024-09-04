@@ -202,8 +202,13 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
             cancellationToken.ThrowIfCancellationRequested();
 
 
-            if (currentIndex == index)
+            if (currentIndex == index - 1)
             {
+                await HighlightRequested.Invoke(InsertAtPositionSteps.LoopToPosition); // "for (k = 0; k<i-1; k++)"
+                cancellationToken.ThrowIfCancellationRequested();
+                await HighlightRequested.Invoke(InsertAtPositionSteps.MovePreToNext); // "pre = pre.next"
+                cancellationToken.ThrowIfCancellationRequested();
+
                 await HighlightRequested.Invoke(InsertAtPositionSteps.SetAftToPreNext); // "Vertex aft = pre.next"
                 cancellationToken.ThrowIfCancellationRequested();
 

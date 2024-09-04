@@ -363,7 +363,7 @@
             .attr("cx", targetX)
             .attr("cy", targetY)
             .attr("r", 20)
-            .style("fill", "orange")
+            .style("fill", "green")
             .style("stroke", "black")
             .style("stroke-width", 2);
 
@@ -396,7 +396,7 @@
             .attr("cx", targetX)
             .attr("cy", targetY)
             .attr("r", 20)
-            .style("fill", "orange")
+            .style("fill", "green")
             .style("stroke", "black")
             .style("stroke-width", 2);
 
