@@ -252,11 +252,11 @@
         });
     }
 
-    async function highlightNodes(valueID, delay) {
-        return new Promise((resolve) => {
-            let timeouts = []; // Array to store timeout IDs for potential clearing
-            let found = false;
+async function highlightNodes(valueID, delay) {
+        let timeouts = []; // Array to store timeout IDs for potential clearing
+        let found = false;
 
+        try {
             nodes.forEach((node, index) => {
                 let timeout = setTimeout(() => {
                     if (isCancelled) {
@@ -272,36 +272,42 @@
                         .style('fill', 'orange');
 
                     if (index > 0) {
+                        if (isCancelled) {
+                            return; // Exit early if cancelled
+
+                        }
                         highlightLinkAndArrowhead(nodes[index - 1].id, node.id);
                     }
 
                     if (node.value === valueID) {
+                        if (isCancelled) {
+                            return; // Exit early if cancelled
+                        }
                         svg.select(`#node-${node.id}`)
                             .transition().duration(delay)
                             .style('fill', 'green');
                         found = true;
                         clearTimeouts(timeouts); // Clear all remaining timeouts
-                        resolve();
                     }
                     else if (node.id === valueID) {
+                        if (isCancelled) {
+                            return; // Exit early if cancelled
+                    }
                         svg.select(`#node-${node.id}`)
                             .transition().duration(delay)
                             .style('fill', 'red');
                         found = true;
                         clearTimeouts(timeouts); // Clear all remaining timeouts
-                        resolve();
                     }
                 }, delay * index);
 
                 timeouts.push(timeout);
             });
+        }
 
-            // Ensure we resolve the promise if no node matches
-            let finalTimeout = setTimeout(() => {
-                if (!found) resolve();
-            }, delay * nodes.length);
-            timeouts.push(finalTimeout);
-        });
+        finally {
+            resetCancellationFlag(); // Reset the cancellation flag
+        }
     }
 
     function highlightTailNode() {
@@ -313,7 +319,6 @@
 
             const tailNode = nodes[nodes.length - 1]; // Get the last node (tail node)
 
-            // Highlight only the tail node in orange
             svg.select(`#node-${tailNode.id}`)
                 .transition().duration(1000)
                 .style('fill', 'orange');
@@ -693,7 +698,7 @@
 
     async function removeNodeInSll(nodeToBeRemoved, timing, isStack) {
 
-        await highlightNodes(nodeToBeRemoved.id, timing.highlightDelay * 2); // Double the delay for highlighting
+        highlightNodes(nodeToBeRemoved.id, timing.highlightDelay * 2); // Double the delay for highlighting
         await new Promise((resolve) => {
             // Transition and then remove the node's visual elements
             svg.select(`#node-${nodeToBeRemoved.id}`)
@@ -802,36 +807,36 @@
         }
     }
 
-window.removeValueInSll = function (nodeToBeRemoved, timing, isStack) {
-    resetNodeColors();
-    resetLinkColors();
-    return removeNodeInSll(nodeToBeRemoved, timing, isStack); // Return the promise
-};
+    window.removeValueInSll = function (nodeToBeRemoved, timing, isStack) {
+        resetNodeColors();
+        resetLinkColors();
+        return removeNodeInSll(nodeToBeRemoved, timing, isStack); // Return the promise
+    };
 
-window.highlightTail = function () {
-    resetNodeColors();
-    resetLinkColors();
-    highlightTailNode();
-}
+    window.highlightTail = function () {
+        resetNodeColors();
+        resetLinkColors();
+        highlightTailNode();
+    }
 
-window.highlightHead = function () {
-    resetNodeColors();
-    resetLinkColors();
-    highlightHeadNode();
-}
+    window.highlightHead = function () {
+        resetNodeColors();
+        resetLinkColors();
+        highlightHeadNode();
+    }
 
-window.insertTailInSll = function (value, timing) {
-    resetNodeColors();
-    resetLinkColors();
-    insertNodeAtTail(value, timing);
-}
+    window.insertTailInSll = function (value, timing) {
+        resetNodeColors();
+        resetLinkColors();
+        insertNodeAtTail(value, timing);
+    }
 
-window.insertHeadInSll = function (value, timing, isStack) {
-    insertNodeAtHead(value, timing, isStack);
-}
+    window.insertHeadInSll = function (value, timing, isStack) {
+        insertNodeAtHead(value, timing, isStack);
+    }
 
-window.resetSllColours = function () {
-    resetNodeColors();
-    resetLinkColors();
-}
-}) ();
+    window.resetSllColours = function () {
+        resetNodeColors();
+        resetLinkColors();
+    }
+})();

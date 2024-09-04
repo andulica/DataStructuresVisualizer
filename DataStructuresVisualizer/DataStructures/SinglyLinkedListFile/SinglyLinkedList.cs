@@ -377,15 +377,17 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// The task completes when the search is done, and the highlights are triggered at each step. 
     /// If the data is found, the node is returned via the highlights; otherwise, the search ends, indicating not found.
     /// </returns>
-    public async Task SearchByValue(T data)
+    public async Task SearchByValue(T data, CancellationToken cancellationToken)
     {
         // Check if the list is empty and handle the first line of the script
         if (_head == null)
         {
             await HighlightRequested.Invoke(SearchSteps.CheckEmptyReturnNotFound); // "return NOT_FOUND."
+            cancellationToken.ThrowIfCancellationRequested();
             return;
         }
         await HighlightRequested.Invoke(SearchSteps.InitializeIndexAndHead); // "index = 0, tmp = head"
+        cancellationToken.ThrowIfCancellationRequested();
 
         SinglyLinkedListNode<T> current = _head;
         int position = 0;
@@ -393,10 +395,12 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         while (current != null)
         {
             await HighlightRequested.Invoke(SearchSteps.LoopUntilFound); // "while (tmp.item != v)"
+            cancellationToken.ThrowIfCancellationRequested();
 
             if (EqualityComparer<T>.Default.Equals(current._data, data))
             {
                 await HighlightRequested.Invoke(SearchSteps.ReturnIndex); // "return index"
+                cancellationToken.ThrowIfCancellationRequested();
                 return;
             }
 
@@ -408,10 +412,12 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
             if (current == null)
             {
                 await HighlightRequested.Invoke(SearchSteps.ReturnNull); // "return null"
+                cancellationToken.ThrowIfCancellationRequested();
             }
             else
             {
                 await HighlightRequested.Invoke(SearchSteps.IncrementIndexAndMoveNext); // "index++, tmp = tmp.next"
+                cancellationToken.ThrowIfCancellationRequested();
             }
         }
     }

@@ -389,6 +389,8 @@
 
     private async Task SearchValue()
     {
+        InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
+
         if (isOperationInProgress) return; // Prevent multiple operations
         isOperationInProgress = true;
         StateHasChanged();
@@ -396,15 +398,24 @@
         {
             linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
-            var searchTask = linkedList.SearchByValue(inputValue);
+            var searchTask = linkedList.SearchByValue(inputValue, _cancellationTokenSource.Token);
             var jsTask = JSRuntime.InvokeVoidAsync("searchValueInSLL", inputValue, timing).AsTask();
 
             await Task.WhenAll(searchTask, jsTask); // Run both tasks concurrently
+        }
+        catch (OperationCanceledException)
+        {
+            await JSRuntime.InvokeVoidAsync("setIsCancelled");
+            messageOutput = $"Visual cancelled.";
+            var linkedListData = ConvertListToJavaScriptFormat(linkedList);
+
+            await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
         }
         finally
         {
             linkedList.HighlightRequested -= HandleHighlightRequest; // Clean up event subscription
             isOperationInProgress = false; // Reset flag after operation
+            JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
             StateHasChanged();
         }
     }
