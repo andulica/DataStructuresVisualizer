@@ -252,63 +252,91 @@
         });
     }
 
-async function highlightNodes(valueID, delay) {
-        let timeouts = []; // Array to store timeout IDs for potential clearing
-        let found = false;
+    function highlightNodes(valueID, delay) {
+        return new Promise((resolve, reject) => {
+            let timeouts = []; // Array to store timeout IDs for potential clearing
+            let found = false;
 
-        try {
-            nodes.forEach((node, index) => {
-                let timeout = setTimeout(() => {
-                    if (isCancelled) {
-                        return; // Exit early if cancelled
-                    }
-                    if (found) {
-                        clearTimeout(timeout); // Prevent this timeout's actions if already found
-                        return;
-                    }
-
-                    svg.select(`#node-${node.id}`)
-                        .transition().duration(delay)
-                        .style('fill', 'orange');
-
-                    if (index > 0) {
+            try {
+                nodes.forEach((node, index) => {
+                    let timeout = setTimeout(() => {
+                        // Check for cancellation immediately
                         if (isCancelled) {
-                            return; // Exit early if cancelled
-
+                            console.log("Cancelled during highlighting step.");
+                            clearTimeouts(timeouts); // Clear all scheduled timeouts
+                            interruptAllVisuals(); // Stop all ongoing transitions
+                            resetCancellationFlag();
+                            resolve(); // Resolve early if cancelled
+                            return;
                         }
-                        highlightLinkAndArrowhead(nodes[index - 1].id, node.id);
-                    }
 
-                    if (node.value === valueID) {
-                        if (isCancelled) {
-                            return; // Exit early if cancelled
+                        if (found) {
+                            clearTimeout(timeout); // Prevent this timeout's actions if already found
+                            return;
                         }
-                        svg.select(`#node-${node.id}`)
-                            .transition().duration(delay)
-                            .style('fill', 'green');
-                        found = true;
-                        clearTimeouts(timeouts); // Clear all remaining timeouts
-                    }
-                    else if (node.id === valueID) {
-                        if (isCancelled) {
-                            return; // Exit early if cancelled
-                    }
-                        svg.select(`#node-${node.id}`)
-                            .transition().duration(delay)
-                            .style('fill', 'red');
-                        found = true;
-                        clearTimeouts(timeouts); // Clear all remaining timeouts
-                    }
-                }, delay * index);
 
-                timeouts.push(timeout);
-            });
-        }
+                        // Highlight the current node
+                        const nodeSelection = svg.select(`#node-${node.id}`);
+                        nodeSelection.transition().duration(delay).style('fill', 'orange')
+                            .on('start', () => {
+                                if (isCancelled) {
+                                    console.log("Cancelled during transition start.");
+                                    nodeSelection.interrupt(); // Interrupt transition if cancelled
+                                    clearTimeouts(timeouts);
+                                    resolve(); // Resolve early if cancelled
+                                    return;
+                                }
+                            });
 
-        finally {
-            resetCancellationFlag(); // Reset the cancellation flag
-        }
+                        if (index > 0) {
+                            if (isCancelled) {
+                                console.log("Cancelled at step with arrowhead.");
+                                interruptAllVisuals();
+                                clearTimeouts(timeouts);
+                                resolve(); // Resolve early if cancelled
+                                return;
+                            }
+                            highlightLinkAndArrowhead(nodes[index - 1].id, node.id);
+                        }
+
+                        // Check the node's value and highlight accordingly
+                        if (node.value === valueID) {
+                            if (isCancelled) {
+                                console.log("Cancelled during value check.");
+                                interruptAllVisuals();
+                                clearTimeouts(timeouts);
+                                resolve(); // Resolve early if cancelled
+                                return;
+                            }
+                            nodeSelection.transition().duration(delay).style('fill', 'green');
+                            found = true;
+                            clearTimeouts(timeouts); // Clear all remaining timeouts
+                            resolve(); // Resolve when the target node is found
+                        } else if (node.id === valueID) {
+                            if (isCancelled) {
+                                console.log("Cancelled during ID check.");
+                                interruptAllVisuals();
+                                clearTimeouts(timeouts);
+                                resolve(); // Resolve early if cancelled
+                                return;
+                            }
+                            nodeSelection.transition().duration(delay).style('fill', 'red');
+                            found = true;
+                            clearTimeouts(timeouts); // Clear all remaining timeouts
+                            resolve(); // Resolve when the target node is found
+                        }
+                    }, delay * index);
+
+                    timeouts.push(timeout);
+                });
+            } catch (error) {
+                reject(error); // Reject the promise if any errors occur
+            } finally {
+                resetCancellationFlag(); // Reset the cancellation flag after the operation
+            }
+        });
     }
+
 
     function highlightTailNode() {
         return new Promise((resolve) => {
@@ -698,13 +726,22 @@ async function highlightNodes(valueID, delay) {
 
     async function removeNodeInSll(nodeToBeRemoved, timing, isStack) {
 
-        highlightNodes(nodeToBeRemoved.id, timing.highlightDelay * 2); // Double the delay for highlighting
-        await new Promise((resolve) => {
+        try {
+            await highlightNodes(nodeToBeRemoved.id, timing.highlightDelay * 2); // Double the delay for highlighting
+
+            if (isCancelled) {
+                return;
+            }
+
             // Transition and then remove the node's visual elements
             svg.select(`#node-${nodeToBeRemoved.id}`)
                 .transition().duration(timing.highlightDelay)
                 .style('opacity', 0) // Fade out effect
 
+
+            if (isCancelled) {
+                return;
+            }
             svg.select(`#node-${nodeToBeRemoved.id}`).remove();
             // Proceed with text removal after node is removed
             svg.select(`#textId-${nodeToBeRemoved.id}`)
@@ -713,14 +750,20 @@ async function highlightNodes(valueID, delay) {
                 .on('end', () => {
                     svg.select(`#textId-${nodeToBeRemoved.id}`).remove();
 
+                    if (isCancelled) {
+                        return;
+                    }
                     // Update links if necessary and resolve when complete
                     updateLinksAfterRemoval(nodeToBeRemoved);
 
                     refreshSinglyLinkedList(isStack);
-
-                    resolve(); // Ensure all transitions have time to complete
                 });
-        });
+        }
+
+        finally {
+            resetCancellationFlag(); // Reset the cancellation flag
+        }
+
     }
 
     function updateLinksAfterRemoval(nodeToBeRemoved) {

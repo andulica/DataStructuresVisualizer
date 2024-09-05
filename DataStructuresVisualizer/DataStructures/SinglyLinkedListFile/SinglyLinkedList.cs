@@ -73,6 +73,31 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         count++;
     }
 
+    public void DeleteAtInstant(int index)
+    {
+        int currentIndex = 0;
+        SinglyLinkedListNode<T> current = _head;
+
+        if (index == 0)
+        {
+            _head = _head.Next;
+            count--;
+            return;
+        }
+
+        while (current.Next != null && currentIndex < index - 1)
+        {
+            current = current.Next;
+            currentIndex++;
+        }
+
+        if (current.Next != null)
+        {
+            current.Next = current.Next.Next;
+            count--;
+        }
+    }
+
     /// <summary>
     /// Appends a new node containing the specified data to the end of the singly linked list and returns the newly created node.
     /// </summary>
@@ -311,13 +336,14 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// business logic with the UI code.
     /// </remarks>
     /// <param name="index">The zero-based index of the node to be deleted.</param>
-    public async Task DeleteAt(int index)
+    public async Task DeleteAt(int index, CancellationToken cancellationToken)
     {
 
         SinglyLinkedListNode <T> nodeToDelete;
         if (_head == null)
         {
             await HighlightRequested.Invoke(RemoveSteps.CheckIfEmpty); // "if empty, do nothing"
+            cancellationToken.ThrowIfCancellationRequested();
             return; // Check if the list is empty and exit
         }
 
@@ -327,25 +353,34 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         if (index == 0)
         {
             await HighlightRequested.Invoke(RemoveSteps.InitializePreHead); // "Vertex pre = head"
+            cancellationToken.ThrowIfCancellationRequested();
+
             nodeToDelete = _head;
             _head = _head.Next; // Update the head to the next node
             nodeToDelete.Next = null; // Explicitly remove reference to the next node
             count--;
             await HighlightRequested.Invoke(RemoveSteps.DeleteDel); // "delete del"
+            cancellationToken.ThrowIfCancellationRequested();
+
             return;
         }
 
         await HighlightRequested.Invoke(RemoveSteps.InitializePreHead); // "Vertex pre = head"
+        cancellationToken.ThrowIfCancellationRequested();
 
         // Traverse to the node before the target node
         for (int i = 0; i < index - 1; i++)
         {
             await HighlightRequested.Invoke(RemoveSteps.LoopToPosition); // "for (k = 0; k<i-1; k++)"
+            cancellationToken.ThrowIfCancellationRequested();
+
             current = current.Next;
             await HighlightRequested.Invoke(RemoveSteps.MovePreToNext); // "pre = pre.next"
+            cancellationToken.ThrowIfCancellationRequested();
         }
 
         await HighlightRequested.Invoke(RemoveSteps.SetDelAndAfter); // "Vertex del = pre.next, after = del.next"
+        cancellationToken.ThrowIfCancellationRequested();
 
         // Save the node to be deleted for cleanup
         nodeToDelete = current.Next;
@@ -359,8 +394,10 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         }
 
         await HighlightRequested.Invoke(RemoveSteps.UpdatePreNextToAfter); // "pre.next = after"
+        cancellationToken.ThrowIfCancellationRequested();
 
         await HighlightRequested.Invoke(RemoveSteps.DeleteDel); // "delete del"
+        cancellationToken.ThrowIfCancellationRequested();
     }
 
 

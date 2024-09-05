@@ -422,6 +422,7 @@
 
     private async Task RemoveValue()
     {
+        InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
         if (isOperationInProgress) return; // Prevent multiple operations
 
         if (inputValue >= linkedList.Count)
@@ -431,22 +432,32 @@
         }
         isOperationInProgress = true;
         StateHasChanged();
+        var nodeToRemove = linkedList.FindNodeByIndex(inputValue);
+        var nodeToBeDeleted = ConvertNodeToJavaScriptFormat(nodeToRemove);
         try
         {
             linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
-            var nodeToRemove = linkedList.FindNodeByIndex(inputValue);
-            var nodeToBeDeleted = ConvertNodeToJavaScriptFormat(nodeToRemove);
-
-            var removeTask = linkedList.DeleteAt(inputValue);
+            var removeTask = linkedList.DeleteAt(inputValue, _cancellationTokenSource.Token);
             var jsTask = JSRuntime.InvokeVoidAsync("removeValueInSll", nodeToBeDeleted, timing).AsTask();
 
             await Task.WhenAll(removeTask, jsTask); // Run both tasks concurrently
+        }
+        catch (OperationCanceledException)
+        {
+            await JSRuntime.InvokeVoidAsync("setIsCancelled");
+            linkedList.DeleteAtInstant(inputValue);
+            var linkedListData = ConvertListToJavaScriptFormat(linkedList);
+
+            await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
+
+            messageOutput = $"Visual cancelled. Node at index {inputValue} removed.";
         }
         finally
         {
             linkedList.HighlightRequested -= HandleHighlightRequest; // Clean up event subscription
             isOperationInProgress = false; // Reset flag after operation
+            JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
             StateHasChanged();
         }
     }
