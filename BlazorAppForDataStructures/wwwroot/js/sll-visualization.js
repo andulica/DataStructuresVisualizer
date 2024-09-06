@@ -455,8 +455,6 @@
     }
 
     async function insertNode(value, position, timing, isStack) {
-        // Immediately stop any ongoing visuals and animations
-        interruptAllVisuals();
 
         return new Promise(async (resolve, reject) => {
             try {
@@ -821,7 +819,6 @@
 
     window.insertAtInSLL = function (value, selectedIndex, timing, isStack = false) {
         resetCancellationFlag(); // Reset the cancellation flag before starting the operation
-        console.log("isCancelled in insertAtInSLL: " + isCancelled);
         try {
             resetNodeColors();
             resetLinkColors();

@@ -114,12 +114,7 @@
     private bool isStack = false;
     private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
-    VisualizationTiming timing = new VisualizationTiming
-        {
-            HighlightDelay = 1000,
-            NodeMovementDelay = 1000,
-            JavaScriptDelay = 1000
-        };
+    VisualizationTiming timing = VisualizationTiming.Default;
 
     public string selectedAction
     {

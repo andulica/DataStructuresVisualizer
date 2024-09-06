@@ -1,6 +1,7 @@
 ﻿@page "/"
 @inject IJSRuntime JSRuntime
 @using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
+@using DataStructuresVisualizer.DataStructures;
 @inject NavigationManager NavigationManager
 @implements IDisposable
 
@@ -79,7 +80,8 @@
     private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
     private bool _isDisposed = false;
     const int delayStartOfAnimation = 1000;
-    const int delayBetweenOperations = 6500;
+    VisualizationTiming timing = VisualizationTiming.Default;
+
 
     protected override void OnInitialized()
     {
@@ -107,8 +109,8 @@
                     var newNode = new SinglyLinkedListNode<int>(rand.Next(1, 30));
                     var jsNode = ConvertNodeToJavaScriptFormat(newNode);
 
-                    await JSRuntime.InvokeVoidAsync("insertAtInSLL", jsNode, position, 1000);
-                    await Task.Delay(1000, _cancellationTokenSource.Token);
+                    await JSRuntime.InvokeVoidAsync("insertAtInSLL", jsNode, position, timing, false);
+                    await Task.Delay(timing.HighlightDelay, _cancellationTokenSource.Token);
 
                     if (_cancellationTokenSource.Token.IsCancellationRequested)
                     {
