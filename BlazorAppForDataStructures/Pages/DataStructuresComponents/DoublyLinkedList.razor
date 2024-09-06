@@ -13,7 +13,8 @@
     <h3>Doubly Linked List Operations</h3>
 
     <div class="operation-selection">
-        <select @bind="selectedAction">
+        <select @onchange="OnActionChanged">
+            <option value="" disabled selected>Select an Operation</option> <!-- Initial message -->
             <option value="insertAtPosition">Insert At Position</option>
             <option value="prepend">Prepend</option>
             <option value="append">Append</option>
@@ -94,8 +95,10 @@
     private Random rand = new Random();
     private string messageOutput = "";
     private IEnumerable<string> currentCode = Enumerable.Empty<string>();
-    private VisualizationTiming timing = new VisualizationTiming { HighlightDelay = 1000, NodeMovementDelay = 1000, JavaScriptDelay = 1000 };
+    VisualizationTiming timing = VisualizationTiming.Default;
     private DoublyLinkedList<int> doublyLinkedList = new DoublyLinkedList<int>();
+    private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+
 
     public string selectedAction
     {
@@ -109,6 +112,18 @@
                 StateHasChanged();
             }
         }
+    }
+
+    private void InitializeNewOperation()
+    {
+        _cancellationTokenSource.Cancel();
+        _cancellationTokenSource = new CancellationTokenSource();
+    }
+
+    private void OnActionChanged(ChangeEventArgs e)
+    {
+        selectedAction = e.Value.ToString();
+        InitializeNewOperation(); // Cancel the ongoing operation when a new action is selected
     }
 
     protected override void OnInitialized()
@@ -136,8 +151,7 @@
                     "if empty, return NOT_FOUND",
                     "index = 0, tmp = head",
                     "while (tmp.item != v)",
-                    "  index++, tmp = tmp.next",
-                    "  if tmp == null",
+                    "index++, tmp = tmp.next,\n if tmp == null,",
                     "    return NOT_FOUND",
                     "return index"
                 },
@@ -195,12 +209,12 @@
 
         isOperationInProgress = true;
 
+        var nodeToInsert = new DoublyLinkedListNode<int>(inputValue);
+        var dllData = ConvertNodeToJavaScriptFormat(nodeToInsert);
+
         try
         {
             doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
-
-            var nodeToInsert = new DoublyLinkedListNode<int>(inputValue);
-            var dllData = ConvertNodeToJavaScriptFormat(nodeToInsert);
 
             var insertTask = doublyLinkedList.InsertAtAsync(nodeToInsert, insertPosition, timing);
             var jsTask = JSRuntime.InvokeVoidAsync("insertAtInDll", dllData, insertPosition, timing.JavaScriptDelay).AsTask();
@@ -271,7 +285,7 @@
             var nodeToInsert = new DoublyLinkedListNode<int>(inputValue);
             var dllData = ConvertNodeToJavaScriptFormat(nodeToInsert);
 
-            var appendTask = doublyLinkedList.AppendAsync(inputValue, timing);        
+            var appendTask = doublyLinkedList.AppendAsync(inputValue, timing);
             var jsTask = JSRuntime.InvokeVoidAsync("insertTailInDll", dllData, timing.JavaScriptDelay).AsTask();
 
             await Task.WhenAll(appendTask, jsTask); // Run both tasks concurrently
@@ -296,7 +310,7 @@
         try
         {
             doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
-            
+
             var searchTask = doublyLinkedList.SearchAsync(inputValue, timing);
             var jsTask = JSRuntime.InvokeVoidAsync("searchValueInDLL", inputValue, timing.JavaScriptDelay).AsTask();
 

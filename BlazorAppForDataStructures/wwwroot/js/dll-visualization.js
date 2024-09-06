@@ -317,9 +317,22 @@
                     }
 
                     if (index === position) {
+                        d3.select(`#node-${node.id}`)
+                            .transition()
+                            .duration(delay)
+                            .style('fill', '#2ebbd1')
+                            .on('end', () => {
+                                // Check if the operation is cancelled after the transition
+                                if (isCancelled) {
+                                    clearTimeouts(timeouts);
+                                    resolve(); // Exit early if cancelled
+                                    return;
+                                }
+                            });
+
                         found = true;
                         clearTimeouts(timeouts);
-                        resolve();
+                        resolve(); // Resolve the promise once the condition is met
                     }
                 }, delay * index);
 
