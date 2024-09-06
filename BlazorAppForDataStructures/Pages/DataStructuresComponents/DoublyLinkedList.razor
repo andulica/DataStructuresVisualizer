@@ -216,7 +216,7 @@
         {
             doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
-            var insertTask = doublyLinkedList.InsertAtAsync(nodeToInsert, insertPosition, timing);
+            var insertTask = doublyLinkedList.InsertAtAsync(nodeToInsert, insertPosition);
             var jsTask = JSRuntime.InvokeVoidAsync("insertAtInDll", dllData, insertPosition, timing.JavaScriptDelay).AsTask();
 
             await Task.WhenAll(insertTask, jsTask); // Run both tasks concurrently
@@ -250,7 +250,7 @@
             var nodeToInsert = new DoublyLinkedListNode<int>(inputValue);
             var dllData = ConvertNodeToJavaScriptFormat(nodeToInsert);
 
-            var insertTask = doublyLinkedList.PrependAsync(nodeToInsert, timing);
+            var insertTask = doublyLinkedList.PrependAsync(nodeToInsert);
             var jsTask = JSRuntime.InvokeVoidAsync("insertHeadInDll", dllData, timing.JavaScriptDelay).AsTask();
 
             await Task.WhenAll(insertTask, jsTask); // Run both tasks concurrently
@@ -285,7 +285,7 @@
             var nodeToInsert = new DoublyLinkedListNode<int>(inputValue);
             var dllData = ConvertNodeToJavaScriptFormat(nodeToInsert);
 
-            var appendTask = doublyLinkedList.AppendAsync(inputValue, timing);
+            var appendTask = doublyLinkedList.AppendAsync(inputValue);
             var jsTask = JSRuntime.InvokeVoidAsync("insertTailInDll", dllData, timing.JavaScriptDelay).AsTask();
 
             await Task.WhenAll(appendTask, jsTask); // Run both tasks concurrently
@@ -311,7 +311,7 @@
         {
             doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
-            var searchTask = doublyLinkedList.SearchAsync(inputValue, timing);
+            var searchTask = doublyLinkedList.SearchAsync(inputValue);
             var jsTask = JSRuntime.InvokeVoidAsync("searchValueInDLL", inputValue, timing.JavaScriptDelay).AsTask();
 
             await Task.WhenAll(searchTask, jsTask); // Run both tasks concurrently
@@ -343,8 +343,10 @@
         {
             doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
-            await doublyLinkedList.DeleteAtAsync(inputValue, timing);
-            await JSRuntime.InvokeVoidAsync("removeValueInDll", inputValue, timing.JavaScriptDelay);
+            var deleteTask = doublyLinkedList.DeleteAtAsync(inputValue);
+            var jsTask = JSRuntime.InvokeVoidAsync("removeValueInDll", inputValue, timing.JavaScriptDelay).AsTask();
+
+            await Task.WhenAll(deleteTask, jsTask); // Run both tasks concurrently for managing both JS visual and C# code highlighting
         }
         catch (Exception ex)
         {
@@ -391,9 +393,10 @@
         }
     }
 
-    private void HandleHighlightRequest(int step, VisualizationTiming timing)
+    private async Task HandleHighlightRequest(Enum step)
     {
-        JSRuntime.InvokeVoidAsync("highlightLine", step);
+        await JSRuntime.InvokeVoidAsync("highlightLine", step);
+        await Task.Delay(timing.HighlightDelay);
     }
 
     private object ConvertNodeToJavaScriptFormat(DoublyLinkedListNode<int> node)

@@ -12,6 +12,8 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         // Tail node of the doubly linked list.
         private DoublyLinkedListNode<T> tail;
 
+        public Func<Enum, Task> HighlightRequested;
+
         // Count of nodes in the doubly linked list.
         private int count;
 
@@ -26,9 +28,6 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
 
         // Public property to access the tail node.
         public DoublyLinkedListNode<T> Tail => tail;
-
-        public Action<int, VisualizationTiming> HighlightRequested { get; set; }
-
 
         /// <summary>
         /// Appends a new node with the specified data at the end of the list.
@@ -57,12 +56,11 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         /// Appends a new node with the specified data at the end of the list.
         /// </summary>
         /// <param name="data">The data to be appended.</param>
-        public async Task<DoublyLinkedListNode<T>> AppendAsync(T data, VisualizationTiming timing)
+        public async Task<DoublyLinkedListNode<T>> AppendAsync(T data)
         {
             var newNode = new DoublyLinkedListNode<T>(data);
 
-            HighlightRequested?.Invoke(Convert.ToInt32(AppendSteps.CreateVertex), timing);
-            await Task.Delay(timing.HighlightDelay);
+            await HighlightRequested.Invoke(AppendSteps.CreateVertex); // "Vertex vtx = new Vertex(v)"
 
             if (tail == null)
             {
@@ -73,14 +71,12 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
                 tail.Next = newNode;
                 newNode.Prev = tail;
 
-                HighlightRequested?.Invoke(Convert.ToInt32(AppendSteps.UpdateTailNextPointer), timing);
-                await Task.Delay(timing.HighlightDelay);
+                await HighlightRequested.Invoke(AppendSteps.UpdateTailNextPointer); // "tail.next = vtx"
 
                 tail = newNode;
             }
 
-            HighlightRequested?.Invoke(Convert.ToInt32(AppendSteps.UpdateTail), timing);
-            await Task.Delay(timing.HighlightDelay);
+            await HighlightRequested.Invoke(AppendSteps.UpdateTail);
 
             count++;
             return newNode;
@@ -92,30 +88,25 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         /// <param name="data">_data for the new node.</param>
         /// <param name="index">Index at which to insert the new node.</param>
         /// <exception cref="IndexOutOfRangeException">Thrown if the index is out of bounds.</exception>
-        public async Task InsertAtAsync(DoublyLinkedListNode<T> newNode, int index, VisualizationTiming timing)
+        public async Task InsertAtAsync(DoublyLinkedListNode<T> newNode, int index)
         {
             var current = head;
             int currentIndex = 0;
 
-            HighlightRequested?.Invoke(Convert.ToInt32(InsertAtPositionSteps.InitializePreHead), timing);
-            await Task.Delay(timing.HighlightDelay);
+            await HighlightRequested.Invoke(InsertAtPositionSteps.InitializePreHead);
 
             while (current != null && currentIndex < index)
             {
-                HighlightRequested?.Invoke(Convert.ToInt32(InsertAtPositionSteps.LoopToPosition), timing);
-                await Task.Delay(timing.HighlightDelay);
+                await HighlightRequested.Invoke(InsertAtPositionSteps.LoopToPosition);
 
                 current = current.Next;
                 currentIndex++;
 
-                HighlightRequested?.Invoke(Convert.ToInt32(InsertAtPositionSteps.MovePreToNext), timing);
-                await Task.Delay(timing.HighlightDelay);
+                await HighlightRequested.Invoke(InsertAtPositionSteps.MovePreToNext);
             }
-            HighlightRequested?.Invoke(Convert.ToInt32(InsertAtPositionSteps.SetAftToPreNext), timing);
-            await Task.Delay(timing.HighlightDelay);
+            await HighlightRequested.Invoke(InsertAtPositionSteps.SetAftToPreNext);
 
-            HighlightRequested?.Invoke(Convert.ToInt32(InsertAtPositionSteps.CreateVertex), timing);
-            await Task.Delay(timing.HighlightDelay);
+            await HighlightRequested.Invoke(InsertAtPositionSteps.CreateVertex);
 
             newNode.Next = current.Next;
             newNode.Prev = current;
@@ -125,10 +116,8 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
                 current.Next.Prev = newNode;
             }
 
-            HighlightRequested?.Invoke(Convert.ToInt32(InsertAtPositionSteps.SetVertexNextToAft), timing);
-            await Task.Delay(timing.HighlightDelay);
-            HighlightRequested?.Invoke(Convert.ToInt32(InsertAtPositionSteps.SetPreNextToVertex), timing);
-            await Task.Delay(timing.HighlightDelay);
+            await HighlightRequested.Invoke(InsertAtPositionSteps.SetVertexNextToAft);
+            await HighlightRequested.Invoke(InsertAtPositionSteps.SetPreNextToVertex);
 
             current.Next = newNode;
 
@@ -144,11 +133,10 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         /// Prepends a new node with specified data at the start of the list.
         /// </summary>
         /// <param name="newNode">_data for the new node.</param>
-        public async Task PrependAsync(DoublyLinkedListNode <T> newNode, VisualizationTiming timing)
+        public async Task PrependAsync(DoublyLinkedListNode <T> newNode)
         {
 
-            HighlightRequested?.Invoke(Convert.ToInt32(PrependSteps.CreateVertex), timing);
-            await Task.Delay(timing.HighlightDelay);
+            await HighlightRequested.Invoke(PrependSteps.CreateVertex);
 
             if (head == null)
             {
@@ -158,17 +146,14 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
             {
                 head.Prev = newNode;
                 newNode.Next = head;
-                HighlightRequested?.Invoke(Convert.ToInt32(PrependSteps.SetPreviousPointer), timing);
-                await Task.Delay(timing.HighlightDelay);
+                await HighlightRequested.Invoke(PrependSteps.SetPreviousPointer);
 
-                HighlightRequested?.Invoke(Convert.ToInt32(PrependSteps.SetNextPointer), timing);
-                await Task.Delay(timing.HighlightDelay);
+                await HighlightRequested.Invoke(PrependSteps.SetNextPointer);
 
                 head = newNode;
             }
 
-            HighlightRequested?.Invoke(Convert.ToInt32(PrependSteps.SetHead), timing);
-            await Task.Delay(timing.HighlightDelay);
+            await HighlightRequested.Invoke(PrependSteps.SetHead);
 
             count++;
         }
@@ -185,30 +170,20 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         /// <exception cref="IndexOutOfRangeException">
         /// Thrown when the specified index is less than 0 or greater than or equal to the size of the list.
         /// </exception>
-        public async Task DeleteAtAsync(int index, VisualizationTiming timing)
+        public async Task DeleteAtAsync(int index)
         {
-            if (index < 0 || index >= count)
-            {
-                throw new IndexOutOfRangeException($"Index {index} is out of range for the linked list.");
-            }
-
-            // Step 1: Check if the list is empty
             if (head == null)
             {
-                HighlightRequested?.Invoke(Convert.ToInt32(RemoveSteps.CheckIfEmpty), timing);
-                await Task.Delay(timing.HighlightDelay);
+                await HighlightRequested.Invoke(RemoveSteps.CheckIfEmpty);
                 return;
             }
 
             DoublyLinkedListNode<T> current = head;
 
-            // Step 2: Handle deletion of the head node
             if (index == 0)
             {
-                HighlightRequested?.Invoke(Convert.ToInt32(RemoveSteps.InitializePreHead), timing); // Initialize Pre Head
-                await Task.Delay(timing.HighlightDelay);
+                await HighlightRequested.Invoke(RemoveSteps.InitializePreHead);
 
-                // Handle deletion of the head node
                 if (head.Next != null)
                 {
                     head = head.Next;
@@ -216,31 +191,24 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
                 }
                 else
                 {
-                    // If the list has only one node
                     head = tail = null;
                 }
 
                 count--;
-                HighlightRequested?.Invoke(Convert.ToInt32(RemoveSteps.DeleteDel), timing); // Delete the node
-                await Task.Delay(timing.HighlightDelay);
+                await HighlightRequested.Invoke(RemoveSteps.DeleteDel);
                 return;
             }
 
-            // Step 3: Traverse to the node at the specified index
             for (int i = 0; i < index; i++)
             {
-                HighlightRequested?.Invoke(Convert.ToInt32(RemoveSteps.LoopToPosition), timing); // Loop to the position
-                await Task.Delay(timing.HighlightDelay);
+                await HighlightRequested.Invoke(RemoveSteps.LoopToPosition);
 
                 current = current.Next;
 
-                HighlightRequested?.Invoke(Convert.ToInt32(RemoveSteps.MovePreToNext), timing); // Move Pre to Next
-                await Task.Delay(timing.HighlightDelay);
+                await HighlightRequested.Invoke(RemoveSteps.MovePreToNext);
             }
 
-            // Step 4: Unlink the node from the list
-            HighlightRequested?.Invoke(Convert.ToInt32(RemoveSteps.SetDelAndAfter), timing); // Set Del and After
-            await Task.Delay(timing.HighlightDelay);
+            await HighlightRequested.Invoke(RemoveSteps.SetDelAndAfter);
 
             current.Prev.Next = current.Next;
 
@@ -250,14 +218,11 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
             }
             else
             {
-                // If the node to be deleted is the tail
                 tail = current.Prev;
             }
 
-            // Step 5: Finalize the deletion and update the count
             count--;
-            HighlightRequested?.Invoke(Convert.ToInt32(RemoveSteps.DeleteDel), timing); // Delete the node
-            await Task.Delay(timing.HighlightDelay);
+            await HighlightRequested.Invoke(RemoveSteps.DeleteDel);
         }
 
         /// <summary>
@@ -265,55 +230,44 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         /// </summary>
         /// <param name="data">The data to locate in the list.</param>
         /// <returns>The zero-based index of the first occurrence of the data, if found; otherwise, -1.</returns>
-        public async Task SearchAsync(T data, VisualizationTiming timing)
+        public async Task SearchAsync(T data)
         {
             int index = 0;
             DoublyLinkedListNode<T> current = head;
 
-            // Step 1: Check if the list is empty
             if (head == null)
             {
-                HighlightRequested?.Invoke(Convert.ToInt32(SearchSteps.CheckEmptyReturnNotFound), timing); // "List is empty"
-                await Task.Delay(timing.HighlightDelay);
+                await HighlightRequested.Invoke(SearchSteps.CheckEmptyReturnNotFound);
                 return;
             }
 
-            // Step 2: Traverse the list to find the data
-            HighlightRequested?.Invoke(Convert.ToInt32(SearchSteps.InitializeIndexAndHead), timing); // Initialize index and set head
-            await Task.Delay(timing.HighlightDelay);
+            await HighlightRequested.Invoke(SearchSteps.InitializeIndexAndHead);
 
             while (current != null)
             {
-                HighlightRequested?.Invoke(Convert.ToInt32(SearchSteps.LoopUntilFound), timing); // Loop until found
-                await Task.Delay(timing.HighlightDelay);
+                await HighlightRequested.Invoke(SearchSteps.LoopUntilFound);
 
                 if (EqualityComparer<T>.Default.Equals(current._data, data))
                 {
-                    HighlightRequested?.Invoke(Convert.ToInt32(SearchSteps.ReturnIndex), timing); // Return index
-                    await Task.Delay(timing.HighlightDelay);
+                    await HighlightRequested.Invoke(SearchSteps.ReturnIndex);
                     return;
                 }
 
-                // Move to the next node
                 current = current.Next;
                 index++;
 
-                // Check if the next node is null
                 if (current == null)
                 {
-                    HighlightRequested?.Invoke(Convert.ToInt32(SearchSteps.CheckIfNullReturnNotFound), timing); // If null, return -1
-                    await Task.Delay(timing.HighlightDelay);
+                    await HighlightRequested.Invoke(SearchSteps.CheckIfNullReturnNotFound);
                 }
                 else
                 {
-                    HighlightRequested?.Invoke(Convert.ToInt32(SearchSteps.IncrementIndexAndMoveNext), timing); // Increment index and move to next
-                    await Task.Delay(timing.HighlightDelay);
+                    await HighlightRequested.Invoke(SearchSteps.IncrementIndexAndMoveNext);
                 }
             }
 
-            HighlightRequested?.Invoke(Convert.ToInt32(SearchSteps.ReturnNull), timing); // Return -1 if not found
-            await Task.Delay(timing.HighlightDelay);
-            return; // Data not found
+            await HighlightRequested.Invoke(SearchSteps.ReturnNull);
+            return;
         }  
 
         /// <summary>
