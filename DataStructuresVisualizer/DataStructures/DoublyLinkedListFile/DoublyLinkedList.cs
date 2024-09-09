@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using System.Threading;
 using DataStructuresVisualizer.DataStructures.Enums.DoublyLinkedList;
 using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
 
@@ -29,6 +31,34 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         // Public property to access the tail node.
         public DoublyLinkedListNode<T> Tail => tail;
 
+        public void InsertAtInstant (DoublyLinkedListNode <T> node, int index)
+        {
+            var current = head;
+            int currentIndex = 0;
+
+            while (current != null && currentIndex < index - 1) // -1 to stop at the node before the target index
+            {
+                current = current.Next;
+                currentIndex++;
+            }
+
+            node.Next = current.Next;
+            node.Prev = current;
+
+            if (current.Next != null)
+            {
+                current.Next.Prev = node;
+            }
+            current.Next = node;
+
+            if (node.Next == null)
+            {
+                tail = node;
+            }
+
+            count++;
+        }
+
         /// <summary>
         /// Appends a new node with the specified data at the end of the list.
         /// </summary>
@@ -56,30 +86,28 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         /// Appends a new node with the specified data at the end of the list.
         /// </summary>
         /// <param name="data">The data to be appended.</param>
-        public async Task<DoublyLinkedListNode<T>> AppendAsync(T data)
+        public async Task<DoublyLinkedListNode<T>> AppendAsync(DoublyLinkedListNode<T> node)
         {
-            var newNode = new DoublyLinkedListNode<T>(data);
-
             await HighlightRequested.Invoke(AppendSteps.CreateVertex); // "Vertex vtx = new Vertex(v)"
 
             if (tail == null)
             {
-                head = tail = newNode;
+                head = tail = node;
             }
             else
             {
-                tail.Next = newNode;
-                newNode.Prev = tail;
+                tail.Next = node;
+                node.Prev = tail;
 
                 await HighlightRequested.Invoke(AppendSteps.UpdateTailNextPointer); // "tail.next = vtx"
 
-                tail = newNode;
+                tail = node;
             }
 
             await HighlightRequested.Invoke(AppendSteps.UpdateTail);
 
             count++;
-            return newNode;
+            return node;
         }
 
         /// <summary>
@@ -88,25 +116,36 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         /// <param name="data">_data for the new node.</param>
         /// <param name="index">Index at which to insert the new node.</param>
         /// <exception cref="IndexOutOfRangeException">Thrown if the index is out of bounds.</exception>
-        public async Task InsertAtAsync(DoublyLinkedListNode<T> newNode, int index)
+        public async Task InsertAtAsync(DoublyLinkedListNode<T> newNode, int index, CancellationToken cancellationToken)
         {
             var current = head;
             int currentIndex = 0;
 
             await HighlightRequested.Invoke(InsertAtPositionSteps.InitializePreHead);
+            cancellationToken.ThrowIfCancellationRequested();
 
-            while (current != null && currentIndex < index)
+            while (current != null && currentIndex < index - 1) // -1 to stop at the node before the target index
             {
                 await HighlightRequested.Invoke(InsertAtPositionSteps.LoopToPosition);
+                cancellationToken.ThrowIfCancellationRequested();
 
                 current = current.Next;
                 currentIndex++;
 
                 await HighlightRequested.Invoke(InsertAtPositionSteps.MovePreToNext);
+                cancellationToken.ThrowIfCancellationRequested();
             }
+            // current is now the node before the target index so we need to mimic the steps of while loop one more time
+            await HighlightRequested.Invoke(InsertAtPositionSteps.LoopToPosition);
+            cancellationToken.ThrowIfCancellationRequested();
+            await HighlightRequested.Invoke(InsertAtPositionSteps.MovePreToNext);
+            cancellationToken.ThrowIfCancellationRequested();
+
             await HighlightRequested.Invoke(InsertAtPositionSteps.SetAftToPreNext);
+            cancellationToken.ThrowIfCancellationRequested();
 
             await HighlightRequested.Invoke(InsertAtPositionSteps.CreateVertex);
+            cancellationToken.ThrowIfCancellationRequested();
 
             newNode.Next = current.Next;
             newNode.Prev = current;
@@ -117,7 +156,10 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
             }
 
             await HighlightRequested.Invoke(InsertAtPositionSteps.SetVertexNextToAft);
+            cancellationToken.ThrowIfCancellationRequested();
+
             await HighlightRequested.Invoke(InsertAtPositionSteps.SetPreNextToVertex);
+            cancellationToken.ThrowIfCancellationRequested();
 
             current.Next = newNode;
 

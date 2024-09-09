@@ -456,6 +456,7 @@
 
     async function insertNode(value, position, timing, isStack) {
 
+
         return new Promise(async (resolve, reject) => {
             try {
                 // Highlight nodes for insertion

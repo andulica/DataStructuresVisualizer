@@ -2,6 +2,11 @@
     let svg, nodes;
     let margin = { top: 20, right: 30, bottom: 40, left: 50 };
     const delayDrawLinks = 1000;
+    let isCancelled = false;
+
+    function resetCancellationFlag() {
+        isCancelled = false;
+    }
 
     function adjustLineEndpoints(x1, y1, x2, y2, radius, strokeWidth, direction) {
         const gap = 10;
@@ -229,9 +234,17 @@
     }
 
     async function insertNode(value, position, delay) {
+
+        if (isCancelled) {
+            return;
+        }
         await highlightNodesForInsertion(position, delay * 2);
 
         await onPurposeDelay(delay);
+
+        if (isCancelled) {
+            return;
+        }
 
         await new Promise((resolve) => {
             setTimeout(async () => {
@@ -240,8 +253,16 @@
                     // Handle insertion at the tail
                     newNode = createTailNode(value);
                     nodes.push(newNode);
+                    // Check again after the delay
+                    if (isCancelled) {
+                        resolve(); // Exit early if cancelled
+                        return;
+                    }
                 } else {
-                    // Handle insertion at the head or specified position
+                    if (isCancelled) {
+                        resolve(); // Exit early if cancelled
+                        return;
+                    }
                     newNode = createNewNode(value, position);
                     nodes.splice(position, 0, newNode);
                 }
@@ -263,13 +284,20 @@
                 // Draw new links with a delay
                 await new Promise((innerResolve) => {
                     setTimeout(() => {
-
+                        if (isCancelled) {
+                            resolve(); // Exit early if cancelled
+                            return;
+                        }
                         if (nextNode) {
                             drawLineWithArrow(newNode.x, newNode.y, nextNode.x, nextNode.y, 20, 2, link3Id, 'right', delay);
                             drawLineWithArrow(nextNode.x, nextNode.y, newNode.x, newNode.y, 20, 2, link4Id, 'left', delay);
                         }
 
                         setTimeout(() => {
+                            if (isCancelled) {
+                                resolve(); // Exit early if cancelled
+                                return;
+                            }
                             if (prevNode) {
                                 drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, link1Id, 'right', delay);
                                 drawLineWithArrow(newNode.x, newNode.y, prevNode.x, prevNode.y, 20, 2, link2Id, 'left', delay);
@@ -286,7 +314,10 @@
                             setTimeout(() => {
                                 // Update the positions and redraw the links
                                 refreshDoublyLinkedList();
-
+                                if (isCancelled) {
+                                    resolve(); // Exit early if cancelled
+                                    return;
+                                }
                                 setTimeout(() => {
                                     resetNodeColors();
                                     innerResolve();
@@ -302,12 +333,17 @@
     }
 
     async function highlightNodesForInsertion(position, delay) {
+
         return new Promise((resolve) => {
             let timeouts = []; // Store timeout IDs for potential clearing
             let found = false;
 
             nodes.forEach((node, index) => {
                 let timeoutId = setTimeout(() => {
+                    if (isCancelled) {
+                        resolve(); // Exit early if cancelled
+                        return;
+                    }
                     if (found) return;
 
                     svg.select(`#node-${node.id}`).transition().duration(delay).style('fill', 'orange');
@@ -336,6 +372,10 @@
                     }
                 }, delay * index);
 
+                if (isCancelled) {
+                    resolve(); // Exit early if cancelled
+                    return;
+                }
                 timeouts.push(timeoutId);
             });
 
@@ -345,6 +385,10 @@
             }, delay * nodes.length);
             timeouts.push(finalTimeout);
 
+            if (isCancelled) {
+                resolve(); // Exit early if cancelled
+                return;
+            }
             // Function to clear all timeouts
             function clearTimeouts(timeouts) {
                 timeouts.forEach(timeoutId => clearTimeout(timeoutId));
@@ -642,7 +686,9 @@
         resetNodeColors();
     };
     window.insertAtInDll = async function (dllData, position, delay) {
-        await insertNode(dllData, position, delay);
+        resetCancellationFlag(); // Reset the cancellation flag before starting the operation
+
+        insertNode(dllData, position, delay);
     };
 
     window.insertTailInDll = function (value, delay) {
@@ -652,6 +698,10 @@
     window.removeValueInDll = function (value, delay) {
         removeNode(value, delay);
     }
+
+    window.setIsCancelled = function () {
+        isCancelled = true;
+    };
 
     window.drawDoublyLinkedList = drawDoublyLinkedList;
 })();

@@ -199,11 +199,19 @@
 
     private async Task PerformInsertion()
     {
+        InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
+
         if (isOperationInProgress) return;
 
         if (doublyLinkedList.IsFull())
         {
             messageOutput = $"The list has reached its maximum capacity of {doublyLinkedList.maxCapacity} nodes. Cannot insert a new node.";
+            return;
+        }
+
+        if (insertPosition <= 0 || insertPosition > doublyLinkedList.Count - 1)
+        {
+            messageOutput = $"The position to insert must be greater than 0 and no bigger than {doublyLinkedList.Count - 1}";
             return;
         }
 
@@ -216,18 +224,25 @@
         {
             doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
-            var insertTask = doublyLinkedList.InsertAtAsync(nodeToInsert, insertPosition);
+            var insertTask = doublyLinkedList.InsertAtAsync(nodeToInsert, insertPosition, _cancellationTokenSource.Token);
             var jsTask = JSRuntime.InvokeVoidAsync("insertAtInDll", dllData, insertPosition, timing.JavaScriptDelay).AsTask();
 
             await Task.WhenAll(insertTask, jsTask); // Run both tasks concurrently
         }
-        catch (Exception ex)
+        catch (OperationCanceledException)
         {
-            // Handle exception
+            await JSRuntime.InvokeVoidAsync("setIsCancelled");
+            doublyLinkedList.InsertAtInstant(nodeToInsert, insertPosition);
+
+            var doublyLinkedListData = ConvertListToJavaScriptFormat(doublyLinkedList);
+            await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", doublyLinkedListData);
+
+            messageOutput = $"Visual cancelled. Value {inputValue} inserted at index {insertPosition}.";
         }
         finally
         {
             doublyLinkedList.HighlightRequested -= HandleHighlightRequest; // Unsubscribe from highlight events
+            JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
             isOperationInProgress = false;
         }
     }
@@ -285,7 +300,7 @@
             var nodeToInsert = new DoublyLinkedListNode<int>(inputValue);
             var dllData = ConvertNodeToJavaScriptFormat(nodeToInsert);
 
-            var appendTask = doublyLinkedList.AppendAsync(inputValue);
+            var appendTask = doublyLinkedList.AppendAsync(nodeToInsert);
             var jsTask = JSRuntime.InvokeVoidAsync("insertTailInDll", dllData, timing.JavaScriptDelay).AsTask();
 
             await Task.WhenAll(appendTask, jsTask); // Run both tasks concurrently
