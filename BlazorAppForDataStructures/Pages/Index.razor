@@ -1,206 +1,110 @@
 ﻿@page "/"
-@inject IJSRuntime JSRuntime
-@using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
-@using DataStructuresVisualizer.DataStructures;
 @inject NavigationManager NavigationManager
-@implements IDisposable
 
-<PageTitle>Home</PageTitle>
+<div class="page-container"> </div>
+<h1 class="page-title">Select a Data Structure to Visualize</h1>
 
-<div class="page-container">
-    <div class="card" style="width: 18rem;">
+<div class="button-container">
+    @foreach (var ds in dataStructures)
+    {
+        <div class="data-structure-wrapper">
+            <button class="data-structure-button" @onclick="() => NavigateToVisualizer(ds)">
+                @ds
+            </button>
+            @if (ds == "SinglyLinkedList")
+            {
+                <img src="/images/sll_visual.gif" alt="Singly Linked List Visualization" class="img-thumbnail" />
+            }
+            @if (ds == "BinarySearchTree")
+            {
+                <img src="/images/bst_visual.gif" alt="Binary Search Tree Visualization" class="img-thumbnail" />
+            }
+            @if (ds == "DoublyLinkedList")
+            {
+                <img src="/images/dll_visual.gif" alt="Doubly Linked List Visualisation" class="img-thumbnail" />
+            }
+            @if (ds == "Queue")
+            {
+                <img src="/images/queue_visual.gif" alt="Queue Visualization" class="img-thumbnail" />
+            }
+            @if (ds == "Stack")
+            {
+                <img src="/images/stack_visual.gif" alt="Stack Visualization" class="img-thumbnail" />
+            }
 
-        <p class="fw-bolder">Click the button below to start exploring various data structures and their operations.</p>
-        <a href="#" class="btn btn-primary" @onclick="NavigateToPage">Explore Data Structures</a>
-    </div>
-    <div id="sll-display" class="shadow-none p-3 mb-5 bg-light rounded">
         </div>
+    }
 </div>
 
 <style>
     .page-container {
-        text-align: center;
-        padding: 20px;
-        color: black;
         background-image: url('/images/home_page_img_bckg.png');
-        background-size: cover;
-        background-repeat: no-repeat;
-        background-position: -110px -150px;
         height: 100vh;
-    }
-
-    .btn-explorer {
-        background-color: #66C3F4;
-        color: black;
-        border: 2px solid black;
-        padding: 10px 20px;
-        font-size: 16px;
-        cursor: pointer;
-    }
-
-        .btn-explorer:hover {
-            background-color: deepskyblue;
-        }
-
-    .background-svg {
         display: block;
-        z-index: 1;
-        position: relative;
+        margin-left: auto;
+        margin-right: auto;
+        height: 300px;
+        width: 50%;
+        padding: 70px 0;
+    }
+
+    body {
+        font-family: 'Roboto', Arial, sans-serif;
+        background-color: #fff;
+        color: #333;
+        margin: 0;
+        padding: 20px;
+        text-align: center;
     }
 
     .page-title {
-        color: black;
+        color: #FFA500; /* Orange */
+        margin-bottom: 20px;
     }
 
-    .card {
-        background-color: #F8F2DB;
-        border: 2px solid black;
-        padding: 15px;
-        border-radius: 20px;
-        display: inline-block;
+    .button-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
     }
 
-    svg {
-        display: block;
-        margin: 0 auto;
+    .data-structure-wrapper {
+        text-align: center;
+        margin-bottom: 20px;
+        width: 200px; /* Ensure consistent width for alignment */
     }
 
-    .highlight {
-        fill: orange !important;
+    .data-structure-button {
+        background-color: skyblue;
+        border: none;
+        color: #004D40; /* Dark Green */
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.3s;
+        width: 100%;
     }
 
-    .found {
-        fill: green !important;
+        .data-structure-button:hover {
+            background-color: deepskyblue; /* Green */
+            transform: scale(1.1);
+        }
+
+    .ds-gif {
+        margin-top: 10px;
+        max-width: 100%;
+        width: 100%; /* Match the button width */
+        height: 150px; /* Adjust height accordingly */
+        border:
     }
 </style>
 
 @code {
-    private SinglyLinkedList<int> linkedList = new SinglyLinkedList<int>();
-    private Random rand = new Random();
-    private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
-    private bool _isDisposed = false;
-    const int delayStartOfAnimation = 1000;
-    VisualizationTiming timing = VisualizationTiming.Default;
+    private string[] dataStructures = { "SinglyLinkedList", "DoublyLinkedList", "BinarySearchTree", "Queue", "Stack"};
 
-
-    protected override void OnInitialized()
+    private void NavigateToVisualizer(string dataStructure)
     {
-        linkedList.Add(rand.Next(1, 30));
-        linkedList.Add(rand.Next(1, 30));
-        linkedList.Add(rand.Next(1, 30));
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            NavigationManager.LocationChanged += OnLocationChanged;
-
-            var linkedListData = ConvertListToJavaScriptFormat(linkedList);
-            await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData);
-
-            try
-            {
-                await Task.Delay(delayStartOfAnimation, _cancellationTokenSource.Token);
-
-                for (int i = 0; i < 3; i++)
-                {
-                    int position = i % (linkedList.Count + 1);
-                    var newNode = new SinglyLinkedListNode<int>(rand.Next(1, 30));
-                    var jsNode = ConvertNodeToJavaScriptFormat(newNode);
-
-                    await JSRuntime.InvokeVoidAsync("insertAtInSLL", jsNode, position, timing, false);
-                    await Task.Delay(timing.HighlightDelay, _cancellationTokenSource.Token);
-
-                    if (_cancellationTokenSource.Token.IsCancellationRequested)
-                    {
-                        break;
-                    }
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                Console.WriteLine("Operation was cancelled.");
-            }
-            catch (ObjectDisposedException)
-            {
-                Console.WriteLine("Cancellation token source was disposed.");
-            }
-            finally
-            {
-                _cancellationTokenSource.Dispose();
-            }
-        }
-    }
-
-    private void OnLocationChanged(object sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
-    {
-        // Ensure that the CancellationTokenSource is not null and not already disposed
-        if (_cancellationTokenSource != null && !_isDisposed)
-        {
-            try
-            {
-                // Attempt to cancel the ongoing operation
-                _cancellationTokenSource.Cancel();
-            }
-            catch (ObjectDisposedException)
-            {
-                // Handle the case where the CancellationTokenSource is already disposed
-                Console.WriteLine("CancellationTokenSource was already disposed.");
-            }
-            finally
-            {
-                DisposeCancellationTokenSource();
-            }
-        }
-    }
-
-    private void DisposeCancellationTokenSource()
-    {
-        if (!_isDisposed)
-        {
-            _cancellationTokenSource.Dispose();
-            _isDisposed = true;
-        }
-    }
-
-    public void Dispose()
-    {
-        NavigationManager.LocationChanged -= OnLocationChanged;
-
-        // Dispose of the CancellationTokenSource when the component is disposed
-        DisposeCancellationTokenSource();
-    }
-
-    private object ConvertNodeToJavaScriptFormat(SinglyLinkedListNode<int> node)
-    {
-        return new
-        {
-            value = node._data,
-            next = node.Next != null ? node.Next.Id : (Guid?)null,
-            id = node.Id
-        };
-    }
-
-    private List<object> ConvertListToJavaScriptFormat(SinglyLinkedList<int> list)
-    {
-        var nodes = new List<object>();
-        var currentNode = list.Head;
-        while (currentNode != null)
-        {
-            nodes.Add(new
-            {
-                value = currentNode._data,
-                next = currentNode.Next != null ? currentNode.Next.Id : (Guid?)null,
-                id = currentNode.Id
-            });
-            currentNode = currentNode.Next;
-        }
-        return nodes;
-    }
-
-    private void NavigateToPage()
-    {
-        NavigationManager.NavigateTo("/dataStructure");
+        NavigationManager.NavigateTo($"/visualize/{dataStructure}");
     }
 }

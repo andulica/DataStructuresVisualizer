@@ -701,6 +701,7 @@
 
     window.setIsCancelled = function () {
         isCancelled = true;
+        console.log('Operation cancelled');
     };
 
     window.drawDoublyLinkedList = drawDoublyLinkedList;

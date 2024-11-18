@@ -257,7 +257,6 @@
         }
 
         isOperationInProgress = true;
-        StateHasChanged();
 
         var newNode = new SinglyLinkedListNode<int>(inputValue);
         var insertedValue = ConvertNodeToJavaScriptFormat(newNode);
@@ -267,7 +266,7 @@
             linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
             var insertTask = linkedList.InsertAt(insertPosition, newNode, _cancellationTokenSource.Token);
-            var jsTask = JSRuntime.InvokeVoidAsync("insertAtInSLL", insertedValue, insertPosition, timing).AsTask();
+            var jsTask = JSRuntime.InvokeVoidAsync("insertAtInSLL", insertedValue, insertPosition, timing.JavaScriptDelay).AsTask();
             await Task.WhenAll(insertTask, jsTask);
         }
         catch (OperationCanceledException)
@@ -285,7 +284,6 @@
             linkedList.HighlightRequested -= HandleHighlightRequest;
             isOperationInProgress = false; // Reset flag after operation
             JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
-            StateHasChanged();
         }
     }
 

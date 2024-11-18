@@ -53,7 +53,6 @@
 
         // Calculate the total length of the line
         const lineLength = Math.sqrt(Math.pow(adjustedPoints.endX - adjustedPoints.startX, 2) + Math.pow(adjustedPoints.endY - adjustedPoints.startY, 2));
-
         const line = svg.append('line')
             .attr('class', 'link')
             .attr('x1', adjustedPoints.startX)
@@ -178,25 +177,16 @@
             nodes.forEach((node, index) => {
                 let timeoutId = setTimeout(() => {
                     if (isCancelled) {
-                        clearTimeouts(timeouts);
                         resolve(); // Exit early if cancelled
                         return;
                     }
                     if (found) return; // Stop further highlighting once the condition is met
 
                     // Highlight the current node
-                    d3.select(`#node-${node.id}`)
+                    svg.select(`#node-${node.id}`)
                         .transition()
                         .duration(delay)
-                        .style('fill', 'orange')
-                        .on('end', () => {
-                            // Check if the operation is cancelled after the transition
-                            if (isCancelled) {
-                                clearTimeouts(timeouts);
-                                resolve(); // Exit early if cancelled
-                                return;
-                            }
-                        });
+                        .style('fill', 'orange');
 
                     // Highlight the link and the arrowhead from the previous node
                     if (index > 0) {
@@ -233,10 +223,13 @@
             }, delay * nodes.length);
             timeouts.push(finalTimeout);
 
+            if (isCancelled) {
+                resolve(); // Exit early if cancelled
+                return;
+            }
             // Function to clear all timeouts
             function clearTimeouts(timeouts) {
                 timeouts.forEach(timeoutId => clearTimeout(timeoutId));
-                timeouts.length = 0; // Clear the array
             }
         });
     }
@@ -454,35 +447,35 @@
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    async function insertNode(value, position, timing, isStack) {
+    async function insertNode(value, position, delay, isStack) {
 
+        if (isCancelled) {
+            return;
+        }
 
-        return new Promise(async (resolve, reject) => {
-            try {
-                // Highlight nodes for insertion
-                await highlightNodesForInsertion(position, timing.highlightDelay * 2);
-                await onPurposeDelay(timing.javaScriptDelay);
+        await highlightNodesForInsertion(position, delay * 2);
 
-                // Check if the operation was cancelled
-                if (isCancelled) {
-                    resolve(); // Exit early if cancelled
-                    return;
-                }
+        await onPurposeDelay(delay);
 
-                await onPurposeDelay(timing.highlightDelay);
+        if (isCancelled) {
+            return;
+        }
 
-                // Check again after the delay
-                if (isCancelled) {
-                    resolve(); // Exit early if cancelled
-                    return;
-                }
-
-                // Insert the node based on its position
+        await new Promise((resolve) => {
+            setTimeout(async () => {
                 let newNode;
                 if (position === nodes.length) {
                     newNode = createTailNode(value);
                     nodes.push(newNode);
+                    if (isCancelled) {
+                        resolve(); // Exit early if cancelled
+                        return;
+                    }
                 } else {
+                    if (isCancelled) {
+                        resolve(); // Exit early if cancelled
+                        return;
+                    }
                     newNode = createNewNode(value, position);
                     nodes.splice(position, 0, newNode);
                 }
@@ -499,55 +492,57 @@
                     link2Id = `link-${newNode.id}-${nextNode.id}`;
                 }
 
-                // Draw connections between nodes using tracked timeouts
-                setTrackedTimeout(() => {
-                    if (isCancelled) {
-                        resolve(); // Exit early if cancelled
-                        return;
-                    }
-
-                    if (nextNode) {
-                        drawLineWithArrow(newNode.x, newNode.y, nextNode.x, nextNode.y, 20, 2, link2Id, timing.nodeMovementDelay);
-                    }
-
-                    setTrackedTimeout(() => {
+                await new Promise((innerResolve) => {
+                    setTimeout(() => {
                         if (isCancelled) {
                             resolve(); // Exit early if cancelled
                             return;
                         }
 
-                        if (prevNode) {
-                            drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, link1Id, timing.nodeMovementDelay);
+                        if (nextNode) {
+                            drawLineWithArrow(newNode.x, newNode.y, nextNode.x, nextNode.y, 20, 2, link2Id, delay);
                         }
 
-                        if (prevNode && nextNode) {
-                            const existingLinkId = `link-${prevNode.id}-${nextNode.id}`;
-                            svg.select(`#${existingLinkId}`).remove();
-                        }
-
-                        // Refresh the list and finalize the operation
-                        setTrackedTimeout(() => {
+                        setTimeout(() => {
                             if (isCancelled) {
                                 resolve(); // Exit early if cancelled
                                 return;
                             }
 
-                            refreshSinglyLinkedList(isStack);
+                            if (prevNode) {
+                                drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, link1Id, delay);
+                            }
 
-                            setTrackedTimeout(() => {
-                                resetNodeColors();
-                                resolve(); // Resolve after final stage completes
-                            }, timing.javaScriptDelay);
-                        }, timing.nodeMovementDelay);
-                    }, timing.nodeMovementDelay);
-                }, timing.nodeMovementDelay);
-            } catch (error) {
-                reject(error); // Reject the promise in case of any errors
-            } finally {
-                resetCancellationFlag(); // Reset the cancellation flag
-            }
+                            if (prevNode && nextNode) {
+                                const existingLinkId = `link-${prevNode.id}-${nextNode.id}`;
+                                svg.select(`#${existingLinkId}`).remove();
+                            }
+
+                            // Refresh the list and finalize the operation
+                            setTimeout(() => {
+
+                                refreshSinglyLinkedList(isStack);
+                                if (isCancelled) {
+                                    resolve(); // Exit early if cancelled
+                                    return;
+                                }
+
+                                setTimeout(() => {
+                                    resetNodeColors();
+                                    innerResolve();
+                                }, delay);
+                            }, delay);
+                        }, delay);
+                    }, delay);
+                });
+
+                resolve();
+            }, delay);
+
         });
+
     }
+
 
     function refreshSinglyLinkedList(isStack) {
         updateNodePositions(isStack);
@@ -820,32 +815,11 @@
 
     window.insertAtInSLL = function (value, selectedIndex, timing, isStack = false) {
         resetCancellationFlag(); // Reset the cancellation flag before starting the operation
-        try {
-            resetNodeColors();
-            resetLinkColors();
+        
 
-            // Check cancellation before starting the operation
-            if (isCancelled) {
-                resolve(); // Exit early if the operation is cancelled
-                return;
-            }
-
-            // Call insertNode and await its completion
             insertNode(value, selectedIndex, timing, isStack);
 
-            // Check cancellation again after the main operation
-            if (isCancelled) {
-                resolve(); // Exit early if the operation was cancelled during execution
-                return;
-            }
 
-            resolve(); // Resolve when all async operations are done successfully
-        } catch (error) {
-
-        }
-        finally {
-            resetCancellationFlag(); // Reset the cancellation flag
-        }
     }
 
     window.removeValueInSll = function (nodeToBeRemoved, timing, isStack) {
