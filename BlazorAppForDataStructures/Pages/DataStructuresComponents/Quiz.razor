@@ -64,10 +64,10 @@
 
 
 @code {
-    private string[] dataStructures = { "SinglyLinkedList", "DoublyLinkedList", "BinarySearchTree", "Queue", "Stack" };
+    private string[] dataStructures = { "SinglyLinkedListQuiz", "DoublyLinkedListQuiz", "BinarySearchTreeQuiz", "QueueQuiz", "StackQuiz" };
 
-    private void NavigateToQuiz(string dataStructure)
+    private void NavigateToQuiz(string dataStructureQuiz)
     {
-        NavigationManager.NavigateTo($"/quiz/{dataStructure}");
+        NavigationManager.NavigateTo($"{dataStructureQuiz}");
     }
 }
