@@ -1,7 +1,120 @@
 ﻿@page "/SinglyLinkedListQuiz"
 
-<h3>SinglyLinkedListQuiz</h3>
+@using BlazorAppForDataStructures.Models
+@inject QuizService QuizService
+@inject NavigationManager NavigationManager
+
+<h3>Singly Linked List Quiz</h3>
+<div>@if (currentQuestion != null)
+{
+    <div>
+        <p><strong>Question @currentIndex:</strong> @currentQuestion.QuestionText</p>
+
+        @foreach (var answer in currentQuestion.Answers)
+        {
+            <div>
+                <input type="radio" id="@answer.AnswerId" name="answer" value="@answer.AnswerId" @onchange="OnAnswerSelected" />
+                <label for="@answer.AnswerId">@answer.AnswerText</label>
+            </div>
+        }
+
+        <button @onclick="NextQuestion">Next</button>
+    </div>
+}
+else if (quizCompleted)
+{
+    <div>
+        <h4>Quiz Completed!</h4>
+        <p>Your Score: @score / @totalQuestions</p>
+        <button @onclick="RestartQuiz">Retry Quiz</button>
+    </div>
+}
+else
+{
+    <p>Loading...</p>
+}
+</div>
+
+
+<style>
+    .quiz-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #f9f9f9;
+}
+
+.quiz-container h3 {
+    margin-bottom: 1rem;
+}
+
+.quiz-container input[type="radio"] {
+    margin-right: 0.5rem;
+}
+
+.quiz-container button {
+    margin-top: 1rem;
+}
+
+</style>
 
 @code {
+    private Question? currentQuestion;
+    private int currentIndex = 1;
+    private int selectedAnswerId = -1;
+    private int score = 0;
+    private int totalQuestions = 0;
+    private bool quizCompleted = false;
 
+    protected override async Task OnInitializedAsync()
+    {
+        // Fetch questions for this quiz
+        var questions = await QuizService.GetQuestionsAsync("SinglyLinkedList");
+        if (questions != null && questions.Any())
+        {
+            currentQuestion = questions[0];
+            totalQuestions = questions.Count;
+        }
+    }
+
+    private void OnAnswerSelected(ChangeEventArgs e)
+    {
+        selectedAnswerId = int.Parse(e.Value?.ToString() ?? "-1");
+    }
+
+    private void NextQuestion()
+    {
+        if (selectedAnswerId != -1 && currentQuestion != null)
+        {
+            // Check if the selected answer is correct
+            var isCorrect = currentQuestion.Answers.Any(a => a.AnswerId == selectedAnswerId && a.IsCorrect);
+            if (isCorrect)
+            {
+                score++;
+            }
+
+            currentIndex++;
+            if (currentIndex <= totalQuestions)
+            {
+                currentQuestion = QuizService.GetQuestionByIndex(currentIndex - 1); // Replace with appropriate logic
+            }
+            else
+            {
+                quizCompleted = true;
+                currentQuestion = null;
+            }
+
+            selectedAnswerId = -1; // Reset selection
+        }
+    }
+
+    private void RestartQuiz()
+    {
+        currentIndex = 1;
+        score = 0;
+        quizCompleted = false;
+        OnInitializedAsync();
+    }
 }

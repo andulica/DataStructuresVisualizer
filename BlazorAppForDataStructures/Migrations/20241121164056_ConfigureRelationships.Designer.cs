@@ -3,6 +3,7 @@ using System;
 using BlazorAppForDataStructures.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlazorAppForDataStructures.Migrations
 {
     [DbContext(typeof(BlazorAppForDataStructuresContext))]
-    partial class BlazorAppForDataStructuresContextModelSnapshot : ModelSnapshot
+    [Migration("20241121164056_ConfigureRelationships")]
+    partial class ConfigureRelationships
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
