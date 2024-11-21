@@ -67,11 +67,12 @@ else
     private int score = 0;
     private int totalQuestions = 0;
     private bool quizCompleted = false;
+    private List<Question> questions = new List<Question>();
 
     protected override async Task OnInitializedAsync()
     {
         // Fetch questions for this quiz
-        var questions = await QuizService.GetQuestionsAsync("SinglyLinkedList");
+        questions = await QuizService.GetQuestionsAsync("SinglyLinkedList");
         if (questions != null && questions.Any())
         {
             currentQuestion = questions[0];
@@ -110,11 +111,27 @@ else
         }
     }
 
-    private void RestartQuiz()
+    private async Task RestartQuiz()
     {
         currentIndex = 1;
         score = 0;
         quizCompleted = false;
-        OnInitializedAsync();
+
+        // Re-fetch questions for the quiz
+        questions = await QuizService.GetQuestionsAsync("SinglyLinkedList");
+
+        // Set the first question
+        if (questions != null && questions.Any())
+        {
+            currentQuestion = questions[0];
+            totalQuestions = questions.Count;
+        }
+        else
+        {
+            currentQuestion = null;
+            totalQuestions = 0;
+        }
+
+        StateHasChanged(); // Trigger UI update
     }
 }
