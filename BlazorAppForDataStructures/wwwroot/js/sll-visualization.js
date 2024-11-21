@@ -1,16 +1,36 @@
 ﻿(function () {
+
+    class CancellationToken {
+        constructor() {
+            this.cancelled = false;
+        }
+
+        cancel() {
+            this.cancelled = true;
+            console.log("Operation cancelled.");
+        }
+
+        reset() {
+            this.cancelled = false;
+        }
+
+        isCancelled() {
+            return this.cancelled;
+        }
+    }
+
     let svg, nodes;
     let margin = { top: 20, right: 30, bottom: 40, left: 50 };
     const delayDrawLinks = 1000;
     const gapBetweenNodeAndFirstElement = 100;
-    let isCancelled = false;
+    const cancellationToken = new CancellationToken();
 
-    function resetCancellationFlag() {
-        isCancelled = false;
-    }
+    window.setIsCancelledToTrue = function () {
+        cancellationToken.cancel();
+    };
 
-    window.setIsCancelled = function () {
-        isCancelled = true;
+    window.setIsCancelledToFalse = function () {
+        cancellationToken.reset();
     };
 
     let timeoutIds = [];
@@ -169,17 +189,19 @@
     };
 
     async function highlightNodesForInsertion(position, delay) {
-
         return new Promise((resolve) => {
             let timeouts = []; // Store timeout IDs for potential clearing
             let found = false;
 
             nodes.forEach((node, index) => {
                 let timeoutId = setTimeout(() => {
-                    if (isCancelled) {
+                    if (cancellationToken.isCancelled()) {
+                        console.log("Cancelled during highlighting.");
+                        clearTimeouts(timeouts);
                         resolve(); // Exit early if cancelled
                         return;
                     }
+
                     if (found) return; // Stop further highlighting once the condition is met
 
                     // Highlight the current node
@@ -200,8 +222,7 @@
                             .duration(delay)
                             .style('fill', '#2ebbd1')
                             .on('end', () => {
-                                // Check if the operation is cancelled after the transition
-                                if (isCancelled) {
+                                if (cancellationToken.isCancelled()) {
                                     clearTimeouts(timeouts);
                                     resolve(); // Exit early if cancelled
                                     return;
@@ -223,16 +244,20 @@
             }, delay * nodes.length);
             timeouts.push(finalTimeout);
 
-            if (isCancelled) {
+            if (cancellationToken.isCancelled()) {
+                console.log("Cancelled before starting highlighting.");
+                clearTimeouts(timeouts);
                 resolve(); // Exit early if cancelled
                 return;
             }
+
             // Function to clear all timeouts
             function clearTimeouts(timeouts) {
                 timeouts.forEach(timeoutId => clearTimeout(timeoutId));
             }
         });
     }
+
 
     function highlightLinkAndArrowhead(sourceNodeId, targetNodeId, delay) {
         let linkId = `#link-${sourceNodeId}-${targetNodeId}`;
@@ -448,39 +473,53 @@
     }
 
     async function insertNode(value, position, delay, isStack) {
-
-        if (isCancelled) {
+        if (cancellationToken.isCancelled()) {
+            console.log("Cancelled during insertion.");
             return;
         }
 
         await highlightNodesForInsertion(position, delay * 2);
 
-        await onPurposeDelay(delay);
-
-        if (isCancelled) {
+        if (cancellationToken.isCancelled()) {
+            console.log("Cancelled during insertion.");
             return;
         }
 
+        await onPurposeDelay(delay);
+
+        if (cancellationToken.isCancelled()) {
+            console.log("Cancelled during insertion.");
+            return;
+        }
+
+        // Core insertion logic
         await new Promise((resolve) => {
-            setTimeout(async () => {
+            const performInsertion = async () => {
+                if (cancellationToken.isCancelled()) {
+                    console.log("Cancelled during insertion.");
+                    resolve(); // Exit early if cancelled
+                    return;
+                }
+
                 let newNode;
                 if (position === nodes.length) {
                     newNode = createTailNode(value);
                     nodes.push(newNode);
-                    if (isCancelled) {
-                        resolve(); // Exit early if cancelled
-                        return;
-                    }
                 } else {
-                    if (isCancelled) {
-                        resolve(); // Exit early if cancelled
-                        return;
-                    }
                     newNode = createNewNode(value, position);
                     nodes.splice(position, 0, newNode);
                 }
 
-                let prevNode, nextNode, link1Id, link2Id;
+                if (cancellationToken.isCancelled()) {
+                    console.log("Cancelled during insertion.");
+                    resolve(); // Exit early if cancelled
+                    return;
+                }
+
+                let prevNode = null,
+                    nextNode = null,
+                    link1Id = null,
+                    link2Id = null;
 
                 if (position > 0) {
                     prevNode = nodes[position - 1];
@@ -492,10 +531,18 @@
                     link2Id = `link-${newNode.id}-${nextNode.id}`;
                 }
 
+                if (cancellationToken.isCancelled()) {
+                    console.log("Cancelled during insertion.");
+                    resolve();
+                    return;
+                }
+
+                // Update links with frequent cancellation checks
                 await new Promise((innerResolve) => {
-                    setTimeout(() => {
-                        if (isCancelled) {
-                            resolve(); // Exit early if cancelled
+                    setTimeout(async () => {
+                        if (cancellationToken.isCancelled()) {
+                            console.log("Cancelled during insertion.");
+                            resolve();
                             return;
                         }
 
@@ -504,8 +551,9 @@
                         }
 
                         setTimeout(() => {
-                            if (isCancelled) {
-                                resolve(); // Exit early if cancelled
+                            if (cancellationToken.isCancelled()) {
+                                console.log("Cancelled during insertion.");
+                                resolve();
                                 return;
                             }
 
@@ -518,12 +566,12 @@
                                 svg.select(`#${existingLinkId}`).remove();
                             }
 
-                            // Refresh the list and finalize the operation
                             setTimeout(() => {
-
                                 refreshSinglyLinkedList(isStack);
-                                if (isCancelled) {
-                                    resolve(); // Exit early if cancelled
+
+                                if (cancellationToken.isCancelled()) {
+                                    console.log("Cancelled during insertion.");
+                                    resolve();
                                     return;
                                 }
 
@@ -537,10 +585,10 @@
                 });
 
                 resolve();
-            }, delay);
+            };
 
+            performInsertion(); // Call the wrapped function
         });
-
     }
 
 
@@ -814,13 +862,8 @@
     };
 
     window.insertAtInSLL = function (value, selectedIndex, timing, isStack = false) {
-        resetCancellationFlag(); // Reset the cancellation flag before starting the operation
-        
-
-            insertNode(value, selectedIndex, timing, isStack);
-
-
-    }
+        insertNode(value, selectedIndex, timing, isStack);
+    };
 
     window.removeValueInSll = function (nodeToBeRemoved, timing, isStack) {
         resetNodeColors();

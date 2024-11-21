@@ -239,10 +239,7 @@
 
     private async Task PerformInsertion()
     {
-
         InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
-
-        if (isOperationInProgress) return;  // Prevent multiple operations
 
         if (linkedList.IsFull())
         {
@@ -250,40 +247,41 @@
             return;
         }
 
-        if (insertPosition <= 0 || insertPosition > linkedList.Count - 1)
+        if (insertPosition <= 0 || insertPosition > linkedList.Count)
         {
-            messageOutput = $"The position to insert must be greater than 0 and no bigger than {linkedList.Count - 1}";
+            messageOutput = $"The position to insert must be greater than 0 and no bigger than {linkedList.Count}";
             return;
         }
-
-        isOperationInProgress = true;
 
         var newNode = new SinglyLinkedListNode<int>(inputValue);
         var insertedValue = ConvertNodeToJavaScriptFormat(newNode);
 
         try
         {
+            await JSRuntime.InvokeVoidAsync("setIsCancelledToFalse"); // Reset cancellation before starting
+
             linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
             var insertTask = linkedList.InsertAt(insertPosition, newNode, _cancellationTokenSource.Token);
             var jsTask = JSRuntime.InvokeVoidAsync("insertAtInSLL", insertedValue, insertPosition, timing.JavaScriptDelay).AsTask();
+
             await Task.WhenAll(insertTask, jsTask);
         }
         catch (OperationCanceledException)
         {
-            await JSRuntime.InvokeVoidAsync("setIsCancelled");
             linkedList.InsertAtInstant(insertPosition, newNode);
 
             var linkedListData = ConvertListToJavaScriptFormat(linkedList);
             await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
+            await JSRuntime.InvokeVoidAsync("setIsCancelledToTrue");
 
             messageOutput = $"Visual cancelled. Value {inputValue} inserted at index {insertPosition}.";
         }
         finally
         {
             linkedList.HighlightRequested -= HandleHighlightRequest;
-            isOperationInProgress = false; // Reset flag after operation
-            JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
+            await JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
+            await JSRuntime.InvokeVoidAsync("setIsCancelledToFalse");
         }
     }
 
