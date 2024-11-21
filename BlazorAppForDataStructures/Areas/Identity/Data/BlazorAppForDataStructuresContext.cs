@@ -1,21 +1,18 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using BlazorAppForDataStructures.Models;
 
-namespace BlazorAppForDataStructures.Data;
-
-public class BlazorAppForDataStructuresContext : IdentityDbContext<IdentityUser>
+namespace BlazorAppForDataStructures.Data
 {
-    public BlazorAppForDataStructuresContext(DbContextOptions<BlazorAppForDataStructuresContext> options)
-        : base(options)
+    public class BlazorAppForDataStructuresContext : IdentityDbContext<ApplicationUser>
     {
-    }
+        public BlazorAppForDataStructuresContext(DbContextOptions<BlazorAppForDataStructuresContext> options)
+            : base(options)
+        {
+        }
 
-    protected override void OnModelCreating(ModelBuilder builder)
-    {
-        base.OnModelCreating(builder);
-        // Customize the ASP.NET Identity model and override the defaults if needed.
-        // For example, you can rename the ASP.NET Identity table names and more.
-        // Add your customizations after calling base.OnModelCreating(builder);
+        public DbSet<Topic> Topics { get; set; }
+        public DbSet<Question> Questions { get; set; }
+        public DbSet<Answer> Answers { get; set; }
     }
 }

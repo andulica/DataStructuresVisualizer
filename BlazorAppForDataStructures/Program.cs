@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using BlazorAppForDataStructures.Data;
+using BlazorAppForDataStructures.Models;
 
 namespace BlazorAppForDataStructures
 {
@@ -14,13 +15,14 @@ namespace BlazorAppForDataStructures
 
             if (string.IsNullOrEmpty(connectionString))
             {
-                throw new InvalidOperationException("Connection string not found. Please set the environment variable 'BlazorAppForDataStructuresContextConnection'.");
+                throw new InvalidOperationException("Connection string not found. Please set the environment variable 'MYAPP_CONNECTION_STRING'.");
             }
 
+            // Configure Entity Framework and Identity
             builder.Services.AddDbContext<BlazorAppForDataStructuresContext>(options =>
                 options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
-            builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<BlazorAppForDataStructuresContext>();
 
             builder.Services.AddRazorPages();
@@ -37,13 +39,14 @@ namespace BlazorAppForDataStructures
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-            app.UseRouting();
 
-            app.MapBlazorHub();
-            app.MapFallbackToPage("/_Host");
+            app.UseRouting();
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.MapBlazorHub();
+            app.MapFallbackToPage("/_Host");
 
             app.Run();
         }
