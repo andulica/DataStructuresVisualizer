@@ -43,6 +43,10 @@
     {
         <p>Loading...</p>
     }
+
+    <div style="margin-top: 20px;">
+        <p>Question @((currentIndex)) of @questions.Count</p>
+    </div>
 </div>
 
 
@@ -101,6 +105,7 @@
             }
             else
             {
+                currentIndex = totalQuestions;
                 quizCompleted = true;
                 currentQuestion = null;
             }
