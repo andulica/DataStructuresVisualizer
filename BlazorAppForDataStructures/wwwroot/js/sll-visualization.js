@@ -1,5 +1,10 @@
 ﻿(function () {
+    let isCancelled = false; // bool flag to be used for cancelling visual operation
 
+
+    function resetCancellationFlag() {
+        isCancelled = false;
+    }
     class CancellationToken {
         constructor() {
             this.cancelled = false;
@@ -641,7 +646,6 @@
                 // Handle synchronous errors
                 reject(error);
             } finally {
-                resetCancellationFlag();
             }
         });
     }
