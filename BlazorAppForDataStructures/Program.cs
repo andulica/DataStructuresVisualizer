@@ -11,7 +11,9 @@ namespace BlazorAppForDataStructures
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            var connectionString = Environment.GetEnvironmentVariable("MYAPP_CONNECTION_STRING");
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+            builder.Services.AddDbContext<BlazorAppForDataStructuresContext>(options =>
+                options.UseSqlServer(connectionString));
 
             if (string.IsNullOrEmpty(connectionString))
             {
@@ -20,7 +22,8 @@ namespace BlazorAppForDataStructures
 
             // Configure Entity Framework and Identity
             builder.Services.AddDbContext<BlazorAppForDataStructuresContext>(options =>
-                options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 
             builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<BlazorAppForDataStructuresContext>();

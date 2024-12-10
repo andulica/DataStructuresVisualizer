@@ -71,7 +71,7 @@
         StateHasChanged();
 
         // Fetch questions for this quiz
-        questions = await QuizService.GetQuestionsAsync("SinglyLinkedList");
+        questions = await QuizService.GetQuestionsAsync("Singly Linked List");
         if (questions != null && questions.Any())
         {
             currentQuestion = questions[0];

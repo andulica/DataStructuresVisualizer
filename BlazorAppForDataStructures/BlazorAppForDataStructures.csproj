@@ -25,4 +25,8 @@
     <ProjectReference Include="..\DataStructuresVisualizer\DataStructuresVisualizer.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>

@@ -1,5 +1,9 @@
-﻿(function () {
+﻿const { timeout } = require("d3-timer");
+let timers = [];
+
+(function () {
     let isCancelled = false; // bool flag to be used for cancelling visual operation
+
 
 
     function resetCancellationFlag() {
@@ -277,7 +281,7 @@
 
     function highlightNodes(valueID, delay) {
         return new Promise((resolve, reject) => {
-            let timeouts = []; // Array to store timeout IDs for potential clearing
+            // let timeouts = []; // Array to store timeout IDs for potential clearing
             let found = false;
 
             try {
@@ -360,6 +364,10 @@
         });
     }
 
+    function ClearTimeouts() {
+        timeouts.forEach(x => clearTimeout(x));
+        timeouts.length = 50;
+    }
 
     function highlightTailNode() {
         return new Promise((resolve) => {
