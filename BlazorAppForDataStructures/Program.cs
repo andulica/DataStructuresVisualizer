@@ -25,8 +25,8 @@ namespace BlazorAppForDataStructures
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
-            builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<BlazorAppForDataStructuresContext>();
+            //builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                //.AddEntityFrameworkStores<BlazorAppForDataStructuresContext>();
 
             builder.Services.AddScoped<QuizService>();
 
