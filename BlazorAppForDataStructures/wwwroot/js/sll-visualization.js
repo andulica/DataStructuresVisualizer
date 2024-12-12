@@ -1,68 +1,33 @@
-﻿const { timeout } = require("d3-timer");
-let timers = [];
-
-(function () {
-    let isCancelled = false; // bool flag to be used for cancelling visual operation
-
-
+﻿(function () {
 
     function resetCancellationFlag() {
         isCancelled = false;
     }
-    class CancellationToken {
-        constructor() {
-            this.cancelled = false;
-        }
 
-        cancel() {
-            this.cancelled = true;
-            console.log("Operation cancelled.");
-        }
-
-        reset() {
-            this.cancelled = false;
-        }
-
-        isCancelled() {
-            return this.cancelled;
-        }
+    window.cancelVisuals = function () {
+        clearAllTimeouts(timeouts)
     }
 
+    // Helper function to clear all timeouts
+    function clearAllTimeouts(timeouts) {
+        timeouts.forEach(timeoutId => console.log(timeoutId));
+        timeouts.forEach(timeoutId => clearTimeout(timeoutId));
+        
+        timeouts = [];
+        console.log("All timeouts cleared.");
+    }
+
+    let isCancelled = false;
     let svg, nodes;
     let margin = { top: 20, right: 30, bottom: 40, left: 50 };
     const delayDrawLinks = 1000;
     const gapBetweenNodeAndFirstElement = 100;
-    const cancellationToken = new CancellationToken();
-
-    window.setIsCancelledToTrue = function () {
-        cancellationToken.cancel();
-    };
 
     window.setIsCancelledToFalse = function () {
-        cancellationToken.reset();
-    };
-
-    let timeoutIds = [];
-
-    // Function to set a tracked timeout
-    function setTrackedTimeout(callback, delay) {
-        const id = setTimeout(callback, delay);
-        timeoutIds.push(id);
-        return id;
+        isCancelled = false;
     }
 
-    // Function to clear all tracked timeouts
-    function clearAllTimeouts() {
-        timeoutIds.forEach(clearTimeout);
-        timeoutIds = [];
-        console.log('All timeouts cleared.');
-    }
-
-    // Function to interrupt all ongoing visuals and timeouts
-    function interruptAllVisuals() {
-        clearAllTimeouts(); // Clear all timeouts to stop animations immediately
-        console.log('All visuals and animations interrupted due to cancellation.');
-    }
+    let timeouts = [];
 
     // Helper function to adjust line endpoints to fit the arrowhead
     function adjustLineEndpoints(x1, y1, x2, y2, radius, strokeWidth) {
@@ -184,33 +149,15 @@ let timers = [];
                 drawLineWithArrow(node.x, node.y, nextNode.x, nextNode.y, 20, 2, `link-${node.id}-${nextNode.id}`, delayDrawLinks);
             }
         });
-
-
-        //if (isStack) {
-        //    svg.append("text")
-        //        .attr("x", width / 4)
-        //        .attr("y", nodes[0].y)
-        //        .text("Top")
-        //        .attr("text-anchor", "middle")
-        //        .style("fill", "orange")
-        //        .style("font-weight", "bold");
-        //}
     };
 
     async function highlightNodesForInsertion(position, delay) {
         return new Promise((resolve) => {
-            let timeouts = []; // Store timeout IDs for potential clearing
             let found = false;
 
+            // Iterate over nodes and schedule highlighting
             nodes.forEach((node, index) => {
-                let timeoutId = setTimeout(() => {
-                    if (cancellationToken.isCancelled()) {
-                        console.log("Cancelled during highlighting.");
-                        clearTimeouts(timeouts);
-                        resolve(); // Exit early if cancelled
-                        return;
-                    }
-
+                setCheckedTimeout(() => {
                     if (found) return; // Stop further highlighting once the condition is met
 
                     // Highlight the current node
@@ -229,41 +176,18 @@ let timers = [];
                         d3.select(`#node-${node.id}`)
                             .transition()
                             .duration(delay)
-                            .style('fill', '#2ebbd1')
-                            .on('end', () => {
-                                if (cancellationToken.isCancelled()) {
-                                    clearTimeouts(timeouts);
-                                    resolve(); // Exit early if cancelled
-                                    return;
-                                }
-                            });
+                            .style('fill', '#2ebbd1');
 
                         found = true;
-                        clearTimeouts(timeouts);
                         resolve(); // Resolve the promise once the condition is met
                     }
                 }, delay * index);
-
-                timeouts.push(timeoutId);
             });
 
             // Ensure promise is resolved even if no node matches
-            let finalTimeout = setTimeout(() => {
+            setCheckedTimeout(() => {
                 if (!found) resolve();
             }, delay * nodes.length);
-            timeouts.push(finalTimeout);
-
-            if (cancellationToken.isCancelled()) {
-                console.log("Cancelled before starting highlighting.");
-                clearTimeouts(timeouts);
-                resolve(); // Exit early if cancelled
-                return;
-            }
-
-            // Function to clear all timeouts
-            function clearTimeouts(timeouts) {
-                timeouts.forEach(timeoutId => clearTimeout(timeoutId));
-            }
         });
     }
 
@@ -284,89 +208,40 @@ let timers = [];
             // let timeouts = []; // Array to store timeout IDs for potential clearing
             let found = false;
 
-            try {
-                nodes.forEach((node, index) => {
-                    let timeout = setTimeout(() => {
-                        // Check for cancellation immediately
-                        if (isCancelled) {
-                            console.log("Cancelled during highlighting step.");
-                            clearTimeouts(timeouts); // Clear all scheduled timeouts
-                            interruptAllVisuals(); // Stop all ongoing transitions
-                            resetCancellationFlag();
-                            resolve(); // Resolve early if cancelled
-                            return;
-                        }
+            nodes.forEach((node, index) => {
+                let timeout = setTimeout(() => {
 
-                        if (found) {
-                            clearTimeout(timeout); // Prevent this timeout's actions if already found
-                            return;
-                        }
+                    if (found) {
+                        clearTimeout(timeout); // Prevent this timeout's actions if already found
+                        return;
+                    }
 
-                        // Highlight the current node
-                        const nodeSelection = svg.select(`#node-${node.id}`);
-                        nodeSelection.transition().duration(delay).style('fill', 'orange')
-                            .on('start', () => {
-                                if (isCancelled) {
-                                    console.log("Cancelled during transition start.");
-                                    nodeSelection.interrupt(); // Interrupt transition if cancelled
-                                    clearTimeouts(timeouts);
-                                    resolve(); // Resolve early if cancelled
-                                    return;
-                                }
-                            });
+                    // Highlight the current node
+                    const nodeSelection = svg.select(`#node-${node.id}`);
+                    nodeSelection.transition().duration(delay).style('fill', 'orange');
 
-                        if (index > 0) {
-                            if (isCancelled) {
-                                console.log("Cancelled at step with arrowhead.");
-                                interruptAllVisuals();
-                                clearTimeouts(timeouts);
-                                resolve(); // Resolve early if cancelled
-                                return;
-                            }
-                            highlightLinkAndArrowhead(nodes[index - 1].id, node.id);
-                        }
+                    if (index > 0) {
 
-                        // Check the node's value and highlight accordingly
-                        if (node.value === valueID) {
-                            if (isCancelled) {
-                                console.log("Cancelled during value check.");
-                                interruptAllVisuals();
-                                clearTimeouts(timeouts);
-                                resolve(); // Resolve early if cancelled
-                                return;
-                            }
-                            nodeSelection.transition().duration(delay).style('fill', 'green');
-                            found = true;
-                            clearTimeouts(timeouts); // Clear all remaining timeouts
-                            resolve(); // Resolve when the target node is found
-                        } else if (node.id === valueID) {
-                            if (isCancelled) {
-                                console.log("Cancelled during ID check.");
-                                interruptAllVisuals();
-                                clearTimeouts(timeouts);
-                                resolve(); // Resolve early if cancelled
-                                return;
-                            }
-                            nodeSelection.transition().duration(delay).style('fill', 'red');
-                            found = true;
-                            clearTimeouts(timeouts); // Clear all remaining timeouts
-                            resolve(); // Resolve when the target node is found
-                        }
-                    }, delay * index);
+                        highlightLinkAndArrowhead(nodes[index - 1].id, node.id);
+                    }
 
-                    timeouts.push(timeout);
-                });
-            } catch (error) {
-                reject(error); // Reject the promise if any errors occur
-            } finally {
-                resetCancellationFlag(); // Reset the cancellation flag after the operation
-            }
+                    // Check the node's value and highlight accordingly
+                    if (node.value === valueID) {
+                        nodeSelection.transition().duration(delay).style('fill', 'green');
+                        found = true;
+                        resolve(); // Resolve when the target node is found
+                    } else if (node.id === valueID) {
+
+                        nodeSelection.transition().duration(delay).style('fill', 'red');
+                        found = true;
+                        resolve(); // Resolve when the target node is found
+                    }
+                }, delay * index);
+
+                timeouts.push(timeout);
+            });
+
         });
-    }
-
-    function ClearTimeouts() {
-        timeouts.forEach(x => clearTimeout(x));
-        timeouts.length = 50;
     }
 
     function highlightTailNode() {
@@ -406,14 +281,6 @@ let timers = [];
                 resolve(); // Resolve after the highlight completes, without changing color to green
             }, 1000);
         });
-    }
-
-    function clearTimeouts(timeouts) {
-        timeouts.forEach(timeout => clearTimeout(timeout));
-    }
-
-    function clearTimeouts(timeouts) {
-        timeouts.forEach((timeoutId) => clearTimeout(timeoutId));
     }
 
     function createNewNode(node, position) {
@@ -485,37 +352,35 @@ let timers = [];
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
+    function setCheckedTimeout(callback, delay) {
+        const timeoutId = setTimeout(() => {
+            if (!timeouts.includes(timeoutId)) {
+                return; // Exit if this timeout was cleared
+            }
+
+            // Remove the timeout ID from tracking and execute the callback
+            timeouts = timeouts.filter(id => id !== timeoutId);
+            callback();
+        }, delay);
+
+        // Track the timeout ID
+        timeouts.push(timeoutId);
+        return timeoutId;
+    }
+
     async function insertNode(value, position, delay, isStack) {
-        if (cancellationToken.isCancelled()) {
-            console.log("Cancelled during insertion.");
-            return;
-        }
 
+        // Highlight nodes for insertion
         await highlightNodesForInsertion(position, delay * 2);
-
-        if (cancellationToken.isCancelled()) {
-            console.log("Cancelled during insertion.");
-            return;
-        }
-
-        await onPurposeDelay(delay);
-
-        if (cancellationToken.isCancelled()) {
-            console.log("Cancelled during insertion.");
-            return;
-        }
 
         // Core insertion logic
         await new Promise((resolve) => {
-            const performInsertion = async () => {
-                if (cancellationToken.isCancelled()) {
-                    console.log("Cancelled during insertion.");
-                    resolve(); // Exit early if cancelled
-                    return;
-                }
-
+            setCheckedTimeout(() => {
                 let newNode;
+
+                // Determine where to insert the node
                 if (position === nodes.length) {
+                    onPurposeDelay(1000);
                     newNode = createTailNode(value);
                     nodes.push(newNode);
                 } else {
@@ -523,16 +388,7 @@ let timers = [];
                     nodes.splice(position, 0, newNode);
                 }
 
-                if (cancellationToken.isCancelled()) {
-                    console.log("Cancelled during insertion.");
-                    resolve(); // Exit early if cancelled
-                    return;
-                }
-
-                let prevNode = null,
-                    nextNode = null,
-                    link1Id = null,
-                    link2Id = null;
+                let prevNode = null, nextNode = null, link1Id = null, link2Id = null;
 
                 if (position > 0) {
                     prevNode = nodes[position - 1];
@@ -544,66 +400,35 @@ let timers = [];
                     link2Id = `link-${newNode.id}-${nextNode.id}`;
                 }
 
-                if (cancellationToken.isCancelled()) {
-                    console.log("Cancelled during insertion.");
-                    resolve();
-                    return;
-                }
+                // Step 4: Update links with additional timeouts
+                setCheckedTimeout(() => {
+                    if (nextNode) {
+                        drawLineWithArrow(newNode.x, newNode.y, nextNode.x, nextNode.y, 20, 2, link2Id, delay);
+                    }
 
-                // Update links with frequent cancellation checks
-                await new Promise((innerResolve) => {
-                    setTimeout(async () => {
-                        if (cancellationToken.isCancelled()) {
-                            console.log("Cancelled during insertion.");
-                            resolve();
-                            return;
+                    setCheckedTimeout(() => {
+                        if (prevNode) {
+                            drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, link1Id, delay);
                         }
 
-                        if (nextNode) {
-                            drawLineWithArrow(newNode.x, newNode.y, nextNode.x, nextNode.y, 20, 2, link2Id, delay);
+                        if (prevNode && nextNode) {
+                            const existingLinkId = `link-${prevNode.id}-${nextNode.id}`;
+                            svg.select(`#${existingLinkId}`).remove();
                         }
 
-                        setTimeout(() => {
-                            if (cancellationToken.isCancelled()) {
-                                console.log("Cancelled during insertion.");
+                        setCheckedTimeout(() => {
+                            refreshSinglyLinkedList(isStack);
+
+                            setCheckedTimeout(() => {
+                                resetNodeColors();
                                 resolve();
-                                return;
-                            }
-
-                            if (prevNode) {
-                                drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, link1Id, delay);
-                            }
-
-                            if (prevNode && nextNode) {
-                                const existingLinkId = `link-${prevNode.id}-${nextNode.id}`;
-                                svg.select(`#${existingLinkId}`).remove();
-                            }
-
-                            setTimeout(() => {
-                                refreshSinglyLinkedList(isStack);
-
-                                if (cancellationToken.isCancelled()) {
-                                    console.log("Cancelled during insertion.");
-                                    resolve();
-                                    return;
-                                }
-
-                                setTimeout(() => {
-                                    resetNodeColors();
-                                    innerResolve();
-                                }, delay);
-                            }, delay);
+                            }, delay);                     
                         }, delay);
                     }, delay);
-                });
-
-                resolve();
-            };
-
-            performInsertion(); // Call the wrapped function
+                }, delay);
+            }, delay);
         });
     }
-
 
     function refreshSinglyLinkedList(isStack) {
         updateNodePositions(isStack);
@@ -618,53 +443,30 @@ let timers = [];
             const newNode = createNewNode(value, 0);
             nodes.unshift(newNode); // Add the new node to the beginning of the list
 
-            try {
-                onPurposeDelay(timing.highlightDelay).then(() => {
-                    if (isCancelled) {
-                        resolve(); // Resolve early if canceled
-                        return;
-                    }
+            onPurposeDelay(timing.highlightDelay).then(() => {
 
-                    if (nodes.length > 1) {
-                        const nextNode = nodes[1];
-                        drawLineWithArrow(newNode.x, newNode.y, nextNode.x, nextNode.y, 20, 2, `link-${newNode.id}-${nextNode.id}`, timing.javaScriptDelay);
-                    }
+                if (nodes.length > 1) {
+                    const nextNode = nodes[1];
+                    drawLineWithArrow(newNode.x, newNode.y, nextNode.x, nextNode.y, 20, 2, `link-${newNode.id}-${nextNode.id}`, timing.javaScriptDelay);
+                }
 
-                    return onPurposeDelay(timing.highlightDelay);
-                }).then(() => {
-                    if (isCancelled) {
-                        resolve(); // Resolve if operation was canceled
-                        return;
-                    }
+                return onPurposeDelay(timing.highlightDelay);
+            }).then(() => {
 
-                    setNodeColor('green', newNode);
+                setNodeColor('green', newNode);
+
+                setTimeout(() => {
+                    refreshSinglyLinkedList(isStack);
 
                     setTimeout(() => {
-                        refreshSinglyLinkedList(isStack);
-
-                        setTimeout(() => {
-                            resetNodeColors();
-                            resolve(); // Ensure resolve is called after completing the operation
-                        }, timing.javaScriptDelay);
-                    }, timing.nodeMovementDelay);
-                }).catch((error) => {
-                    reject(error); // Reject the promise in case of an error
-                });
-            } catch (error) {
-                // Handle synchronous errors
-                reject(error);
-            } finally {
-            }
+                        resetNodeColors();
+                        resolve(); // Ensure resolve is called after completing the operation
+                    }, timing.javaScriptDelay);
+                }, timing.nodeMovementDelay);
+            }).catch((error) => {
+                reject(error); // Reject the promise in case of an error
+            });
         });
-    }
-
-    // Utility function to check if the operation is cancelled and handle early resolution
-    function checkCancellationAndExit() {
-        if (isCancelled) {
-            resetCancellationFlag();
-            return true;
-        }
-        return false;
     }
 
     function setNodeColor(color, node) {
@@ -677,41 +479,19 @@ let timers = [];
         const newNode = createTailNode(value);
         nodes.push(newNode);
 
-        try {
-            if (checkCancellationAndExit()) return;
+        const prevNode = nodes[nodes.length - 2];
 
-            const prevNode = nodes[nodes.length - 2];
-
-            if (prevNode) {
-                await onPurposeDelay(timing.javaScriptDelay);
-
-                drawLineWithArrow(
-                    prevNode.x,
-                    prevNode.y,
-                    newNode.x,
-                    newNode.y,
-                    20,
-                    2,
-                    `link-${prevNode.id}-${newNode.id}`,
-                    timing.javaScriptDelay
-                );
-
-                if (checkCancellationAndExit()) return;
-            }
-
+        if (prevNode) {
             await onPurposeDelay(timing.javaScriptDelay);
 
-            if (checkCancellationAndExit()) return;
-
-            setNodeColor('green', newNode);
-            await onPurposeDelay(timing.javaScriptDelay);
-            resetNodeColors();
-
-            if (checkCancellationAndExit()) return;
-        } catch (error) {
-        } finally {
-            resetCancellationFlag();
+            drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, `link-${prevNode.id}-${newNode.id}`, timing.javaScriptDelay);
         }
+
+        await onPurposeDelay(timing.javaScriptDelay);
+
+        setNodeColor('green', newNode);
+        await onPurposeDelay(timing.javaScriptDelay);
+        resetNodeColors();
     }
 
     function updateNodePositions(isStack) {
@@ -780,44 +560,24 @@ let timers = [];
 
     async function removeNodeInSll(nodeToBeRemoved, timing, isStack) {
 
-        try {
-            await highlightNodes(nodeToBeRemoved.id, timing.highlightDelay * 2); // Double the delay for highlighting
+        await highlightNodes(nodeToBeRemoved.id, timing.highlightDelay * 2); // Double the delay for highlighting
 
-            if (isCancelled) {
-                return;
-            }
+        // Transition and then remove the node's visual elements
+        svg.select(`#node-${nodeToBeRemoved.id}`)
+            .transition().duration(timing.highlightDelay)
+            .style('opacity', 0) // Fade out effect
+        svg.select(`#node-${nodeToBeRemoved.id}`).remove();
+        // Proceed with text removal after node is removed
+        svg.select(`#textId-${nodeToBeRemoved.id}`)
+            .transition().duration(timing.highlightDelay)
+            .style('opacity', 0) // Fade out effect for text
+            .on('end', () => {
+                svg.select(`#textId-${nodeToBeRemoved.id}`).remove();
+                // Update links if necessary and resolve when complete
+                updateLinksAfterRemoval(nodeToBeRemoved);
 
-            // Transition and then remove the node's visual elements
-            svg.select(`#node-${nodeToBeRemoved.id}`)
-                .transition().duration(timing.highlightDelay)
-                .style('opacity', 0) // Fade out effect
-
-
-            if (isCancelled) {
-                return;
-            }
-            svg.select(`#node-${nodeToBeRemoved.id}`).remove();
-            // Proceed with text removal after node is removed
-            svg.select(`#textId-${nodeToBeRemoved.id}`)
-                .transition().duration(timing.highlightDelay)
-                .style('opacity', 0) // Fade out effect for text
-                .on('end', () => {
-                    svg.select(`#textId-${nodeToBeRemoved.id}`).remove();
-
-                    if (isCancelled) {
-                        return;
-                    }
-                    // Update links if necessary and resolve when complete
-                    updateLinksAfterRemoval(nodeToBeRemoved);
-
-                    refreshSinglyLinkedList(isStack);
-                });
-        }
-
-        finally {
-            resetCancellationFlag(); // Reset the cancellation flag
-        }
-
+                refreshSinglyLinkedList(isStack);
+            });
     }
 
     function updateLinksAfterRemoval(nodeToBeRemoved) {

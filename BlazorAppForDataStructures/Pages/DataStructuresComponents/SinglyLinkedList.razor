@@ -269,11 +269,11 @@
         }
         catch (OperationCanceledException)
         {
+            await JSRuntime.InvokeVoidAsync("cancelVisuals");
             linkedList.InsertAtInstant(insertPosition, newNode);
 
             var linkedListData = ConvertListToJavaScriptFormat(linkedList);
             await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
-            await JSRuntime.InvokeVoidAsync("setIsCancelledToTrue");
 
             messageOutput = $"Visual cancelled. Value {inputValue} inserted at index {insertPosition}.";
         }
