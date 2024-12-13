@@ -1,9 +1,4 @@
 ﻿(function () {
-
-    function resetCancellationFlag() {
-        isCancelled = false;
-    }
-
     window.cancelVisuals = function () {
         clearAllTimeouts(timeouts)
     }
@@ -14,10 +9,8 @@
         timeouts.forEach(timeoutId => clearTimeout(timeoutId));
         
         timeouts = [];
-        console.log("All timeouts cleared.");
     }
 
-    let isCancelled = false;
     let svg, nodes;
     let margin = { top: 20, right: 30, bottom: 40, left: 50 };
     const delayDrawLinks = 1000;
@@ -204,8 +197,7 @@
     }
 
     function highlightNodes(valueID, delay) {
-        return new Promise((resolve, reject) => {
-            // let timeouts = []; // Array to store timeout IDs for potential clearing
+        return new Promise((resolve) => {
             let found = false;
 
             nodes.forEach((node, index) => {
@@ -240,7 +232,6 @@
 
                 timeouts.push(timeout);
             });
-
         });
     }
 
@@ -400,7 +391,7 @@
                     link2Id = `link-${newNode.id}-${nextNode.id}`;
                 }
 
-                // Step 4: Update links with additional timeouts
+                // Update links with additional timeouts
                 setCheckedTimeout(() => {
                     if (nextNode) {
                         drawLineWithArrow(newNode.x, newNode.y, nextNode.x, nextNode.y, 20, 2, link2Id, delay);
