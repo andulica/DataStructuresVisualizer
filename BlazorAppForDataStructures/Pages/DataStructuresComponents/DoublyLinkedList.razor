@@ -354,12 +354,15 @@
 
         isOperationInProgress = true;
 
+        var nodeToRemove = doublyLinkedList.FindNodeByIndex(inputValue);
+        var nodeToBeDeleted = ConvertNodeToJavaScriptFormat(nodeToRemove);
+
         try
         {
             doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
             var deleteTask = doublyLinkedList.DeleteAtAsync(inputValue);
-            var jsTask = JSRuntime.InvokeVoidAsync("removeValueInDll", inputValue, timing.JavaScriptDelay).AsTask();
+            var jsTask = JSRuntime.InvokeVoidAsync("removeValueInDll", nodeToBeDeleted, timing.JavaScriptDelay).AsTask();
 
             await Task.WhenAll(deleteTask, jsTask); // Run both tasks concurrently for managing both JS visual and C# code highlighting
         }

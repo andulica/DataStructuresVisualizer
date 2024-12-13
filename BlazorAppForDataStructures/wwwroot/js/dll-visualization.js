@@ -484,24 +484,24 @@
         }, delay);
     }
 
-    function removeNode(nodeToBeRemoved, delay) {
+    function removeNode(indexOfnodeToBeRemoved, delay) {
         return new Promise((resolve) => {
-            highlightNodes(nodeToBeRemoved.value, delay).then(() => {
+            highlightNodes(indexOfnodeToBeRemoved.value, delay * 2).then(() => {
                 setTimeout(() => {
                     // Transition and then remove the node's visual elements
-                    svg.select(`#node-${nodeToBeRemoved.id}`)
+                    svg.select(`#node-${indexOfnodeToBeRemoved.id}`)
                         .transition().duration(delay)
                         .style('opacity', 0)
                         .on('end', () => {
-                            svg.select(`#node-${nodeToBeRemoved.id}`).remove();
-                            svg.select(`#textId-${nodeToBeRemoved.id}`)
+                            svg.select(`#node-${indexOfnodeToBeRemoved.id}`).remove();
+                            svg.select(`#textId-${indexOfnodeToBeRemoved.id}`)
                                 .transition().duration(delay)
                                 .style('opacity', 0)
                                 .on('end', () => {
-                                    svg.select(`#textId-${nodeToBeRemoved.id}`).remove();
+                                    svg.select(`#textId-${indexOfnodeToBeRemoved.id}`).remove();
 
                                     // Update links if necessary and resolve when complete
-                                    updateLinksAfterRemoval(nodeToBeRemoved);
+                                    updateLinksAfterRemoval(indexOfnodeToBeRemoved);
 
                                     refreshDoublyLinkedList();
 

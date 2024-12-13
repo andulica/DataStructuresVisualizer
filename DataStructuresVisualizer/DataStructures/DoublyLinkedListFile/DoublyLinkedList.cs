@@ -221,10 +221,10 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
             }
 
             DoublyLinkedListNode<T> current = head;
+            await HighlightRequested.Invoke(RemoveSteps.InitializePreHead);
 
             if (index == 0)
             {
-                await HighlightRequested.Invoke(RemoveSteps.InitializePreHead);
 
                 if (head.Next != null)
                 {
