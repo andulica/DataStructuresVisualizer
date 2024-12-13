@@ -366,15 +366,15 @@
 
         // Core insertion logic
         await new Promise((resolve) => {
-            setCheckedTimeout(() => {
+            setCheckedTimeout(async () => {
                 let newNode;
 
                 // Determine where to insert the node
                 if (position === nodes.length) {
-                    onPurposeDelay(1000);
                     newNode = createTailNode(value);
                     nodes.push(newNode);
                 } else {
+                    await onPurposeDelay(delay);
                     newNode = createNewNode(value, position);
                     nodes.splice(position, 0, newNode);
                 }
