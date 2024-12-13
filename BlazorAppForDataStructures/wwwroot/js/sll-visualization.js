@@ -5,20 +5,13 @@
 
     // Helper function to clear all timeouts
     function clearAllTimeouts(timeouts) {
-        timeouts.forEach(timeoutId => console.log(timeoutId));
         timeouts.forEach(timeoutId => clearTimeout(timeoutId));
-        
-        timeouts = [];
     }
 
     let svg, nodes;
     let margin = { top: 20, right: 30, bottom: 40, left: 50 };
     const delayDrawLinks = 1000;
     const gapBetweenNodeAndFirstElement = 100;
-
-    window.setIsCancelledToFalse = function () {
-        isCancelled = false;
-    }
 
     let timeouts = [];
 

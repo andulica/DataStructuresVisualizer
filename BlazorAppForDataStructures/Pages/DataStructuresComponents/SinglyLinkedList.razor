@@ -258,8 +258,6 @@
 
         try
         {
-            await JSRuntime.InvokeVoidAsync("setIsCancelledToFalse"); // Reset cancellation before starting
-
             linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
             var insertTask = linkedList.InsertAt(insertPosition, newNode, _cancellationTokenSource.Token);
@@ -281,7 +279,6 @@
         {
             linkedList.HighlightRequested -= HandleHighlightRequest;
             await JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
-            await JSRuntime.InvokeVoidAsync("setIsCancelledToFalse");
         }
     }
 
