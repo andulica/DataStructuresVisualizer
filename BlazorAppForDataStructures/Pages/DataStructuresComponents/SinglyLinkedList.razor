@@ -393,7 +393,7 @@
         }
         catch (OperationCanceledException)
         {
-            await JSRuntime.InvokeVoidAsync("setIsCancelled");
+            await JSRuntime.InvokeVoidAsync("cancelVisuals");
             messageOutput = $"Visual cancelled.";
             var linkedListData = ConvertListToJavaScriptFormat(linkedList);
 

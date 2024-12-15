@@ -194,19 +194,13 @@
             let found = false;
 
             nodes.forEach((node, index) => {
-                let timeout = setTimeout(() => {
+                setCheckedTimeout(() => {
+                    if (found) return; // Skip further processing if the target node is already found
 
-                    if (found) {
-                        clearTimeout(timeout); // Prevent this timeout's actions if already found
-                        return;
-                    }
-
-                    // Highlight the current node
                     const nodeSelection = svg.select(`#node-${node.id}`);
                     nodeSelection.transition().duration(delay).style('fill', 'orange');
 
                     if (index > 0) {
-
                         highlightLinkAndArrowhead(nodes[index - 1].id, node.id);
                     }
 
@@ -216,15 +210,17 @@
                         found = true;
                         resolve(); // Resolve when the target node is found
                     } else if (node.id === valueID) {
-
                         nodeSelection.transition().duration(delay).style('fill', 'red');
                         found = true;
                         resolve(); // Resolve when the target node is found
                     }
                 }, delay * index);
-
-                timeouts.push(timeout);
             });
+
+            // Final fallback to resolve the promise in case no match is found
+            setCheckedTimeout(() => {
+                if (!found) resolve();
+            }, delay * nodes.length);
         });
     }
 
