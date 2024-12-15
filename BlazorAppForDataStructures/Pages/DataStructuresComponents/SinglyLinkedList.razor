@@ -311,7 +311,7 @@
         }
         catch (OperationCanceledException)
         {
-            await JSRuntime.InvokeVoidAsync("setIsCancelled");
+            await JSRuntime.InvokeVoidAsync("cancelVisuals");
 
             linkedList.PrependInstant(head); // Insert the node instantly in case of an exception)
             var linkedListData = ConvertListToJavaScriptFormat(linkedList);

@@ -421,37 +421,45 @@
     }
 
     async function insertNodeAtHead(value, timing, isStack) {
-        // Return a new promise to ensure resolve and reject are correctly scoped
         return new Promise((resolve, reject) => {
-            // Start the asynchronous operation
             const newNode = createNewNode(value, 0);
             nodes.unshift(newNode); // Add the new node to the beginning of the list
 
-            onPurposeDelay(timing.highlightDelay).then(() => {
-
+            // Highlight delay
+            setCheckedTimeout(() => {
                 if (nodes.length > 1) {
                     const nextNode = nodes[1];
-                    drawLineWithArrow(newNode.x, newNode.y, nextNode.x, nextNode.y, 20, 2, `link-${newNode.id}-${nextNode.id}`, timing.javaScriptDelay);
+                    drawLineWithArrow(
+                        newNode.x,
+                        newNode.y,
+                        nextNode.x,
+                        nextNode.y,
+                        20,
+                        2,
+                        `link-${newNode.id}-${nextNode.id}`,
+                        timing.javaScriptDelay
+                    );
                 }
 
-                return onPurposeDelay(timing.highlightDelay);
-            }).then(() => {
+                // Color the node green
+                setCheckedTimeout(() => {
+                    setNodeColor('green', newNode);
 
-                setNodeColor('green', newNode);
+                    // Refresh the list after the node is inserted
+                    setCheckedTimeout(() => {
+                        refreshSinglyLinkedList(isStack);
 
-                setTimeout(() => {
-                    refreshSinglyLinkedList(isStack);
-
-                    setTimeout(() => {
-                        resetNodeColors();
-                        resolve(); // Ensure resolve is called after completing the operation
-                    }, timing.javaScriptDelay);
-                }, timing.nodeMovementDelay);
-            }).catch((error) => {
-                reject(error); // Reject the promise in case of an error
-            });
+                        // Reset colors and resolve the operation
+                        setCheckedTimeout(() => {
+                            resetNodeColors();
+                            resolve();
+                        }, timing.javaScriptDelay);
+                    }, timing.nodeMovementDelay);
+                }, timing.highlightDelay);
+            }, timing.highlightDelay);
         });
     }
+
 
     function setNodeColor(color, node) {
         svg.select(`#node-${node.id}`).
