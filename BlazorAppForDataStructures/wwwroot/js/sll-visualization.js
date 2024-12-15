@@ -201,9 +201,7 @@
                     nodeSelection.transition().duration(delay).style('fill', 'orange');
 
                     if (index > 0) {
-                        setCheckedTimeout(() => {
-                            highlightLinkAndArrowhead(nodes[index - 1].id, node.id);
-                        }, delay);
+                        highlightLinkAndArrowhead(nodes[index - 1].id, node.id);
                     }
 
                     if (node.value === valueID) {
@@ -573,10 +571,10 @@
     }
 
     async function removeNodeInSll(nodeToBeRemoved, timing, isStack) {
-        // Step 1: Highlight the node to be removed
+
         await highlightNodes(nodeToBeRemoved.id, timing.highlightDelay * 2);
 
-        // Step 2: Fade out and remove the node's circle
+        // Fade out and remove the node's circle
         setCheckedTimeout(() => {
             svg.select(`#node-${nodeToBeRemoved.id}`)
                 .transition()
@@ -585,7 +583,7 @@
                 .on('end', () => {
                     svg.select(`#node-${nodeToBeRemoved.id}`).remove();
 
-                    // Step 3: Fade out and remove the node's text
+                    // Fade out and remove the node's text
                     setCheckedTimeout(() => {
                         svg.select(`#textId-${nodeToBeRemoved.id}`)
                             .transition()
@@ -594,10 +592,18 @@
                             .on('end', () => {
                                 svg.select(`#textId-${nodeToBeRemoved.id}`).remove();
 
-                                // Step 4: Update links and refresh the list
+                                // Remove the node from the nodes array
+                                const nodeIndex = nodes.findIndex(node => node.id === nodeToBeRemoved.id);
+                                if (nodeIndex !== -1) {
+                                    nodes.splice(nodeIndex, 1);
+                                }
+
+                                // Update links and refresh the list
                                 setCheckedTimeout(() => {
                                     updateLinksAfterRemoval(nodeToBeRemoved);
                                     refreshSinglyLinkedList(isStack);
+
+                                    // Complete the operation
                                 }, timing.javaScriptDelay);
                             });
                     }, timing.javaScriptDelay);

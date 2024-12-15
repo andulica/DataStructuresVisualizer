@@ -355,7 +355,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
         cancellationToken.ThrowIfCancellationRequested();
 
         // Traverse to the node before the target node
-        for (int i = 0; i < index - 1; i++)
+        for (int i = 0; i < index; i++)
         {
             await HighlightRequested.Invoke(RemoveSteps.LoopToPosition); // "for (k = 0; k<i-1; k++)"
             cancellationToken.ThrowIfCancellationRequested();
