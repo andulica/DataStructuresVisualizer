@@ -468,22 +468,47 @@
     }
 
     async function insertNodeAtTail(value, timing) {
-        const newNode = createTailNode(value);
-        nodes.push(newNode);
+        return new Promise((resolve) => {
+            const newNode = createTailNode(value);
+            nodes.push(newNode);
 
-        const prevNode = nodes[nodes.length - 2];
+            const prevNode = nodes[nodes.length - 2];
 
-        if (prevNode) {
-            await onPurposeDelay(timing.javaScriptDelay);
+            // Draw the connecting line if a previous node exists
+            if (prevNode) {
+                setCheckedTimeout(() => {
+                    drawLineWithArrow(
+                        prevNode.x,
+                        prevNode.y,
+                        newNode.x,
+                        newNode.y,
+                        20,
+                        2,
+                        `link-${prevNode.id}-${newNode.id}`,
+                        timing.javaScriptDelay
+                    );
 
-            drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, `link-${prevNode.id}-${newNode.id}`, timing.javaScriptDelay);
-        }
+                    setCheckedTimeout(() => {
+                        setNodeColor('green', newNode);
 
-        await onPurposeDelay(timing.javaScriptDelay);
+                        setCheckedTimeout(() => {
+                            resetNodeColors();
+                            resolve();
+                        }, timing.javaScriptDelay);
+                    }, timing.javaScriptDelay);
+                }, timing.javaScriptDelay);
+            } else {
+                // If there is no previous node, directly color and reset
+                setCheckedTimeout(() => {
+                    setNodeColor('green', newNode);
 
-        setNodeColor('green', newNode);
-        await onPurposeDelay(timing.javaScriptDelay);
-        resetNodeColors();
+                    setCheckedTimeout(() => {
+                        resetNodeColors();
+                        resolve();
+                    }, timing.javaScriptDelay);
+                }, timing.javaScriptDelay);
+            }
+        });
     }
 
     function updateNodePositions(isStack) {
