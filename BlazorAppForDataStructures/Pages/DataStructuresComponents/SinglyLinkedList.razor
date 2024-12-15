@@ -433,7 +433,7 @@
         }
         catch (OperationCanceledException)
         {
-            await JSRuntime.InvokeVoidAsync("setIsCancelled");
+            await JSRuntime.InvokeVoidAsync("cancelVisuals");
             linkedList.DeleteAtInstant(inputValue);
             var linkedListData = ConvertListToJavaScriptFormat(linkedList);
 

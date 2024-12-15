@@ -201,10 +201,11 @@
                     nodeSelection.transition().duration(delay).style('fill', 'orange');
 
                     if (index > 0) {
-                        highlightLinkAndArrowhead(nodes[index - 1].id, node.id);
+                        setCheckedTimeout(() => {
+                            highlightLinkAndArrowhead(nodes[index - 1].id, node.id);
+                        }, delay);
                     }
 
-                    // Check the node's value and highlight accordingly
                     if (node.value === valueID) {
                         nodeSelection.transition().duration(delay).style('fill', 'green');
                         found = true;
@@ -212,12 +213,12 @@
                     } else if (node.id === valueID) {
                         nodeSelection.transition().duration(delay).style('fill', 'red');
                         found = true;
-                        resolve(); // Resolve when the target node is found
+                        resolve();
                     }
                 }, delay * index);
             });
 
-            // Final fallback to resolve the promise in case no match is found
+            // Final fallback to resolve the promise if no match is found
             setCheckedTimeout(() => {
                 if (!found) resolve();
             }, delay * nodes.length);
@@ -572,25 +573,36 @@
     }
 
     async function removeNodeInSll(nodeToBeRemoved, timing, isStack) {
+        // Step 1: Highlight the node to be removed
+        await highlightNodes(nodeToBeRemoved.id, timing.highlightDelay * 2);
 
-        await highlightNodes(nodeToBeRemoved.id, timing.highlightDelay * 2); // Double the delay for highlighting
+        // Step 2: Fade out and remove the node's circle
+        setCheckedTimeout(() => {
+            svg.select(`#node-${nodeToBeRemoved.id}`)
+                .transition()
+                .duration(timing.highlightDelay)
+                .style('opacity', 0)
+                .on('end', () => {
+                    svg.select(`#node-${nodeToBeRemoved.id}`).remove();
 
-        // Transition and then remove the node's visual elements
-        svg.select(`#node-${nodeToBeRemoved.id}`)
-            .transition().duration(timing.highlightDelay)
-            .style('opacity', 0) // Fade out effect
-        svg.select(`#node-${nodeToBeRemoved.id}`).remove();
-        // Proceed with text removal after node is removed
-        svg.select(`#textId-${nodeToBeRemoved.id}`)
-            .transition().duration(timing.highlightDelay)
-            .style('opacity', 0) // Fade out effect for text
-            .on('end', () => {
-                svg.select(`#textId-${nodeToBeRemoved.id}`).remove();
-                // Update links if necessary and resolve when complete
-                updateLinksAfterRemoval(nodeToBeRemoved);
+                    // Step 3: Fade out and remove the node's text
+                    setCheckedTimeout(() => {
+                        svg.select(`#textId-${nodeToBeRemoved.id}`)
+                            .transition()
+                            .duration(timing.highlightDelay)
+                            .style('opacity', 0)
+                            .on('end', () => {
+                                svg.select(`#textId-${nodeToBeRemoved.id}`).remove();
 
-                refreshSinglyLinkedList(isStack);
-            });
+                                // Step 4: Update links and refresh the list
+                                setCheckedTimeout(() => {
+                                    updateLinksAfterRemoval(nodeToBeRemoved);
+                                    refreshSinglyLinkedList(isStack);
+                                }, timing.javaScriptDelay);
+                            });
+                    }, timing.javaScriptDelay);
+                });
+        }, timing.highlightDelay);
     }
 
     function updateLinksAfterRemoval(nodeToBeRemoved) {
@@ -653,7 +665,7 @@
     window.removeValueInSll = function (nodeToBeRemoved, timing, isStack) {
         resetNodeColors();
         resetLinkColors();
-        return removeNodeInSll(nodeToBeRemoved, timing, isStack); // Return the promise
+        removeNodeInSll(nodeToBeRemoved, timing, isStack); // Return the promise
     };
 
     window.highlightTail = function () {
