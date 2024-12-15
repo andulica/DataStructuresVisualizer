@@ -484,7 +484,7 @@
         }, delay);
     }
 
-    function removeNode(indexOfnodeToBeRemoved, delay) {
+    async function removeNode(indexOfnodeToBeRemoved, delay) {
         return new Promise((resolve) => {
             highlightNodes(indexOfnodeToBeRemoved.value, delay * 2).then(() => {
                 setTimeout(() => {
@@ -504,7 +504,7 @@
                                     updateLinksAfterRemoval(indexOfnodeToBeRemoved);
 
                                     refreshDoublyLinkedList();
-
+                                 
                                     resolve(); // Ensure all transitions have time to complete
                                 });
                         });
@@ -686,8 +686,6 @@
         resetNodeColors();
     };
     window.insertAtInDll = async function (dllData, position, delay) {
-        resetCancellationFlag(); // Reset the cancellation flag before starting the operation
-
         insertNode(dllData, position, delay);
     };
 
@@ -695,14 +693,11 @@
         insertNodeAtTail(value, delay);
     }
 
-    window.removeValueInDll = function (value, delay) {
-        removeNode(value, delay);
+    window.removeValueInDll = async function (value, delay) {
+        await removeNode(value, delay);
+        await onPurposeDelay(delay);
+        resetNodeColors();
     }
-
-    window.setIsCancelled = function () {
-        isCancelled = true;
-        console.log('Operation cancelled');
-    };
 
     window.drawDoublyLinkedList = drawDoublyLinkedList;
 })();
