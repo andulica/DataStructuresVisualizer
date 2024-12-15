@@ -33,7 +33,7 @@
                     <label for="insertPosition">Insert Position</label>
                     <input type="number" id="insertPosition" @bind="insertPosition" placeholder="Enter Position" />
 
-                    <button class="custom-button" @onclick="PerformInsertion" disabled="@isOperationInProgress">Insert</button>
+                    <button class="custom-button" @onclick="PerformInsertion">Insert</button>
                 </div>
                 break;
             case "prepend":
@@ -41,7 +41,7 @@
                     <label for="inputValue">Input Value</label>
                     <input type="number" id="inputValue" @bind="inputValue" placeholder="Enter Value" />
 
-                    <button class="custom-button" @onclick="PrependValue" disabled="@isOperationInProgress">Prepend</button>
+                    <button class="custom-button" @onclick="PrependValue">Prepend</button>
                 </div>
                 break;
             case "append":
@@ -49,7 +49,7 @@
                     <label for="inputValue">Input Value</label>
                     <input type="number" id="inputValue" @bind="inputValue" placeholder="Enter Value" />
 
-                    <button class="custom-button" @onclick="AppendValue" disabled="@isOperationInProgress">Append</button>
+                    <button class="custom-button" @onclick="AppendValue">Append</button>
                 </div>
                 break;
             case "search":
@@ -57,7 +57,7 @@
                     <label for="inputValue">Input Value</label>
                     <input type="number" id="inputValue" @bind="inputValue" placeholder="Enter Value" />
 
-                    <button class="custom-button" @onclick="SearchValue" disabled="@isOperationInProgress">Search</button>
+                    <button class="custom-button" @onclick="SearchValue">Search</button>
                 </div>
                 break;
             case "remove":
@@ -65,7 +65,7 @@
                     <label for="inputValue">Input Index</label>
                     <input type="number" id="inputValue" @bind="inputValue" placeholder="Enter Value" />
 
-                    <button class="custom-button" @onclick="RemoveValue" disabled="@isOperationInProgress">Remove</button>
+                    <button class="custom-button" @onclick="RemoveValue">Remove</button>
                 </div>
                 break;
             case "create":
@@ -73,7 +73,7 @@
                     <label for="inputValue">Number of Nodes</label>
                     <input type="number" id="inputValue" @bind="inputValue" placeholder="Enter Value" />
 
-                    <button class="custom-button" @onclick="CreateSinglyLinkedList" disabled="@isOperationInProgress">Create List</button>
+                    <button class="custom-button" @onclick="CreateSinglyLinkedList">Create List</button>
                 </div>
                 break;
             default:
@@ -108,7 +108,6 @@
     private int inputValue;
     private string messageOutput = "";
     private IEnumerable<string> currentCode = Enumerable.Empty<string>();
-    private bool isOperationInProgress = false; // Flag to track operation state
     private List<Snapshot> snapshots = new();
     private int currentSnapshotIndex = 0;
     private bool isStack = false;
@@ -286,16 +285,11 @@
     {
         InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
 
-        if (isOperationInProgress) return; // Prevent multiple operations
-
         if (linkedList.IsFull())
         {
             messageOutput = $"The list has reached its maximum capacity of {linkedList.maxCapacity} nodes. Cannot insert a new node.";
             return;
         }
-
-        isOperationInProgress = true;
-        StateHasChanged();
 
         var head = new SinglyLinkedListNode<int>(inputValue);
         var headForJSInsertion = ConvertNodeToJavaScriptFormat(head);
@@ -323,9 +317,7 @@
         finally
         {
             linkedList.HighlightRequested -= HandleHighlightRequest;
-            isOperationInProgress = false; // Reset flag after operation
             JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
-            StateHasChanged();
         }
     }
 
@@ -333,19 +325,15 @@
     {
         InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
 
-        if (isOperationInProgress) return; // Prevent multiple operations
-
         if (linkedList.IsFull())
         {
             messageOutput = $"The list has reached its maximum capacity of {linkedList.maxCapacity} nodes. Cannot insert a new node.";
             return;
         }
 
-        isOperationInProgress = true;
-        StateHasChanged();
-
         var tail = new SinglyLinkedListNode<int>(inputValue);
         var tailToInsert = ConvertNodeToJavaScriptFormat(tail);
+
         try
         {
             linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
@@ -360,6 +348,7 @@
             await JSRuntime.InvokeVoidAsync("cancelVisuals");
 
             linkedList.AppendInstant(tail); // Insert the node instantly in case of an exception)
+
             var linkedListData = ConvertListToJavaScriptFormat(linkedList);
 
             await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
@@ -369,9 +358,7 @@
         finally
         {
             linkedList.HighlightRequested -= HandleHighlightRequest; // Clean up event subscription
-            isOperationInProgress = false; // Reset flag after operation
             JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
-            StateHasChanged();
         }
     }
 
@@ -379,9 +366,6 @@
     {
         InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
 
-        if (isOperationInProgress) return; // Prevent multiple operations
-        isOperationInProgress = true;
-        StateHasChanged();
         try
         {
             linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
@@ -394,7 +378,9 @@
         catch (OperationCanceledException)
         {
             await JSRuntime.InvokeVoidAsync("cancelVisuals");
+
             messageOutput = $"Visual cancelled.";
+
             var linkedListData = ConvertListToJavaScriptFormat(linkedList);
 
             await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
@@ -402,26 +388,23 @@
         finally
         {
             linkedList.HighlightRequested -= HandleHighlightRequest; // Clean up event subscription
-            isOperationInProgress = false; // Reset flag after operation
             JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
-            StateHasChanged();
         }
     }
 
     private async Task RemoveValue()
     {
         InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
-        if (isOperationInProgress) return; // Prevent multiple operations
 
         if (inputValue >= linkedList.Count)
         {
             messageOutput = $"The index {inputValue} you are trying to delete does not exist. Please enter a smaller value.";
             return;
         }
-        isOperationInProgress = true;
-        StateHasChanged();
+
         var nodeToRemove = linkedList.FindNodeByIndex(inputValue);
         var nodeToBeDeleted = ConvertNodeToJavaScriptFormat(nodeToRemove);
+
         try
         {
             linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
@@ -434,7 +417,9 @@
         catch (OperationCanceledException)
         {
             await JSRuntime.InvokeVoidAsync("cancelVisuals");
+
             linkedList.DeleteAtInstant(inputValue);
+
             var linkedListData = ConvertListToJavaScriptFormat(linkedList);
 
             await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
@@ -444,41 +429,27 @@
         finally
         {
             linkedList.HighlightRequested -= HandleHighlightRequest; // Clean up event subscription
-            isOperationInProgress = false; // Reset flag after operation
             JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
-            StateHasChanged();
         }
     }
 
     private async Task CreateSinglyLinkedList()
     {
-        if (isOperationInProgress) return; // Prevent multiple operations
-
         if (inputValue > linkedList.maxCapacity)
         {
             messageOutput = $"The singly linked list can have a maximum number of {linkedList.maxCapacity} nodes. Please enter a smaller value.";
             return;
         }
-        isOperationInProgress = true;
-        StateHasChanged();
-        try
+
+        linkedList = new SinglyLinkedList<int>();
+
+        for (int i = 0; i < inputValue; i++)
         {
-            linkedList = new SinglyLinkedList<int>();
-
-
-            for (int i = 0; i < inputValue; i++)
-            {
-                linkedList.Add(rand.Next(1, 30));
-            }
-
-            await UpdateDisplay(linkedList);
-            await InvokeAsync(StateHasChanged);
+            linkedList.Add(rand.Next(1, 30));
         }
-        finally
-        {
-            isOperationInProgress = false; // Reset flag after operation
-            StateHasChanged();
-        }
+
+        await UpdateDisplay(linkedList);
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task HandleHighlightRequest(Enum step)
