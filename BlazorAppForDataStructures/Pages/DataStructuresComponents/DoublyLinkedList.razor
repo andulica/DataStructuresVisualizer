@@ -227,7 +227,7 @@
         }
         catch (OperationCanceledException)
         {
-            await JSRuntime.InvokeVoidAsync("setIsCancelled");
+            await JSRuntime.InvokeVoidAsync("cancelVisuals");
             doublyLinkedList.InsertAtInstant(nodeToInsert, insertPosition);
 
             var doublyLinkedListData = ConvertListToJavaScriptFormat(doublyLinkedList);
