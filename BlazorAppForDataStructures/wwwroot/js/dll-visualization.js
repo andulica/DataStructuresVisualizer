@@ -429,20 +429,44 @@
     }
 
     async function insertNodeAtTail(value, delay) {
+        return new Promise((resolve) => {
+            const newNode = createTailNode(value);
+            nodes.push(newNode);
 
-        const newNode = createTailNode(value);
-        nodes.push(newNode);
+            const prevNode = nodes[nodes.length - 2];
 
-        const prevNode = nodes[nodes.length - 2];
+            if (prevNode) {
+                setCheckedTimeout(() => {
+                    drawLineWithArrow(
+                        prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, `link-${prevNode.id}-${newNode.id}`, 'right', delay);
 
-        if (prevNode) {
-            await onPurposeDelay(delay);
-            drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, `link-${prevNode.id}-${newNode.id}`, 'right', delay);
-            drawLineWithArrow(newNode.x, newNode.y, prevNode.x, prevNode.y, 20, 2, `link-${newNode.id}-${prevNode.id}`, 'left', delay);
-        }
-        setTimeout(() => {
-            resetNodeColors();
-        }, delay);
+                    setCheckedTimeout(() => {
+                        drawLineWithArrow(
+                            newNode.x,
+                            newNode.y,
+                            prevNode.x,
+                            prevNode.y,
+                            20,
+                            2,
+                            `link-${newNode.id}-${prevNode.id}`,
+                            'left',
+                            delay
+                        );
+
+                        setCheckedTimeout(() => {
+                            resetNodeColors();
+                            resolve();
+                        }, delay);
+                    }, delay);
+                }, delay);
+            } else {
+                // If no previous node, directly reset colors and resolve
+                setCheckedTimeout(() => {
+                    resetNodeColors();
+                    resolve();
+                }, delay);
+            }
+        });
     }
 
     async function removeNode(indexOfnodeToBeRemoved, delay) {
