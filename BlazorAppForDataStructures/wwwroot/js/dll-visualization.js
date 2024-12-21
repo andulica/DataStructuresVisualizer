@@ -472,26 +472,33 @@
     async function removeNode(indexOfnodeToBeRemoved, delay) {
         return new Promise((resolve) => {
             highlightNodes(indexOfnodeToBeRemoved.value, delay * 2).then(() => {
-                setTimeout(() => {
+                setCheckedTimeout(() => {
                     // Transition and then remove the node's visual elements
                     svg.select(`#node-${indexOfnodeToBeRemoved.id}`)
-                        .transition().duration(delay)
+                        .transition()
+                        .duration(delay)
                         .style('opacity', 0)
                         .on('end', () => {
                             svg.select(`#node-${indexOfnodeToBeRemoved.id}`).remove();
-                            svg.select(`#textId-${indexOfnodeToBeRemoved.id}`)
-                                .transition().duration(delay)
-                                .style('opacity', 0)
-                                .on('end', () => {
-                                    svg.select(`#textId-${indexOfnodeToBeRemoved.id}`).remove();
 
-                                    // Update links if necessary and resolve when complete
-                                    updateLinksAfterRemoval(indexOfnodeToBeRemoved);
+                            setCheckedTimeout(() => {
+                                svg.select(`#textId-${indexOfnodeToBeRemoved.id}`)
+                                    .transition()
+                                    .duration(delay)
+                                    .style('opacity', 0)
+                                    .on('end', () => {
+                                        svg.select(`#textId-${indexOfnodeToBeRemoved.id}`).remove();
 
-                                    refreshDoublyLinkedList();
-                                 
-                                    resolve(); // Ensure all transitions have time to complete
-                                });
+                                        // Update links and refresh the list
+                                        setCheckedTimeout(() => {
+                                            updateLinksAfterRemoval(indexOfnodeToBeRemoved);
+                                            refreshDoublyLinkedList();
+
+                                            // Resolve the promise after all actions are complete
+                                            resolve();
+                                        }, delay);
+                                    });
+                            }, delay);
                         });
                 }, delay);
             });
