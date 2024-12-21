@@ -175,10 +175,11 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         /// Prepends a new node with specified data at the start of the list.
         /// </summary>
         /// <param name="newNode">_data for the new node.</param>
-        public async Task PrependAsync(DoublyLinkedListNode <T> newNode)
+        public async Task PrependAsync(DoublyLinkedListNode <T> newNode, CancellationToken cancellationToken)
         {
 
             await HighlightRequested.Invoke(PrependSteps.CreateVertex);
+            cancellationToken.ThrowIfCancellationRequested();
 
             if (head == null)
             {
@@ -189,13 +190,16 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
                 head.Prev = newNode;
                 newNode.Next = head;
                 await HighlightRequested.Invoke(PrependSteps.SetPreviousPointer);
+                cancellationToken.ThrowIfCancellationRequested();
 
                 await HighlightRequested.Invoke(PrependSteps.SetNextPointer);
+                cancellationToken.ThrowIfCancellationRequested();
 
                 head = newNode;
             }
 
             await HighlightRequested.Invoke(PrependSteps.SetHead);
+            cancellationToken.ThrowIfCancellationRequested();
 
             count++;
         }

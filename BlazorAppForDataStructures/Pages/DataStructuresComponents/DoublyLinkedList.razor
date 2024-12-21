@@ -244,29 +244,39 @@
 
     private async Task PrependValue()
     {
+        InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
+
         if (doublyLinkedList.IsFull())
         {
             messageOutput = $"The list has reached its maximum capacity of {doublyLinkedList.maxCapacity} nodes. Cannot insert a new node.";
             return;
         }
 
+        var nodeToInsert = new DoublyLinkedListNode<int>(inputValue);
+        var dllData = ConvertNodeToJavaScriptFormat(nodeToInsert);
+
         try
         {
             doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
-            var nodeToInsert = new DoublyLinkedListNode<int>(inputValue);
-            var dllData = ConvertNodeToJavaScriptFormat(nodeToInsert);
 
-            var insertTask = doublyLinkedList.PrependAsync(nodeToInsert);
+            var insertTask = doublyLinkedList.PrependAsync(nodeToInsert, _cancellationTokenSource.Token);
             var jsTask = JSRuntime.InvokeVoidAsync("insertHeadInDll", dllData, timing.JavaScriptDelay).AsTask();
 
             await Task.WhenAll(insertTask, jsTask); // Run both tasks concurrently
         }
-        catch (Exception ex)
+        catch (OperationCanceledException)
         {
-            // Handle exception
+            await JSRuntime.InvokeVoidAsync("cancelVisuals");
+            doublyLinkedList.InsertAtInstant(nodeToInsert, insertPosition);
+
+            var doublyLinkedListData = ConvertListToJavaScriptFormat(doublyLinkedList);
+            await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", doublyLinkedListData);
+
+            messageOutput = $"Visual cancelled. Value {inputValue} prepended.";
         }
         finally
         {
+            JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
             doublyLinkedList.HighlightRequested -= HandleHighlightRequest; // Unsubscribe from highlight events
         }
     }

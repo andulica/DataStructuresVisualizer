@@ -630,53 +630,42 @@
         return new Promise((resolve) => {
             const newNode = createHeadNode(value);
 
-            setCheckedTimeout(() => {
-                const headNode = nodes[0];
+            const headNode = nodes[0];
 
-                if (headNode) {
-                    drawLineWithArrow(
-                        newNode.x,
-                        newNode.y,
-                        headNode.x,
-                        headNode.y,
-                        20,
-                        2,
-                        `link-${headNode.id}-${newNode.id}`,
-                        'right',
-                        delay
-                    );
+            if (headNode) {
+                setCheckedTimeout(() => {
+                    drawLineWithArrow(newNode.x, newNode.y, headNode.x, headNode.y, 20, 2, `link-${headNode.id}-${newNode.id}`, 'right', delay);
 
                     setCheckedTimeout(() => {
-                        drawLineWithArrow(
-                            headNode.x,
-                            headNode.y,
-                            newNode.x,
-                            newNode.y,
-                            20,
-                            2,
-                            `link-${newNode.id}-${headNode.id}`,
-                            'left',
-                            delay
-                        );
+                        drawLineWithArrow(headNode.x, headNode.y, newNode.x, newNode.y, 20, 2, `link-${newNode.id}-${headNode.id}`, 'left', delay);
 
                         setCheckedTimeout(() => {
                             nodes.splice(0, 0, newNode);
                             setColoursForNode(newNode, 'green', delay);
 
                             setCheckedTimeout(() => {
-                                resolve();
+
+                                // Ensure refresh happens after the node is fully inserted
+                                refreshDoublyLinkedList();
+                                setCheckedTimeout(() => {
+                                    resetNodeColors();
+                                    resolve(); // Explicitly resolve the Promise here
+                                }, delay);
                             }, delay);
                         }, delay);
                     }, delay);
-                } else {
-                    nodes.splice(0, 0, newNode);
-                    setColoursForNode(newNode, 'green', delay);
+                }, delay);
+            } else {
+                // No headNode exists; directly update and refresh
+                nodes.splice(0, 0, newNode);
+                setColoursForNode(newNode, 'green', delay);
 
-                    setCheckedTimeout(() => {
-                        resolve();
-                    }, delay);
-                }
-            }, delay);
+                refreshDoublyLinkedList();
+                setCheckedTimeout(() => {
+                    resetNodeColors();
+                    resolve(); // Explicitly resolve the Promise here
+                }, delay);
+            }
         });
     }
 
@@ -708,10 +697,7 @@
     };
 
     window.insertHeadInDll = async function (value, delay) {
-        await insertNodeAtHead(value, delay)
-        refreshDoublyLinkedList();
-        await onPurposeDelay(delay);
-        resetNodeColors();
+        insertNodeAtHead(value, delay)
     };
     window.insertAtInDll = async function (dllData, position, delay) {
         insertNode(dllData, position, delay);
