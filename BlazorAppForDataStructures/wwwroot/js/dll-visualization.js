@@ -627,21 +627,57 @@
     }
 
     async function insertNodeAtHead(value, delay) {
-        const newNode = createHeadNode(value);
-        await onPurposeDelay(delay);
+        return new Promise((resolve) => {
+            const newNode = createHeadNode(value);
 
-        const headNode = nodes[0];
+            setCheckedTimeout(() => {
+                const headNode = nodes[0];
 
-        if (headNode) {
-            drawLineWithArrow(newNode.x, newNode.y, headNode.x, headNode.y, 20, 2, `link-${headNode.id}-${newNode.id}`, 'right', delay);
-            await onPurposeDelay(delay);
-            drawLineWithArrow(headNode.x, headNode.y, newNode.x, newNode.y, 20, 2, `link-${newNode.id}-${headNode.id}`, 'left', delay);
-            await onPurposeDelay(delay);
-        }
+                if (headNode) {
+                    drawLineWithArrow(
+                        newNode.x,
+                        newNode.y,
+                        headNode.x,
+                        headNode.y,
+                        20,
+                        2,
+                        `link-${headNode.id}-${newNode.id}`,
+                        'right',
+                        delay
+                    );
 
-        nodes.splice(0, 0, newNode);
-        setColoursForNode(newNode, 'green', delay);
-        await onPurposeDelay(delay);
+                    setCheckedTimeout(() => {
+                        drawLineWithArrow(
+                            headNode.x,
+                            headNode.y,
+                            newNode.x,
+                            newNode.y,
+                            20,
+                            2,
+                            `link-${newNode.id}-${headNode.id}`,
+                            'left',
+                            delay
+                        );
+
+                        setCheckedTimeout(() => {
+                            nodes.splice(0, 0, newNode);
+                            setColoursForNode(newNode, 'green', delay);
+
+                            setCheckedTimeout(() => {
+                                resolve();
+                            }, delay);
+                        }, delay);
+                    }, delay);
+                } else {
+                    nodes.splice(0, 0, newNode);
+                    setColoursForNode(newNode, 'green', delay);
+
+                    setCheckedTimeout(() => {
+                        resolve();
+                    }, delay);
+                }
+            }, delay);
+        });
     }
 
     function highlightLinkAndArrowhead(sourceNodeId, targetNodeId, direction, delay) {
