@@ -363,3 +363,7 @@ MigrationBackup/
 FodyWeavers.xsd
 /BlazorAppForDataStructures/Models
 /BlazorAppForDataStructures/Pages/DataStructuresComponents/Array.razor
+/BlazorAppForDataStructures/appsettings.json
+/BlazorAppForDataStructures/compose.yaml
+/BlazorAppForDataStructures/appsettings.Development.json
+/.gitignore
