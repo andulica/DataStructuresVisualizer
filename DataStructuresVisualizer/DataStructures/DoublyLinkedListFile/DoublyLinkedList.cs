@@ -313,7 +313,7 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         /// </summary>
         /// <param name="data">The data to locate in the list.</param>
         /// <returns>The zero-based index of the first occurrence of the data, if found; otherwise, -1.</returns>
-        public async Task SearchAsync(T data)
+        public async Task SearchAsync(T data, CancellationToken cancellationToken)
         {
             int index = 0;
             DoublyLinkedListNode<T> current = _head;
@@ -321,18 +321,22 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
             if (_head == null)
             {
                 await HighlightRequested.Invoke(SearchSteps.CheckEmptyReturnNotFound);
+                cancellationToken.ThrowIfCancellationRequested();
                 return;
             }
 
             await HighlightRequested.Invoke(SearchSteps.InitializeIndexAndHead);
+            cancellationToken.ThrowIfCancellationRequested();
 
             while (current != null)
             {
                 await HighlightRequested.Invoke(SearchSteps.LoopUntilFound);
+                cancellationToken.ThrowIfCancellationRequested();
 
                 if (EqualityComparer<T>.Default.Equals(current._data, data))
                 {
                     await HighlightRequested.Invoke(SearchSteps.ReturnIndex);
+                    cancellationToken.ThrowIfCancellationRequested();
                     return;
                 }
 
@@ -342,14 +346,17 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
                 if (current == null)
                 {
                     await HighlightRequested.Invoke(SearchSteps.CheckIfNullReturnNotFound);
+                    cancellationToken.ThrowIfCancellationRequested();
                 }
                 else
                 {
                     await HighlightRequested.Invoke(SearchSteps.IncrementIndexAndMoveNext);
+                    cancellationToken.ThrowIfCancellationRequested();
                 }
             }
 
             await HighlightRequested.Invoke(SearchSteps.ReturnNull);
+            cancellationToken.ThrowIfCancellationRequested();
             return;
         }  
 

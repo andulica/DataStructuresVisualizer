@@ -150,7 +150,7 @@
                     "if empty, return NOT_FOUND",
                     "index = 0, tmp = head",
                     "while (tmp.item != v)",
-                    "index++, tmp = tmp.next", 
+                    "index++, tmp = tmp.next",
                     "if tmp == null,",
                     "    return NOT_FOUND",
                     "return index"
@@ -283,6 +283,9 @@
 
     private async Task AppendValue()
     {
+
+        InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
+
         if (doublyLinkedList.IsFull())
         {
             messageOutput = $"The list has reached its maximum capacity of {doublyLinkedList.maxCapacity} nodes. Cannot insert a new node.";
@@ -320,21 +323,27 @@
 
     private async Task SearchValue()
     {
+        InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
+
         try
         {
             doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
-            var searchTask = doublyLinkedList.SearchAsync(inputValue);
+            var searchTask = doublyLinkedList.SearchAsync(inputValue, _cancellationTokenSource.Token);
             var jsTask = JSRuntime.InvokeVoidAsync("searchValueInDLL", inputValue, timing.JavaScriptDelay).AsTask();
 
             await Task.WhenAll(searchTask, jsTask); // Run both tasks concurrently
         }
-        catch (Exception ex)
+        catch (OperationCanceledException)
         {
-            // Handle exception
+            await JSRuntime.InvokeVoidAsync("cancelVisuals");
+            var doublyLinkedListData = ConvertListToJavaScriptFormat(doublyLinkedList);
+            await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", doublyLinkedListData);
+            messageOutput = "Visual cancelled.";
         }
         finally
         {
+            JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
             doublyLinkedList.HighlightRequested -= HandleHighlightRequest; // Unsubscribe from highlight events
         }
     }
