@@ -697,8 +697,8 @@
     }
 
     window.removeValueInDll = async function (value, delay) {
-        await removeNode(value, delay);
-        await onPurposeDelay(delay);
+        removeNode(value, delay);
+        onPurposeDelay(delay);
         resetNodeColors();
     }
 

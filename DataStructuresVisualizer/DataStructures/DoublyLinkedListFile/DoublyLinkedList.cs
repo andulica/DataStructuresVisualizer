@@ -253,16 +253,18 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         /// <exception cref="IndexOutOfRangeException">
         /// Thrown when the specified index is less than 0 or greater than or equal to the size of the list.
         /// </exception>
-        public async Task DeleteAtAsync(int index)
+        public async Task DeleteAtAsync(int index, CancellationToken cancellationToken)
         {
             if (_head == null)
             {
                 await HighlightRequested.Invoke(RemoveSteps.CheckIfEmpty);
+                cancellationToken.ThrowIfCancellationRequested();
                 return;
             }
 
             DoublyLinkedListNode<T> current = _head;
             await HighlightRequested.Invoke(RemoveSteps.InitializePreHead);
+            cancellationToken.ThrowIfCancellationRequested();
 
             if (index == 0)
             {
@@ -279,19 +281,23 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
 
                 count--;
                 await HighlightRequested.Invoke(RemoveSteps.DeleteDel);
+                cancellationToken.ThrowIfCancellationRequested();
                 return;
             }
 
             for (int i = 0; i < index; i++)
             {
                 await HighlightRequested.Invoke(RemoveSteps.LoopToPosition);
+                cancellationToken.ThrowIfCancellationRequested();
 
                 current = current.Next;
 
                 await HighlightRequested.Invoke(RemoveSteps.MovePreToNext);
+                cancellationToken.ThrowIfCancellationRequested();
             }
 
             await HighlightRequested.Invoke(RemoveSteps.SetDelAndAfter);
+            cancellationToken.ThrowIfCancellationRequested();
 
             current.Prev.Next = current.Next;
 
@@ -306,6 +312,32 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
 
             count--;
             await HighlightRequested.Invoke(RemoveSteps.DeleteDel);
+            cancellationToken.ThrowIfCancellationRequested();
+        }
+
+        public void DeleteAtInstant(int index)
+        {
+            int currentIndex = 0;
+            DoublyLinkedListNode<T> current = _head;
+
+            if (index == 0)
+            {
+                _head = _head.Next;
+                count--;
+                return;
+            }
+
+            while (current.Next != null && currentIndex < index - 1)
+            {
+                current = current.Next;
+                currentIndex++;
+            }
+
+            if (current.Next != null)
+            {
+                current.Next = current.Next.Next;
+                count--;
+            }
         }
 
         /// <summary>

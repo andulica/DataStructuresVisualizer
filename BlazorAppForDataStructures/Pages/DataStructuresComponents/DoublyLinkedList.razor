@@ -350,6 +350,8 @@
 
     private async Task RemoveValue()
     {
+        InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
+
         if (inputValue >= doublyLinkedList.Count)
         {
             messageOutput = $"The index {inputValue} you are trying to delete does not exist. Please enter a smaller value.";
@@ -363,17 +365,24 @@
         {
             doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
-            var deleteTask = doublyLinkedList.DeleteAtAsync(inputValue);
+            var deleteTask = doublyLinkedList.DeleteAtAsync(inputValue, _cancellationTokenSource.Token);
             var jsTask = JSRuntime.InvokeVoidAsync("removeValueInDll", nodeToBeDeleted, timing.JavaScriptDelay).AsTask();
 
             await Task.WhenAll(deleteTask, jsTask); // Run both tasks concurrently for managing both JS visual and C# code highlighting
         }
-        catch (Exception ex)
+        catch (OperationCanceledException)
         {
-            // Handle exception
+            await JSRuntime.InvokeVoidAsync("cancelVisuals");
+            doublyLinkedList.DeleteAtInstant(inputValue);
+
+            var doublyLinkedListData = ConvertListToJavaScriptFormat(doublyLinkedList);
+            await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", doublyLinkedListData);
+
+            messageOutput = $"Visual cancelled. Value at index {inputValue} deleted.";
         }
         finally
         {
+            JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
             doublyLinkedList.HighlightRequested -= HandleHighlightRequest; // Unsubscribe from highlight events
         }
     }
