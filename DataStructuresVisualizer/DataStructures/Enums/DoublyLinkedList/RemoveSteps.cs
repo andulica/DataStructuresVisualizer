@@ -12,7 +12,7 @@ namespace DataStructuresVisualizer.DataStructures.Enums.DoublyLinkedList
         CheckIfEmpty = 0,
 
         /// <summary>
-        /// Vertex pre = head
+        /// Vertex pre = _head
         /// </summary>
         InitializePreHead = 1,
 

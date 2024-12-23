@@ -437,21 +437,10 @@
 
             if (prevNode) {
                 setCheckedTimeout(() => {
-                    drawLineWithArrow(
-                        prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, `link-${prevNode.id}-${newNode.id}`, 'right', delay);
+                    drawLineWithArrow(prevNode.x, prevNode.y, newNode.x, newNode.y, 20, 2, `link-${prevNode.id}-${newNode.id}`, 'right', delay);
 
                     setCheckedTimeout(() => {
-                        drawLineWithArrow(
-                            newNode.x,
-                            newNode.y,
-                            prevNode.x,
-                            prevNode.y,
-                            20,
-                            2,
-                            `link-${newNode.id}-${prevNode.id}`,
-                            'left',
-                            delay
-                        );
+                        drawLineWithArrow(newNode.x,newNode.y,prevNode.x,prevNode.y,20,2,`link-${newNode.id}-${prevNode.id}`,'left',delay);
 
                         setCheckedTimeout(() => {
                             resetNodeColors();

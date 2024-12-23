@@ -12,7 +12,7 @@ namespace DataStructuresVisualizer.DataStructures.Enums.SinglyLinkedList
         CheckEmptyReturnNotFound = 0,
 
         /// <summary>
-        /// Step where the search index is initialized and the head of the list is set as the starting point.
+        /// Step where the search index is initialized and the _head of the list is set as the starting point.
         /// </summary>
         InitializeIndexAndHead = 1,
 

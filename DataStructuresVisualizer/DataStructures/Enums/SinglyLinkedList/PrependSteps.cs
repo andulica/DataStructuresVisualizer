@@ -12,12 +12,12 @@ namespace DataStructuresVisualizer.DataStructures.Enums.SinglyLinkedList
         CreateVertex = 0,
 
         /// <summary>
-        /// Step where the new vertex's next pointer is set to the current head of the list.
+        /// Step where the new vertex's next pointer is set to the current _head of the list.
         /// </summary>
         SetNextPointer = 1,
 
         /// <summary>
-        /// Step where the head of the list is updated to point to the new vertex.
+        /// Step where the _head of the list is updated to point to the new vertex.
         /// </summary>
         SetHead = 2
     }

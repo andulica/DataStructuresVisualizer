@@ -7,7 +7,7 @@ namespace DataStructuresVisualizer.DataStructures.Enums.DoublyLinkedList
     public enum InsertAtPositionSteps
     {
         /// <summary>
-        /// Vertex pre = head
+        /// Vertex pre = _head
         /// </summary>
         InitializePreHead = 0,
 

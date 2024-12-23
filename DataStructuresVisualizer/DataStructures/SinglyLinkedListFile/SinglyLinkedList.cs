@@ -106,8 +106,8 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// The newly created <see cref="SinglyLinkedListNode{T}"/> that was added to the list.
     /// </returns>
     /// <remarks>
-    /// This method sets the new node as the last node of the list by updating the tail. If the list is empty,
-    /// the new node will serve as both the head and tail. An exception is thrown if the list has already reached its maximum capacity.
+    /// This method sets the new node as the last node of the list by updating the _tail. If the list is empty,
+    /// the new node will serve as both the _head and _tail. An exception is thrown if the list has already reached its maximum capacity.
     /// </remarks>
     /// <exception cref="InvalidOperationException">
     /// Thrown when the list has reached its maximum capacity and cannot accommodate additional nodes.
@@ -123,12 +123,12 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
 
         if (_head == null)
         {
-            _head = _tail = newNode; // If the list is empty, the new node becomes both the head and the tail.
+            _head = _tail = newNode; // If the list is empty, the new node becomes both the _head and the _tail.
         }
         else
         {
-            _tail.Next = newNode; // Link the new node to the current tail.
-            _tail = newNode;      // Update the tail reference to the new node.
+            _tail.Next = newNode; // Link the new node to the current _tail.
+            _tail = newNode;      // Update the _tail reference to the new node.
         }
 
         count++; // Increment the node count in the list.
@@ -141,8 +141,8 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// <param name="newNode">The new node to append to the list.</param>
     /// <returns>The newly appended node.</returns>
     /// <remarks>
-    /// This method handles the insertion of a new node at the tail of the list, updating both 
-    /// the tail pointer and the links between nodes. It triggers asynchronous highlights to visually 
+    /// This method handles the insertion of a new node at the _tail of the list, updating both 
+    /// the _tail pointer and the links between nodes. It triggers asynchronous highlights to visually 
     /// represent each step of the append operation. Highlighting steps are managed externally, 
     /// allowing for clear separation of business logic from UI visualization concerns.
     /// </remarks>
@@ -157,18 +157,18 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
 
             if (_head == null)
             {
-                _head = _tail = newNode; // Set both head and tail to the new node if list was empty
-                await HighlightRequested.Invoke(AppendSteps.UpdateTailNextPointer); // "tail.next = vtx"
+                _head = _tail = newNode; // Set both _head and _tail to the new node if list was empty
+                await HighlightRequested.Invoke(AppendSteps.UpdateTailNextPointer); // "_tail.next = vtx"
                 cancellationToken.ThrowIfCancellationRequested();
             }
             else
             {
-                await HighlightRequested.Invoke(AppendSteps.UpdateTailNextPointer); // "tail.next = vtx"
+                await HighlightRequested.Invoke(AppendSteps.UpdateTailNextPointer); // "_tail.next = vtx"
                 cancellationToken.ThrowIfCancellationRequested();
                 _tail.Next = newNode;
 
                 _tail = newNode;
-                await HighlightRequested.Invoke(AppendSteps.UpdateTail); // "tail = vtx"
+                await HighlightRequested.Invoke(AppendSteps.UpdateTail); // "_tail = vtx"
                 cancellationToken.ThrowIfCancellationRequested();
             }
         }
@@ -182,8 +182,8 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// </summary>
     /// <param name="newNode">The new node to prepend to the list.</param>
     /// <remarks>
-    /// This method inserts a new node at the start of the list, updating the head pointer
-    /// and linking the new node to the current head. It manages the addition by invoking asynchronous 
+    /// This method inserts a new node at the start of the list, updating the _head pointer
+    /// and linking the new node to the current _head. It manages the addition by invoking asynchronous 
     /// highlight operations, which are used for visualizing each step of the prepend process externally.
     /// This separation of business logic from UI allows for clear and maintainable code structure.
     /// </remarks>
@@ -212,7 +212,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// <param name="newNode">The new node to be inserted into the list.</param>
     /// <remarks>
     /// This method navigates to the specified index position, updating the links between nodes to insert 
-    /// the new node correctly. If the index matches the start of the list, the new node is set as the head.
+    /// the new node correctly. If the index matches the start of the list, the new node is set as the _head.
     /// The method asynchronously triggers highlight steps for each significant operation, such as node 
     /// creation and pointer updates, allowing the UI to visualize the insertion process. 
     /// </remarks>
@@ -223,14 +223,14 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
             newNode.Next = _head;
             _head = newNode;
             count++;
-            await HighlightRequested.Invoke(InsertAtPositionSteps.SetPreNextToVertex); // "head = vtx"
+            await HighlightRequested.Invoke(InsertAtPositionSteps.SetPreNextToVertex); // "_head = vtx"
             cancellationToken.ThrowIfCancellationRequested();
         }
 
         SinglyLinkedListNode<T> current = _head;
         int currentIndex = 0;
 
-        await HighlightRequested.Invoke(InsertAtPositionSteps.InitializePreHead); // "Vertex pre = head"
+        await HighlightRequested.Invoke(InsertAtPositionSteps.InitializePreHead); // "Vertex pre = _head"
         cancellationToken.ThrowIfCancellationRequested();
 
         // Traverse until the end of the list or the specified index
@@ -275,13 +275,13 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     //        return; // Check if the list is empty and exit
     //    }
 
-    //    HighlightRequested?.Invoke(1); // "Vertex pre = head"
+    //    HighlightRequested?.Invoke(1); // "Vertex pre = _head"
     //    await Task.Delay(500);
 
     //    SinglyLinkedListNode<T> current = _head;
     //    if (EqualityComparer<T>.Default.Equals(current._data, data))
     //    {
-    //        _head = _head.Next; // Move head to next node, effectively deleting it
+    //        _head = _head.Next; // Move _head to next node, effectively deleting it
     //        count--;
     //        HighlightRequested?.Invoke(6); // "delete del"
     //        await Task.Delay(500);
@@ -316,7 +316,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// </summary>
     /// <remarks>
     /// This method handles the deletion of nodes from any position within the list, including 
-    /// the head, tail, or any node in between. It updates the links between nodes to maintain 
+    /// the head, _tail, or any node in between. It updates the links between nodes to maintain 
     /// the list structure after deletion. The method also integrates asynchronous highlight steps 
     /// to visually represent the deletion process, aiding in UI visualization without coupling 
     /// business logic with the UI code.
@@ -335,14 +335,14 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
 
         SinglyLinkedListNode<T> current = _head;
 
-        // Special case for deleting the head node
+        // Special case for deleting the _head node
         if (index == 0)
         {
-            await HighlightRequested.Invoke(RemoveSteps.InitializePreHead); // "Vertex pre = head"
+            await HighlightRequested.Invoke(RemoveSteps.InitializePreHead); // "Vertex pre = _head"
             cancellationToken.ThrowIfCancellationRequested();
 
             nodeToDelete = _head;
-            _head = _head.Next; // Update the head to the next node
+            _head = _head.Next; // Update the _head to the next node
             nodeToDelete.Next = null; // Explicitly remove reference to the next node
             count--;
             await HighlightRequested.Invoke(RemoveSteps.DeleteDel); // "delete del"
@@ -351,7 +351,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
             return;
         }
 
-        await HighlightRequested.Invoke(RemoveSteps.InitializePreHead); // "Vertex pre = head"
+        await HighlightRequested.Invoke(RemoveSteps.InitializePreHead); // "Vertex pre = _head"
         cancellationToken.ThrowIfCancellationRequested();
 
         // Traverse to the node before the target node
@@ -391,7 +391,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// Asynchronously searches for the first node containing the specified data in the singly linked list.
     /// </summary>
     /// <remarks>
-    /// This method traverses the linked list, starting from the head, to find the first occurrence of the specified data.
+    /// This method traverses the linked list, starting from the _head, to find the first occurrence of the specified data.
     /// It integrates asynchronous highlight steps to visually represent each phase of the search operation, supporting
     /// external visualization and clear separation of concerns between business logic and UI.
     /// </remarks>
@@ -409,7 +409,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
             cancellationToken.ThrowIfCancellationRequested();
             return;
         }
-        await HighlightRequested.Invoke(SearchSteps.InitializeIndexAndHead); // "index = 0, tmp = head"
+        await HighlightRequested.Invoke(SearchSteps.InitializeIndexAndHead); // "index = 0, tmp = _head"
         cancellationToken.ThrowIfCancellationRequested();
 
         SinglyLinkedListNode<T> current = _head;
@@ -446,7 +446,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     }
 
     /// <summary>
-    /// Removes and returns the head node of the singly linked list.
+    /// Removes and returns the _head node of the singly linked list.
     /// </summary>
     /// <returns>The node that was removed from the front of the list.</returns>
     /// <exception cref="InvalidOperationException">Thrown if the list is empty.</exception>

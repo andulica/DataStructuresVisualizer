@@ -127,9 +127,9 @@
 
     protected override void OnInitialized()
     {
-        doublyLinkedList.Append(rand.Next(1, 30));
-        doublyLinkedList.Append(rand.Next(1, 30));
-        doublyLinkedList.Append(rand.Next(1, 30));
+        doublyLinkedList.AppendInstant(rand.Next(1, 30));
+        doublyLinkedList.AppendInstant(rand.Next(1, 30));
+        doublyLinkedList.AppendInstant(rand.Next(1, 30));
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -267,7 +267,7 @@
         catch (OperationCanceledException)
         {
             await JSRuntime.InvokeVoidAsync("cancelVisuals");
-            doublyLinkedList.InsertAtInstant(nodeToInsert, insertPosition);
+            doublyLinkedList.PrependInstant(inputValue);
 
             var doublyLinkedListData = ConvertListToJavaScriptFormat(doublyLinkedList);
             await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", doublyLinkedListData);
@@ -289,24 +289,31 @@
             return;
         }
 
+        var nodeToInsert = new DoublyLinkedListNode<int>(inputValue);
+        var dllData = ConvertNodeToJavaScriptFormat(nodeToInsert);
+
         try
         {
             doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
-            var nodeToInsert = new DoublyLinkedListNode<int>(inputValue);
-            var dllData = ConvertNodeToJavaScriptFormat(nodeToInsert);
-
-            var appendTask = doublyLinkedList.AppendAsync(nodeToInsert);
+            var appendTask = doublyLinkedList.AppendAsync(nodeToInsert, _cancellationTokenSource.Token);
             var jsTask = JSRuntime.InvokeVoidAsync("insertTailInDll", dllData, timing.JavaScriptDelay).AsTask();
 
             await Task.WhenAll(appendTask, jsTask); // Run both tasks concurrently
         }
-        catch (Exception ex)
+        catch (OperationCanceledException)
         {
-            // Handle exception
+            await JSRuntime.InvokeVoidAsync("cancelVisuals");
+            doublyLinkedList.AppendInstant(inputValue);
+
+            var doublyLinkedListData = ConvertListToJavaScriptFormat(doublyLinkedList);
+            await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", doublyLinkedListData);
+
+            messageOutput = $"Visual cancelled. Value {inputValue} appended.";
         }
         finally
         {
+            JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
             doublyLinkedList.HighlightRequested -= HandleHighlightRequest; // Unsubscribe from highlight events
         }
     }
@@ -376,7 +383,7 @@
 
             for (int i = 0; i < inputValue; i++)
             {
-                doublyLinkedList.Append(rand.Next(1, 30));
+                doublyLinkedList.AppendInstant(rand.Next(1, 30));
             }
 
             var dllData = ConvertListToJavaScriptFormat(doublyLinkedList);
