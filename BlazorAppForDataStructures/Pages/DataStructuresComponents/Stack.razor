@@ -134,7 +134,7 @@
     //                 NodeMovementDelay = 1500,
     //                 JavaScriptDelay = 2000
     //             };
-    //         await stack.Prepend(head); // Wait for the node to be pushed onto the stack
+    //         await stack.PrependAsync(head); // Wait for the node to be pushed onto the stack
     //         var nodeToBePushedOnSVG = ConvertNodeToJavaScriptFormat(head);
     //         await JSRuntime.InvokeVoidAsync("insertAtInSLL", nodeToBePushedOnSVG, 0, 1000, isStack); // Then update the UI
     //     }
@@ -156,7 +156,7 @@
         {
             var nodeToBeRemoved = stack.Head;
             var nodeToBeRemovedOnSVG = ConvertNodeToJavaScriptFormat(nodeToBeRemoved);
-            // await stack.DeleteAt(0, 0);
+            // await stack.DeleteAtAsync(0, 0);
             await JSRuntime.InvokeVoidAsync("removeValueInSll", nodeToBeRemovedOnSVG, 1000, true);
         }
         finally

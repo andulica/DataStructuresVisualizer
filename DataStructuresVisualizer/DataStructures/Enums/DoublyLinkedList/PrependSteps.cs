@@ -2,7 +2,7 @@
 namespace DataStructuresVisualizer.DataStructures.Enums.DoublyLinkedList
 {
     /// <summary>
-    /// Enum representing the steps involved in the Prepend operation for a SinglyLinkedList.
+    /// Enum representing the steps involved in the PrependAsync operation for a SinglyLinkedList.
     /// </summary>
     public enum PrependSteps
     {

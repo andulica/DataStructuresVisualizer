@@ -259,7 +259,7 @@
         {
             linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
-            var insertTask = linkedList.InsertAt(insertPosition, newNode, _cancellationTokenSource.Token);
+            var insertTask = linkedList.InsertAtAsync(insertPosition, newNode, _cancellationTokenSource.Token);
             var jsTask = JSRuntime.InvokeVoidAsync("insertAtInSLL", insertedValue, insertPosition, timing.JavaScriptDelay).AsTask();
 
             await Task.WhenAll(insertTask, jsTask);
@@ -298,7 +298,7 @@
         {
             linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
-            var prependTask = linkedList.Prepend(head, _cancellationTokenSource.Token);
+            var prependTask = linkedList.PrependAsync(head, _cancellationTokenSource.Token);
             var jsTask = JSRuntime.InvokeVoidAsync("insertHeadInSll", headForJSInsertion, timing, isStack = false).AsTask();
 
             await Task.WhenAll(prependTask, jsTask); // Run both tasks concurrently
@@ -370,7 +370,7 @@
         {
             linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
-            var searchTask = linkedList.SearchByValue(inputValue, _cancellationTokenSource.Token);
+            var searchTask = linkedList.SearchByValueAsync(inputValue, _cancellationTokenSource.Token);
             var jsTask = JSRuntime.InvokeVoidAsync("searchValueInSLL", inputValue, timing).AsTask();
 
             await Task.WhenAll(searchTask, jsTask); // Run both tasks concurrently
@@ -409,7 +409,7 @@
         {
             linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
-            var removeTask = linkedList.DeleteAt(inputValue, _cancellationTokenSource.Token);
+            var removeTask = linkedList.DeleteAtAsync(inputValue, _cancellationTokenSource.Token);
             var jsTask = JSRuntime.InvokeVoidAsync("removeValueInSll", nodeToBeDeleted, timing).AsTask();
 
             await Task.WhenAll(removeTask, jsTask); // Run both tasks concurrently

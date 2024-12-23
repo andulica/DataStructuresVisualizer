@@ -17,7 +17,7 @@ namespace DataStructuresVisualizer.DataStructures.Stack
         //public async Task<SinglyLinkedListNode<T>> PushAsync(T value)
         //{
         //    var nodeToPush = new SinglyLinkedListNode<T>(value);
-        //    await list.Prepend(nodeToPush);
+        //    await list.PrependAsync(nodeToPush);
 
         //    return nodeToPush;
         //}
