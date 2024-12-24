@@ -165,7 +165,8 @@
                 ["append"] = new List<string>
                 {
                     "Vertex vtx = new Vertex(v)",
-                    "tail.next = vtx, vtx.prev = tail",
+                    "tail.next = vtx",
+                    "vtx.prev = tail",
                     "tail = vtx"
                 },
                 ["insertAtPosition"] = new List<string>

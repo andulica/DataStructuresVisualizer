@@ -17,7 +17,12 @@ public enum AppendSteps
     UpdateTailNextPointer = 1,
 
     /// <summary>
+    /// Step where the new vertex previous pointer is updated to point to the current _tail.
+    /// </summary>
+    UpdateTailPreviousPointer = 2,
+
+    /// <summary>
     /// Step where the _tail of the list is updated to point to the new vertex.
     /// </summary>
-    UpdateTail = 2
+    UpdateTail = 3
 }

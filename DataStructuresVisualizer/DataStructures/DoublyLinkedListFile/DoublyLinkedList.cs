@@ -146,17 +146,17 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
             else
             {
                 _tail.Next = node;
-                node.Prev = _tail;
-
                 await HighlightRequested.Invoke(AppendSteps.UpdateTailNextPointer); // "_tail.next = vtx"
                 cancellationToken.ThrowIfCancellationRequested();
 
+                node.Prev = _tail;
+                await HighlightRequested.Invoke(AppendSteps.UpdateTailPreviousPointer); // "vtx.prev = _tail"
+                cancellationToken.ThrowIfCancellationRequested();
+
                 _tail = node;
+                await HighlightRequested.Invoke(AppendSteps.UpdateTail);
+                cancellationToken.ThrowIfCancellationRequested();
             }
-
-            await HighlightRequested.Invoke(AppendSteps.UpdateTail);
-            cancellationToken.ThrowIfCancellationRequested();
-
             count++;
             return node;
         }
