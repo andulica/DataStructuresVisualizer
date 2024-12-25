@@ -246,9 +246,9 @@
             return;
         }
 
-        if (insertPosition <= 0 || insertPosition > linkedList.Count)
+        if (insertPosition <= 0 || insertPosition >= linkedList.Count)
         {
-            messageOutput = $"The position to insert must be greater than 0 and no bigger than {linkedList.Count}";
+            messageOutput = $"The position to insert must be greater than 0 and no bigger than {linkedList.Count - 1}";
             return;
         }
 
@@ -266,7 +266,7 @@
         }
         catch (OperationCanceledException)
         {
-            await JSRuntime.InvokeVoidAsync("cancelVisuals");
+            await JSRuntime.InvokeVoidAsync("SllCancelVisuals");
             linkedList.InsertAtInstant(insertPosition, newNode);
 
             var linkedListData = ConvertListToJavaScriptFormat(linkedList);
@@ -305,7 +305,7 @@
         }
         catch (OperationCanceledException)
         {
-            await JSRuntime.InvokeVoidAsync("cancelVisuals");
+            await JSRuntime.InvokeVoidAsync("SllCancelVisuals");
 
             linkedList.PrependInstant(head); // Insert the node instantly in case of an exception)
             var linkedListData = ConvertListToJavaScriptFormat(linkedList);
@@ -345,7 +345,7 @@
         }
         catch (OperationCanceledException)
         {
-            await JSRuntime.InvokeVoidAsync("cancelVisuals");
+            await JSRuntime.InvokeVoidAsync("SllCancelVisuals");
 
             linkedList.AppendInstant(tail); // Insert the node instantly in case of an exception)
 
@@ -377,7 +377,7 @@
         }
         catch (OperationCanceledException)
         {
-            await JSRuntime.InvokeVoidAsync("cancelVisuals");
+            await JSRuntime.InvokeVoidAsync("SllCancelVisuals");
 
             messageOutput = $"Visual cancelled.";
 
@@ -416,7 +416,7 @@
         }
         catch (OperationCanceledException)
         {
-            await JSRuntime.InvokeVoidAsync("cancelVisuals");
+            await JSRuntime.InvokeVoidAsync("SllCancelVisuals");
 
             linkedList.DeleteAtInstant(inputValue);
 

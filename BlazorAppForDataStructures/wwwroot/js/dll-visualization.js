@@ -2,10 +2,9 @@
     let svg, nodes;
     let margin = { top: 20, right: 30, bottom: 40, left: 50 };
     const delayDrawLinks = 1000;
-    let isCancelled = false;
     let timeouts = [];
 
-    window.cancelVisuals = function () {
+    window.DllCancelVisuals = function () {
         clearAllTimeouts(timeouts)
     }
 
@@ -29,7 +28,6 @@
         timeouts.push(timeoutId);
         return timeoutId;
     }
-
 
     function adjustLineEndpoints(x1, y1, x2, y2, radius, strokeWidth, direction) {
         const gap = 10;

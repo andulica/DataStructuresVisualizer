@@ -1,5 +1,12 @@
 ﻿(function () {
-    window.cancelVisuals = function () {
+    let svg, nodes;
+    let margin = { top: 20, right: 30, bottom: 40, left: 50 };
+    const delayDrawLinks = 1000;
+    const gapBetweenNodeAndFirstElement = 100;
+
+    let timeouts = [];
+
+    window.SllCancelVisuals = function () {
         clearAllTimeouts(timeouts)
     }
 
@@ -8,12 +15,21 @@
         timeouts.forEach(timeoutId => clearTimeout(timeoutId));
     }
 
-    let svg, nodes;
-    let margin = { top: 20, right: 30, bottom: 40, left: 50 };
-    const delayDrawLinks = 1000;
-    const gapBetweenNodeAndFirstElement = 100;
+    function setCheckedTimeout(callback, delay) {
+        const timeoutId = setTimeout(() => {
+            if (!timeouts.includes(timeoutId)) {
+                return; // Exit if this timeout was cleared
+            }
 
-    let timeouts = [];
+            // Remove the timeout ID from tracking and execute the callback
+            timeouts = timeouts.filter(id => id !== timeoutId);
+            callback();
+        }, delay);
+
+        // Track the timeout ID
+        timeouts.push(timeoutId);
+        return timeoutId;
+    }
 
     // Helper function to adjust line endpoints to fit the arrowhead
     function adjustLineEndpoints(x1, y1, x2, y2, radius, strokeWidth) {
@@ -204,7 +220,7 @@
                         highlightLinkAndArrowhead(nodes[index - 1].id, node.id);
                     }
 
-                    if (node.value === valueID) {
+                    if (node.id === valueID) {
                         nodeSelection.transition().duration(delay).style('fill', 'green');
                         found = true;
                         resolve(); // Resolve when the target node is found
@@ -331,22 +347,6 @@
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    function setCheckedTimeout(callback, delay) {
-        const timeoutId = setTimeout(() => {
-            if (!timeouts.includes(timeoutId)) {
-                return; // Exit if this timeout was cleared
-            }
-
-            // Remove the timeout ID from tracking and execute the callback
-            timeouts = timeouts.filter(id => id !== timeoutId);
-            callback();
-        }, delay);
-
-        // Track the timeout ID
-        timeouts.push(timeoutId);
-        return timeoutId;
-    }
-
     async function insertNode(value, position, delay, isStack) {
 
         // Highlight nodes for insertion
@@ -401,7 +401,7 @@
                             setCheckedTimeout(() => {
                                 resetNodeColors();
                                 resolve();
-                            }, delay);                     
+                            }, delay);
                         }, delay);
                     }, delay);
                 }, delay);

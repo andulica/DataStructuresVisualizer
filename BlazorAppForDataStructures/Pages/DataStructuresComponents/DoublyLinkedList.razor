@@ -228,7 +228,7 @@
         }
         catch (OperationCanceledException)
         {
-            await JSRuntime.InvokeVoidAsync("cancelVisuals");
+            await JSRuntime.InvokeVoidAsync("DllCancelVisuals");
             doublyLinkedList.InsertAtInstant(nodeToInsert, insertPosition);
 
             var doublyLinkedListData = ConvertListToJavaScriptFormat(doublyLinkedList);
@@ -267,7 +267,7 @@
         }
         catch (OperationCanceledException)
         {
-            await JSRuntime.InvokeVoidAsync("cancelVisuals");
+            await JSRuntime.InvokeVoidAsync("DllCancelVisuals");
             doublyLinkedList.PrependInstant(inputValue);
 
             var doublyLinkedListData = ConvertListToJavaScriptFormat(doublyLinkedList);
@@ -307,7 +307,7 @@
         }
         catch (OperationCanceledException)
         {
-            await JSRuntime.InvokeVoidAsync("cancelVisuals");
+            await JSRuntime.InvokeVoidAsync("DllCancelVisuals");
             doublyLinkedList.AppendInstant(inputValue);
 
             var doublyLinkedListData = ConvertListToJavaScriptFormat(doublyLinkedList);
@@ -337,7 +337,7 @@
         }
         catch (OperationCanceledException)
         {
-            await JSRuntime.InvokeVoidAsync("cancelVisuals");
+            await JSRuntime.InvokeVoidAsync("DllCancelVisuals");
             var doublyLinkedListData = ConvertListToJavaScriptFormat(doublyLinkedList);
             await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", doublyLinkedListData);
             messageOutput = "Visual cancelled.";
@@ -373,7 +373,7 @@
         }
         catch (OperationCanceledException)
         {
-            await JSRuntime.InvokeVoidAsync("cancelVisuals");
+            await JSRuntime.InvokeVoidAsync("DllCancelVisuals");
             doublyLinkedList.DeleteAtInstant(inputValue);
 
             var doublyLinkedListData = ConvertListToJavaScriptFormat(doublyLinkedList);
