@@ -2,6 +2,7 @@
     let svg, nodes;
     let margin = { top: 20, right: 30, bottom: 40, left: 50 };
     const delayDrawLinks = 1000;
+    const delayForVisual = 1000;
     let timeouts = [];
 
     window.DllCancelVisuals = function () {
@@ -528,7 +529,8 @@
         }
     }
 
-    function resetNodeColors() {
+    async function resetNodeColors() {
+        await onPurposeDelay(delayForVisual);
         nodes.forEach(node => {
             svg.select(`#node-${node.id}`)
                 .transition()
@@ -704,8 +706,7 @@
     }
 
     window.removeValueInDll = async function (value, delay) {
-        removeNode(value, delay);
-        onPurposeDelay(delay);
+        await removeNode(value, delay);
         resetNodeColors();
     }
 

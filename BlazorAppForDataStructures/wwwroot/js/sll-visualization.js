@@ -2,6 +2,7 @@
     let svg, nodes;
     let margin = { top: 20, right: 30, bottom: 40, left: 50 };
     const delayDrawLinks = 1000;
+    const delayForVisual = 1000;
     const gapBetweenNodeAndFirstElement = 100;
 
     let timeouts = [];
@@ -667,13 +668,15 @@
     };
 
     window.insertAtInSLL = function (value, selectedIndex, timing, isStack = false) {
+        resetNodeColors();
+        resetLinkColors();
         insertNode(value, selectedIndex, timing, isStack);
     };
 
     window.removeValueInSll = function (nodeToBeRemoved, timing, isStack) {
+        removeNodeInSll(nodeToBeRemoved, timing, isStack); // Return the promise
         resetNodeColors();
         resetLinkColors();
-        removeNodeInSll(nodeToBeRemoved, timing, isStack); // Return the promise
     };
 
     window.highlightTail = function () {
@@ -695,6 +698,8 @@
     }
 
     window.insertHeadInSll = function (value, timing, isStack) {
+        resetNodeColors();
+        resetLinkColors();
         insertNodeAtHead(value, timing, isStack);
     }
 
