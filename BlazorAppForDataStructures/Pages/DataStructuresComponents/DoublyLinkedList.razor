@@ -30,35 +30,35 @@
                     <input type="number" @bind="inputValue" placeholder="Enter Value" />
                     <label>Insert Position:</label>
                     <input type="number" @bind="insertPosition" placeholder="Enter Position" />
-                    <button class="custom-button" @onclick="PerformInsertion">Insert</button>
+                    <button class="custom-button" @onclick="PerformInsertion" disabled="@isOperationInProgress">Insert</button>
                 </div>
                 break;
             case "prepend":
                 <div class="insertion-fields">
                     <label>Input Value:</label>
                     <input type="number" @bind="inputValue" placeholder="Enter Value" />
-                    <button class="custom-button" @onclick="PrependValue">Prepend</button>
+                    <button class="custom-button" @onclick="PrependValue" disabled="@isOperationInProgress">Prepend</button>
                 </div>
                 break;
             case "append":
                 <div class="insertion-fields">
                     <label>Input Value:</label>
                     <input type="number" @bind="inputValue" placeholder="Enter Value" />
-                    <button class="custom-button" @onclick="AppendValue">Append</button>
+                    <button class="custom-button" @onclick="AppendValue" disabled="@isOperationInProgress">Append</button>
                 </div>
                 break;
             case "search":
                 <div class="insertion-fields">
                     <label>Input Value:</label>
                     <input type="number" @bind="inputValue" placeholder="Enter Value" />
-                    <button class="custom-button" @onclick="SearchValue">Search</button>
+                    <button class="custom-button" @onclick="SearchValue" disabled="@isOperationInProgress" >Search</button>
                 </div>
                 break;
             case "remove":
                 <div class="insertion-fields">
                     <label>Input Index:</label>
                     <input type="number" @bind="inputValue" placeholder="Enter Index" />
-                    <button class="custom-button" @onclick="RemoveValue">Remove</button>
+                    <button class="custom-button" @onclick="RemoveValue" disabled="@isOperationInProgress">Remove</button>
                 </div>
                 break;
             case "create":
@@ -97,6 +97,7 @@
     VisualizationTiming timing = VisualizationTiming.Default;
     private DoublyLinkedList<int> doublyLinkedList = new DoublyLinkedList<int>();
     private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+    bool isOperationInProgress = false;
 
 
     public string selectedAction
@@ -225,6 +226,8 @@
 
         try
         {
+            isOperationInProgress = true;
+
             doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
             var insertTask = doublyLinkedList.InsertAtAsync(nodeToInsert, insertPosition, _cancellationTokenSource.Token);
@@ -246,6 +249,9 @@
         {
             doublyLinkedList.HighlightRequested -= HandleHighlightRequest; // Unsubscribe from highlight events
             JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
+
+            await Task.Delay(1000);
+            isOperationInProgress = false;
         }
     }
 
@@ -270,6 +276,8 @@
 
         try
         {
+            isOperationInProgress = true;
+
             doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
             var insertTask = doublyLinkedList.PrependAsync(nodeToInsert, _cancellationTokenSource.Token);
@@ -291,6 +299,9 @@
         {
             JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
             doublyLinkedList.HighlightRequested -= HandleHighlightRequest; // Unsubscribe from highlight events
+
+            await Task.Delay(1000);
+            isOperationInProgress = false;
         }
     }
 
@@ -316,6 +327,8 @@
 
         try
         {
+            isOperationInProgress = true; 
+
             doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
             var appendTask = doublyLinkedList.AppendAsync(nodeToInsert, _cancellationTokenSource.Token);
@@ -337,6 +350,9 @@
         {
             JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
             doublyLinkedList.HighlightRequested -= HandleHighlightRequest; // Unsubscribe from highlight events
+
+            await Task.Delay(1000);
+            isOperationInProgress = false;
         }
     }
 
@@ -352,6 +368,8 @@
 
         try
         {
+            isOperationInProgress = true;
+
             doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
             var searchTask = doublyLinkedList.SearchAsync(inputValue, _cancellationTokenSource.Token);
@@ -370,6 +388,9 @@
         {
             JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
             doublyLinkedList.HighlightRequested -= HandleHighlightRequest; // Unsubscribe from highlight events
+
+            await Task.Delay(1000);
+            isOperationInProgress = false;
         }
     }
 
@@ -394,6 +415,8 @@
 
         try
         {
+            isOperationInProgress = true;
+
             doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
             var deleteTask = doublyLinkedList.DeleteAtAsync(inputValue, _cancellationTokenSource.Token);
@@ -419,6 +442,9 @@
         {
             JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
             doublyLinkedList.HighlightRequested -= HandleHighlightRequest; // Unsubscribe from highlight events
+
+            await Task.Delay(1000);
+            isOperationInProgress = false;
         }
     }
 
