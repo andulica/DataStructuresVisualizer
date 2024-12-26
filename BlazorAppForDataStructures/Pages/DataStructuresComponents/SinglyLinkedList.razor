@@ -112,6 +112,7 @@
     private int currentSnapshotIndex = 0;
     private bool isStack = false;
     private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+    private int numberOfNodesForReplacingAnEmptyList = 3;
 
     VisualizationTiming timing = VisualizationTiming.Default;
 
@@ -246,6 +247,12 @@
             return;
         }
 
+        if (linkedList.Count == 0)
+        {
+            CreateNewList();
+            return;
+        }
+
         if (insertPosition <= 0 || insertPosition >= linkedList.Count)
         {
             messageOutput = $"The position to insert must be greater than 0 and no bigger than {linkedList.Count - 1}";
@@ -291,6 +298,12 @@
             return;
         }
 
+        if (linkedList.Count == 0)
+        {
+            CreateNewList();
+            return;
+        }
+
         var head = new SinglyLinkedListNode<int>(inputValue);
         var headForJSInsertion = ConvertNodeToJavaScriptFormat(head);
 
@@ -331,6 +344,12 @@
             return;
         }
 
+        if (linkedList.Count == 0)
+        {
+            CreateNewList();
+            return;
+        }
+
         var tail = new SinglyLinkedListNode<int>(inputValue);
         var tailToInsert = ConvertNodeToJavaScriptFormat(tail);
 
@@ -366,6 +385,12 @@
     {
         InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
 
+        if (linkedList.Count == 0)
+        {
+            CreateNewList();
+            return;
+        }
+
         try
         {
             linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
@@ -396,6 +421,12 @@
     {
         InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
 
+        if (linkedList.Count == 0)
+        {
+            CreateNewList();
+            return;
+        }
+
         if (linkedList.Count == 0 || inputValue >= linkedList.Count)
         {
             messageOutput = $"The index {inputValue} you are trying to delete does not exist.";
@@ -419,7 +450,7 @@
             await JSRuntime.InvokeVoidAsync("SllCancelVisuals");
 
             // Use case where the above delete function gets the chance to delete the node resulting in no more nodes to delete so we continue with the message
-            if ( linkedList.Contains(nodeToRemove))
+            if (linkedList.Contains(nodeToRemove))
             {
                 linkedList.DeleteAtInstant(nodeToRemove);
             }
@@ -445,6 +476,15 @@
             return;
         }
 
+        if (linkedList.Count == 0)
+        {
+            linkedList.Add(rand.Next(1, 30));
+            linkedList.Add(rand.Next(1, 30));
+            linkedList.Add(rand.Next(1, 30));
+            return;
+        }
+
+
         linkedList = new SinglyLinkedList<int>();
 
         for (int i = 0; i < inputValue; i++)
@@ -465,6 +505,14 @@
     private async Task UpdateDisplay(SinglyLinkedList<int> list)
     {
         var linkedListData = ConvertListToJavaScriptFormat(list);
+        await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
+    }
+
+    private async void CreateNewList()
+    {
+        messageOutput = $"The list is empty. New list has been created.";
+        await CreateSinglyLinkedList();
+        var linkedListData = ConvertListToJavaScriptFormat(linkedList);
         await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
     }
 

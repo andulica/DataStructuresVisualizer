@@ -208,6 +208,12 @@
             return;
         }
 
+        if (doublyLinkedList.Count == 0)
+        {
+            CreateNewList();
+            return;
+        }
+
         if (insertPosition <= 0 || insertPosition > doublyLinkedList.Count - 1)
         {
             messageOutput = $"The position to insert must be greater than 0 and no bigger than {doublyLinkedList.Count - 1}";
@@ -253,6 +259,12 @@
             return;
         }
 
+        if (doublyLinkedList.Count == 0)
+        {
+            CreateNewList();
+            return;
+        }
+
         var nodeToInsert = new DoublyLinkedListNode<int>(inputValue);
         var dllData = ConvertNodeToJavaScriptFormat(nodeToInsert);
 
@@ -293,6 +305,12 @@
             return;
         }
 
+        if (doublyLinkedList.Count == 0)
+        {
+            CreateNewList();
+            return;
+        }
+
         var nodeToInsert = new DoublyLinkedListNode<int>(inputValue);
         var dllData = ConvertNodeToJavaScriptFormat(nodeToInsert);
 
@@ -326,6 +344,12 @@
     {
         InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
 
+        if (doublyLinkedList.Count == 0)
+        {
+            CreateNewList();
+            return;
+        }
+
         try
         {
             doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
@@ -352,6 +376,12 @@
     private async Task RemoveValue()
     {
         InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
+
+        if (doublyLinkedList.Count == 0)
+        {
+            CreateNewList();
+            return;
+        }
 
         if (doublyLinkedList.Count() == 0 || inputValue >= doublyLinkedList.Count)
         {
@@ -392,11 +422,28 @@
         }
     }
 
+    private async void CreateNewList()
+    {
+        messageOutput = $"The list is empty. New list has been created.";
+        await CreateDoublyLinkedList();
+        var doublyLinkedListData = ConvertListToJavaScriptFormat(this.doublyLinkedList);
+        await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", doublyLinkedListData);
+    }
+
+
     private async Task CreateDoublyLinkedList()
     {
         if (inputValue > doublyLinkedList.maxCapacity)
         {
             messageOutput = $"The doubly linked list can have a maximum number of {doublyLinkedList.maxCapacity} nodes. Please enter a smaller value.";
+            return;
+        }
+
+        if (doublyLinkedList.Count == 0)
+        {
+            doublyLinkedList.AppendInstant(rand.Next(1, 30));
+            doublyLinkedList.AppendInstant(rand.Next(1, 30));
+            doublyLinkedList.AppendInstant(rand.Next(1, 30));
             return;
         }
 
