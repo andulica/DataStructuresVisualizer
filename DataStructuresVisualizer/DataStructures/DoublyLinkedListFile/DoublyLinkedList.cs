@@ -32,14 +32,14 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         public DoublyLinkedListNode<T> Tail => _tail;
 
         /// <summary>
-        /// Inserts a node at the specified index in the doubly linked list.
+        /// Inserts a node at the specified node in the doubly linked list.
         /// </summary>
         /// <typeparam name="T">The type of the data stored in the nodes.</typeparam>
         /// <param name="node">The node to be inserted.</param>
-        /// <param name="index">The zero-based index where the node should be inserted.</param>
-        /// <exception cref="IndexOutOfRangeException">Thrown if the index is less than 0 or greater than the size of the list.</exception>
+        /// <param name="index">The zero-based node where the node should be inserted.</param>
+        /// <exception cref="IndexOutOfRangeException">Thrown if the node is less than 0 or greater than the size of the list.</exception>
         /// <remarks>
-        /// Adjusts the list's head, tail, and node links as necessary. If the index is invalid, 
+        /// Adjusts the list's head, tail, and node links as necessary. If the node is invalid, 
         /// the method throws an exception to avoid corrupting the list structure.
         /// </remarks>
         public void InsertAtInstant(DoublyLinkedListNode<T> node, int index)
@@ -162,14 +162,14 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         }
 
         /// <summary>
-        /// Asynchronously inserts a node at the specified index in the doubly linked list.
+        /// Asynchronously inserts a node at the specified node in the doubly linked list.
         /// </summary>
         /// <param name="newNode">The node to be inserted.</param>
-        /// <param name="index">The zero-based index where the node should be inserted.</param>
+        /// <param name="index">The zero-based node where the node should be inserted.</param>
         /// <param name="cancellationToken">A token to observe while waiting for the task to complete.</param>
         /// <remarks>
         /// This method handles cancellation and provides visual feedback during the operation.
-        /// Throws <see cref="IndexOutOfRangeException"/> if the index is invalid.
+        /// Throws <see cref="IndexOutOfRangeException"/> if the node is invalid.
         /// </remarks>
         public async Task InsertAtAsync(DoublyLinkedListNode<T> newNode, int index, CancellationToken cancellationToken)
         {
@@ -179,7 +179,7 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
             await HighlightRequested.Invoke(InsertAtPositionSteps.InitializePreHead);
             cancellationToken.ThrowIfCancellationRequested();
 
-            while (current != null && currentIndex < index - 1) // -1 to stop at the node before the target index
+            while (current != null && currentIndex < index - 1) // -1 to stop at the node before the target node
             {
                 await HighlightRequested.Invoke(InsertAtPositionSteps.LoopToPosition);
                 cancellationToken.ThrowIfCancellationRequested();
@@ -190,7 +190,7 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
                 await HighlightRequested.Invoke(InsertAtPositionSteps.MovePreToNext);
                 cancellationToken.ThrowIfCancellationRequested();
             }
-            // current is now the node before the target index so we need to mimic the steps of while loop one more time
+            // current is now the node before the target node so we need to mimic the steps of while loop one more time
             await HighlightRequested.Invoke(InsertAtPositionSteps.LoopToPosition);
             cancellationToken.ThrowIfCancellationRequested();
             await HighlightRequested.Invoke(InsertAtPositionSteps.MovePreToNext);
@@ -264,13 +264,13 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         }
 
         /// <summary>
-        /// Deletes a node at the specified index from the doubly linked list asynchronously.
+        /// Deletes a node at the specified node from the doubly linked list asynchronously.
         /// </summary>
-        /// <param name="index">The zero-based index of the node to delete.</param>
+        /// <param name="index">The zero-based node of the node to delete.</param>
         /// <param name="cancellationToken">A token to observe while waiting for the task to complete.</param>
         /// <remarks>
         /// Supports cancellation and visual feedback. Adjusts the list pointers and decreases the node count.
-        /// Throws <see cref="IndexOutOfRangeException"/> if the index is invalid.
+        /// Throws <see cref="IndexOutOfRangeException"/> if the node is invalid.
         /// </remarks>
         public async Task DeleteAtAsync(int index, CancellationToken cancellationToken)
         {
@@ -335,36 +335,53 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         }
 
         /// <summary>
-        /// Deletes a node at the specified index in the doubly linked list instantly.
+        /// Deletes a specified node in the doubly linked list instantly.
         /// </summary>
-        /// <param name="index">The zero-based index of the node to delete.</param>
-        /// <remarks>
-        /// Adjusts the head or tail pointers if necessary and decreases the node count.
-        /// Throws <see cref="IndexOutOfRangeException"/> if the index is invalid.
-        /// </remarks>
-        public void DeleteAtInstant(int index)
+        /// <param name="node">The node to delete.</param>
+        public void DeleteAtInstant(DoublyLinkedListNode<T> node)
         {
-            int currentIndex = 0;
-            DoublyLinkedListNode<T> current = _head;
 
-            if (index == 0)
+            // Case 1: Node is the head
+            if (node == _head)
             {
                 _head = _head.Next;
+                if (_head != null)
+                {
+                    _head.Prev = null;
+                }
+                else
+                {
+                    // If the list is now empty, update the tail as well
+                    _tail = null;
+                }
                 count--;
                 return;
             }
 
-            while (current.Next != null && currentIndex < index - 1)
+            // Case 2: Node is the tail
+            if (node == _tail)
             {
-                current = current.Next;
-                currentIndex++;
+                _tail = _tail.Prev;
+                if (_tail != null)
+                {
+                    _tail.Next = null;
+                }
+                count--;
+                return;
             }
 
-            if (current.Next != null)
+            // Case 3: Node is in the middle
+            if (node.Prev != null)
             {
-                current.Next = current.Next.Next;
-                count--;
+                node.Prev.Next = node.Next;
             }
+
+            if (node.Next != null)
+            {
+                node.Next.Prev = node.Prev;
+            }
+
+            count--;
         }
 
         /// <summary>
@@ -372,7 +389,7 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         /// </summary>
         /// <param name="data">The data to locate.</param>
         /// <param name="cancellationToken">A token to observe while waiting for the task to complete.</param>
-        /// <returns>The index of the data if found; otherwise, -1.</returns>
+        /// <returns>The node of the data if found; otherwise, -1.</returns>
         /// <remarks>
         /// Provides visual feedback during the search and supports cancellation.
         /// </remarks>
@@ -436,12 +453,12 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         }
 
         /// <summary>
-        /// Finds the node at the specified index in the doubly linked list.
+        /// Finds the node at the specified node in the doubly linked list.
         /// </summary>
-        /// <param name="index">The zero-based index of the node to locate.</param>
-        /// <returns>The node at the specified index, or <c>null</c> if the index is invalid.</returns>
+        /// <param name="index">The zero-based node of the node to locate.</param>
+        /// <returns>The node at the specified node, or <c>null</c> if the node is invalid.</returns>
         /// <exception cref="IndexOutOfRangeException">
-        /// Thrown if the index is less than 0 or greater than or equal to the size of the list.
+        /// Thrown if the node is less than 0 or greater than or equal to the size of the list.
         /// </exception>
         public DoublyLinkedListNode<T> FindNodeByIndex(int index)
         {
@@ -463,7 +480,7 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
                 currentIndex++;
             }
 
-            return null; // Should not reach here if the index is valid
+            return null; // Should not reach here if the node is valid
         }
 
         /// <summary>

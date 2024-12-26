@@ -353,7 +353,7 @@
     {
         InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
 
-        if (inputValue >= doublyLinkedList.Count)
+        if (doublyLinkedList.Count() == 0 || inputValue >= doublyLinkedList.Count)
         {
             messageOutput = $"The index {inputValue} you are trying to delete does not exist. Please enter a smaller value.";
             return;
@@ -374,7 +374,11 @@
         catch (OperationCanceledException)
         {
             await JSRuntime.InvokeVoidAsync("DllCancelVisuals");
-            doublyLinkedList.DeleteAtInstant(inputValue);
+
+            if (doublyLinkedList.Count() != 0 || doublyLinkedList.Contains(nodeToRemove))
+            {
+                doublyLinkedList.DeleteAtInstant(nodeToRemove);
+            }
 
             var doublyLinkedListData = ConvertListToJavaScriptFormat(doublyLinkedList);
             await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", doublyLinkedListData);

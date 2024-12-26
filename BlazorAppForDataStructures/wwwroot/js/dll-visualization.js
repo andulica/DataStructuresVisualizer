@@ -529,8 +529,7 @@
         }
     }
 
-    async function resetNodeColors() {
-        await onPurposeDelay(delayForVisual);
+    function resetNodeColors() {
         nodes.forEach(node => {
             svg.select(`#node-${node.id}`)
                 .transition()
@@ -695,19 +694,26 @@
     };
 
     window.insertHeadInDll = async function (value, delay) {
+        resetNodeColors();
+        resetLinkColors()
         insertNodeAtHead(value, delay)
     };
     window.insertAtInDll = async function (dllData, position, delay) {
+        resetNodeColors();
+        resetLinkColors()
         insertNode(dllData, position, delay);
     };
 
     window.insertTailInDll = function (value, delay) {
+        resetNodeColors();
+        resetLinkColors()
         insertNodeAtTail(value, delay);
     }
 
     window.removeValueInDll = async function (value, delay) {
-        await removeNode(value, delay);
         resetNodeColors();
+        resetLinkColors();
+        removeNode(value, delay);
     }
 
     window.drawDoublyLinkedList = drawDoublyLinkedList;

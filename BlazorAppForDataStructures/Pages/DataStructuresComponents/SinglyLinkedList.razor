@@ -396,7 +396,7 @@
     {
         InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
 
-        if (linkedList.Count == 0 || inputValue >= linkedList.Count )
+        if (linkedList.Count == 0 || inputValue >= linkedList.Count)
         {
             messageOutput = $"The index {inputValue} you are trying to delete does not exist.";
             return;
@@ -419,14 +419,14 @@
             await JSRuntime.InvokeVoidAsync("SllCancelVisuals");
 
             // Use case where the above delete function gets the chance to delete the node resulting in no more nodes to delete so we continue with the message
-            if (linkedList.Count != 0)
+            if ( linkedList.Contains(nodeToRemove))
             {
-                linkedList.DeleteAtInstant(inputValue);
-
-                var linkedListData = ConvertListToJavaScriptFormat(linkedList);
-
-                await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
+                linkedList.DeleteAtInstant(nodeToRemove);
             }
+
+            var linkedListData = ConvertListToJavaScriptFormat(linkedList);
+
+            await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
 
             messageOutput = $"Visual cancelled. Node at index {inputValue} removed.";
         }

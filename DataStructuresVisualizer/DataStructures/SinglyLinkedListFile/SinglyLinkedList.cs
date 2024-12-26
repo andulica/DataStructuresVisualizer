@@ -105,31 +105,38 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     }
 
     /// <summary>
-    /// Deletes a node at the specified index from the singly linked list.
+    /// Deletes a specified node from the singly linked list instantly.
     /// </summary>
-    /// <param name="index">The zero-based index of the node to delete.</param>
-    public void DeleteAtInstant(int index)
+    /// <param name="node">The node to delete.</param>
+    public void DeleteAtInstant(SinglyLinkedListNode<T> node)
     {
-        int currentIndex = 0;
-        SinglyLinkedListNode<T> current = _head;
+        if (node == null)
+        {
+            throw new ArgumentNullException(nameof(node), "Node cannot be null.");
+        }
 
-        if (index == 0)
+        // Case 1: Node is the head
+        if (_head == node)
         {
             _head = _head.Next;
             count--;
             return;
         }
 
-        while (current.Next != null && currentIndex < index - 1)
-        {
-            current = current.Next;
-            currentIndex++;
-        }
+        // Traverse the list to find the node
+        SinglyLinkedListNode<T> current = _head;
 
-        if (current.Next != null)
+        while (current != null && current.Next != null)
         {
-            current.Next = current.Next.Next;
-            count--;
+            if (current.Next == node)
+            {
+                // Node found, bypass it
+                current.Next = current.Next.Next;
+                count--;
+                return;
+            }
+
+            current = current.Next;
         }
     }
 
