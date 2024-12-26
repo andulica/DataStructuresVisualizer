@@ -128,9 +128,9 @@
 
     protected override void OnInitialized()
     {
-        doublyLinkedList.AppendInstant(rand.Next(1, 30));
-        doublyLinkedList.AppendInstant(rand.Next(1, 30));
-        doublyLinkedList.AppendInstant(rand.Next(1, 30));
+        doublyLinkedList.Add(rand.Next(1, 30));
+        doublyLinkedList.Add(rand.Next(1, 30));
+        doublyLinkedList.Add(rand.Next(1, 30));
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -238,7 +238,11 @@
         catch (OperationCanceledException)
         {
             await JSRuntime.InvokeVoidAsync("DllCancelVisuals");
-            doublyLinkedList.InsertAtInstant(nodeToInsert, insertPosition);
+
+            if (!doublyLinkedList.Contains(nodeToInsert))
+            {
+                doublyLinkedList.InsertAtInstant(nodeToInsert, insertPosition);
+            }
 
             var doublyLinkedListData = ConvertListToJavaScriptFormat(doublyLinkedList);
             await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", doublyLinkedListData);
@@ -288,7 +292,11 @@
         catch (OperationCanceledException)
         {
             await JSRuntime.InvokeVoidAsync("DllCancelVisuals");
-            doublyLinkedList.PrependInstant(inputValue);
+
+            if(!doublyLinkedList.Contains(nodeToInsert))
+            {
+                doublyLinkedList.PrependInstant(nodeToInsert);
+            }
 
             var doublyLinkedListData = ConvertListToJavaScriptFormat(doublyLinkedList);
             await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", doublyLinkedListData);
@@ -339,7 +347,11 @@
         catch (OperationCanceledException)
         {
             await JSRuntime.InvokeVoidAsync("DllCancelVisuals");
-            doublyLinkedList.AppendInstant(inputValue);
+
+            if(!doublyLinkedList.Contains(nodeToInsert))
+            {
+                doublyLinkedList.AppendInstant(nodeToInsert);
+            }
 
             var doublyLinkedListData = ConvertListToJavaScriptFormat(doublyLinkedList);
             await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", doublyLinkedListData);
@@ -467,9 +479,9 @@
 
         if (doublyLinkedList.Count == 0)
         {
-            doublyLinkedList.AppendInstant(rand.Next(1, 30));
-            doublyLinkedList.AppendInstant(rand.Next(1, 30));
-            doublyLinkedList.AppendInstant(rand.Next(1, 30));
+            doublyLinkedList.Add(rand.Next(1, 30));
+            doublyLinkedList.Add(rand.Next(1, 30));
+            doublyLinkedList.Add(rand.Next(1, 30));
             return;
         }
 
@@ -479,7 +491,7 @@
 
             for (int i = 0; i < inputValue; i++)
             {
-                doublyLinkedList.AppendInstant(rand.Next(1, 30));
+                doublyLinkedList.Add(rand.Next(1, 30));
             }
 
             var dllData = ConvertListToJavaScriptFormat(doublyLinkedList);

@@ -277,7 +277,10 @@
         catch (OperationCanceledException)
         {
             await JSRuntime.InvokeVoidAsync("SllCancelVisuals");
-            linkedList.InsertAtInstant(insertPosition, newNode);
+            if (!linkedList.Contains(newNode))
+            {
+                linkedList.InsertAtInstant(insertPosition, newNode);
+            }
 
             var linkedListData = ConvertListToJavaScriptFormat(linkedList);
             await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
@@ -327,7 +330,10 @@
         {
             await JSRuntime.InvokeVoidAsync("SllCancelVisuals");
 
-            linkedList.PrependInstant(head); // Insert the node instantly in case of an exception)
+            if (!linkedList.Contains(head))
+            {
+                linkedList.PrependInstant(head); // Insert the node instantly in case of an exception)
+            }
             var linkedListData = ConvertListToJavaScriptFormat(linkedList);
 
             await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
@@ -376,8 +382,10 @@
         catch (OperationCanceledException)
         {
             await JSRuntime.InvokeVoidAsync("SllCancelVisuals");
-
-            linkedList.AppendInstant(tail); // Insert the node instantly in case of an exception)
+            if (!linkedList.Contains(tail))
+            {
+                linkedList.AppendInstant(tail); // Insert the node instantly in case of an exception)
+            }
 
             var linkedListData = ConvertListToJavaScriptFormat(linkedList);
 

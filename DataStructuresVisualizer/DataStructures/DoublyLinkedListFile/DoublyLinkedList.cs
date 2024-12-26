@@ -79,10 +79,8 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         /// This operation sets the head pointer to the new node. If the list is empty, 
         /// both the head and tail pointers are initialized to point to the new node.
         /// </remarks>
-        public void PrependInstant(T data)
+        public void PrependInstant(DoublyLinkedListNode<T> newNode)
         {
-            DoublyLinkedListNode<T> newNode = new DoublyLinkedListNode<T>(data);
-
             if (_head == null)
             {
                 _head = _tail = newNode;
@@ -107,9 +105,8 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         /// Updates the tail pointer to the newly appended node. If the list is empty, 
         /// initializes both head and tail pointers.
         /// </remarks>
-        public DoublyLinkedListNode<T> AppendInstant(T data)
+        public DoublyLinkedListNode<T> AppendInstant(DoublyLinkedListNode<T> newNode)
         {
-            DoublyLinkedListNode<T> newNode = new DoublyLinkedListNode<T>(data);
             if (_tail == null)
             {
                 _head = _tail = newNode;
@@ -235,7 +232,7 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         /// <remarks>
         /// Handles cancellation and provides visual feedback for each operation step.
         /// </remarks>
-        public async Task PrependAsync(DoublyLinkedListNode <T> newNode, CancellationToken cancellationToken)
+        public async Task PrependAsync(DoublyLinkedListNode<T> newNode, CancellationToken cancellationToken)
         {
 
             await HighlightRequested.Invoke(PrependSteps.CreateVertex);
@@ -452,6 +449,37 @@ namespace DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
         {
             return count >= maxCapacity;
         }
+
+        /// <summary>
+        /// Adds a new node containing the specified data to the end of the doubly linked list.
+        /// </summary>
+        /// <param name="data">The data to store in the new node.</param>
+        /// <returns>The newly added node.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if the list is at maximum capacity.</exception>
+        public DoublyLinkedListNode<T> Add(T data)
+        {
+            if (count >= maxCapacity)
+            {
+                throw new InvalidOperationException("List is full.");
+            }
+
+            DoublyLinkedListNode<T> newNode = new DoublyLinkedListNode<T>(data);
+
+            if (_head == null)
+            {
+                _head = _tail = newNode; // If the list is empty, the new node becomes both the _head and the _tail.
+            }
+            else
+            {
+                _tail.Next = newNode; // Link the new node to the current _tail.
+                newNode.Prev = _tail;
+                _tail = newNode;      // Update the _tail reference to the new node.
+            }
+
+            count++; // Increment the node count in the list.
+            return newNode;
+        }
+
 
         /// <summary>
         /// Finds the node at the specified node in the doubly linked list.
