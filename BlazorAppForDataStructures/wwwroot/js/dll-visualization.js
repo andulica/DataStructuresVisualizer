@@ -209,7 +209,7 @@
         });
     };
 
-    async function highlightNodes(value, delay) {
+    async function highlightNodes(valueID, delay) {
         return new Promise((resolve) => {
             let found = false;
 
@@ -226,7 +226,16 @@
                         highlightLinkAndArrowhead(nodes[index - 1].id, node.id, 'right', delay);
                     }
 
-                    if (node.value === value) {
+                    if (node.value === valueID) {
+                        svg.select(`#node-${node.id}`)
+                            .transition()
+                            .duration(delay)
+                            .style('fill', 'green');
+                        found = true;
+                        resolve(); // Resolve when the target node is found
+                    }
+
+                    if (node.id === valueID) {
                         svg.select(`#node-${node.id}`)
                             .transition()
                             .duration(delay)
@@ -456,29 +465,29 @@
         });
     }
 
-    async function removeNode(indexOfnodeToBeRemoved, delay) {
+    async function removeNode(nodeToBeRemoved, delay) {
         return new Promise((resolve) => {
-            highlightNodes(indexOfnodeToBeRemoved.value, delay * 2).then(() => {
+            highlightNodes(nodeToBeRemoved.id, delay * 2).then(() => {
                 setCheckedTimeout(() => {
                     // Transition and then remove the node's visual elements
-                    svg.select(`#node-${indexOfnodeToBeRemoved.id}`)
+                    svg.select(`#node-${nodeToBeRemoved.id}`)
                         .transition()
                         .duration(delay)
                         .style('opacity', 0)
                         .on('end', () => {
-                            svg.select(`#node-${indexOfnodeToBeRemoved.id}`).remove();
+                            svg.select(`#node-${nodeToBeRemoved.id}`).remove();
 
                             setCheckedTimeout(() => {
-                                svg.select(`#textId-${indexOfnodeToBeRemoved.id}`)
+                                svg.select(`#textId-${nodeToBeRemoved.id}`)
                                     .transition()
                                     .duration(delay)
                                     .style('opacity', 0)
                                     .on('end', () => {
-                                        svg.select(`#textId-${indexOfnodeToBeRemoved.id}`).remove();
+                                        svg.select(`#textId-${nodeToBeRemoved.id}`).remove();
 
                                         // Update links and refresh the list
                                         setCheckedTimeout(() => {
-                                            updateLinksAfterRemoval(indexOfnodeToBeRemoved);
+                                            updateLinksAfterRemoval(nodeToBeRemoved);
                                             refreshDoublyLinkedList();
 
                                             // Resolve the promise after all actions are complete

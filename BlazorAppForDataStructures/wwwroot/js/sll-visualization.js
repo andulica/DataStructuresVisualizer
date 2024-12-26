@@ -220,14 +220,16 @@
                         highlightLinkAndArrowhead(nodes[index - 1].id, node.id);
                     }
 
+                    if (node.value === valueID) {
+                        nodeSelection.transition().duration(delay).style('fill', 'green');
+                        found = true;
+                        resolve(); // Resolve when the target node is found
+                    }
+
                     if (node.id === valueID) {
                         nodeSelection.transition().duration(delay).style('fill', 'green');
                         found = true;
                         resolve(); // Resolve when the target node is found
-                    } else if (node.id === valueID) {
-                        nodeSelection.transition().duration(delay).style('fill', 'red');
-                        found = true;
-                        resolve();
                     }
                 }, delay * index);
             });
