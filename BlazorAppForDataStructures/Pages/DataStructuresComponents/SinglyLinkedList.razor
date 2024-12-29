@@ -3,13 +3,13 @@
 @using DataStructuresVisualizer.DataStructures
 @using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
 @using DataStructuresVisualizer.Snapshot;
+@using BlazorAppForDataStructures.Shared;
+@using DataStructuresVisualizer;
 
 @inject IJSRuntime JSRuntime
 @inject CancellationService CancellationService
 @inject NotificationService NotificationService
 @implements IDisposable
-
-
 
 <head>
     <link rel="stylesheet" href="/css/styles.css" />
@@ -117,7 +117,6 @@
     private bool isStack = false;
     private int numberOfNodesForReplacingAnEmptyList = 3;
     bool isOperationInProgress = false;
-    private int operationCancellationTime = 500;
 
     VisualizationTiming timing = VisualizationTiming.Default;
 
@@ -317,7 +316,7 @@
         {
             await JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
 
-            await Task.Delay(operationCancellationTime);
+            await Task.Delay(Constants.operationCancellationTime);
             isOperationInProgress = false;
         }
     }
@@ -368,7 +367,7 @@
         {
             JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
 
-            await Task.Delay(operationCancellationTime);
+            await Task.Delay(Constants.operationCancellationTime);
             isOperationInProgress = false;
         }
     }
@@ -419,7 +418,7 @@
         {
             JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
 
-            await Task.Delay(operationCancellationTime);
+            await Task.Delay(Constants.operationCancellationTime);
             isOperationInProgress = false;
         }
     }
@@ -457,7 +456,7 @@
         {
             JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
 
-            await Task.Delay(operationCancellationTime);
+            await Task.Delay(Constants.operationCancellationTime);
             isOperationInProgress = false;
         }
     }
@@ -510,7 +509,7 @@
         {
             JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
 
-            await Task.Delay(operationCancellationTime);
+            await Task.Delay(Constants.operationCancellationTime);
             isOperationInProgress = false;
         }
     }
