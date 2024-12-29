@@ -6,6 +6,10 @@
 
 @inject IJSRuntime JSRuntime
 @inject CancellationService CancellationService
+@inject NotificationService NotificationService
+@implements IDisposable
+
+
 
 <head>
     <link rel="stylesheet" href="/css/styles.css" />
@@ -95,7 +99,7 @@
     {
         <div class="notification-container">
             <span class="notification-message">@messageOutput</span>
-            <button class="notification-close" @onclick="ClearMessage">✖</button>
+            <button class="notification-close" @onclick="() => NotificationService.ClearMessage()">✖</button>
         </div>
     }
 </div>
@@ -148,7 +152,31 @@
         linkedList.Add(rand.Next(1, 30));
         linkedList.Add(rand.Next(1, 30));
         linkedList.Add(rand.Next(1, 30));
+
+        NotificationService.OnMessageAdded += HandleMessageAdded;
+        NotificationService.OnMessageCleared += HandleMessageCleared;
+        linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
     }
+
+    private void HandleMessageAdded(string message)
+    {
+        messageOutput = message;
+        StateHasChanged();
+    }
+
+    private void HandleMessageCleared()
+    {
+        messageOutput = string.Empty;
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NotificationService.OnMessageAdded -= HandleMessageAdded;
+        NotificationService.OnMessageCleared -= HandleMessageCleared;
+        linkedList.HighlightRequested -= HandleHighlightRequest;
+    }
+
 
     // private void CaptureSnapshot()
     // {
@@ -244,7 +272,7 @@
 
         if (linkedList.IsFull())
         {
-            messageOutput = $"The list has reached its maximum capacity of {linkedList.maxCapacity} nodes. Cannot insert a new node.";
+            NotificationService.AddMessage($"The list has reached its maximum capacity of {linkedList.maxCapacity} nodes.Cannot insert a new node.");
             return;
         }
 
@@ -256,7 +284,7 @@
 
         if (insertPosition <= 0 || insertPosition >= linkedList.Count)
         {
-            messageOutput = $"The position to insert must be greater than 0 and no bigger than {linkedList.Count - 1}";
+            NotificationService.AddMessage($"The position to insert must be greater than 0 and no bigger than {linkedList.Count - 1}");
             return;
         }
 
@@ -266,8 +294,6 @@
         try
         {
             isOperationInProgress = true;
-
-            linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
             var insertTask = linkedList.InsertAtAsync(insertPosition, newNode, token);
             var jsTask = JSRuntime.InvokeVoidAsync("insertAtInSLL", insertedValue, insertPosition, timing.JavaScriptDelay).AsTask();
@@ -285,11 +311,10 @@
             var linkedListData = ConvertListToJavaScriptFormat(linkedList);
             await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
 
-            messageOutput = $"Visual cancelled. Value {inputValue} inserted at index {insertPosition}.";
+            NotificationService.AddMessage($"Visual cancelled. Value {inputValue} inserted at index {insertPosition}.");
         }
         finally
         {
-            linkedList.HighlightRequested -= HandleHighlightRequest;
             await JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
 
             await Task.Delay(operationCancellationTime);
@@ -303,7 +328,7 @@
 
         if (linkedList.IsFull())
         {
-            messageOutput = $"The list has reached its maximum capacity of {linkedList.maxCapacity} nodes. Cannot insert a new node.";
+            NotificationService.AddMessage($"The list has reached its maximum capacity of {linkedList.maxCapacity} nodes. Cannot insert a new node.");
             return;
         }
 
@@ -319,7 +344,6 @@
         try
         {
             isOperationInProgress = true;
-            linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
             var prependTask = linkedList.PrependAsync(head, token);
             var jsTask = JSRuntime.InvokeVoidAsync("insertHeadInSll", headForJSInsertion, timing, isStack = false).AsTask();
@@ -338,11 +362,10 @@
 
             await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
 
-            messageOutput = $"Visual cancelled. Value {inputValue} prepended.";
+            NotificationService.AddMessage($"Visual cancelled. Value {inputValue} prepended.");
         }
         finally
         {
-            linkedList.HighlightRequested -= HandleHighlightRequest;
             JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
 
             await Task.Delay(operationCancellationTime);
@@ -356,7 +379,7 @@
 
         if (linkedList.IsFull())
         {
-            messageOutput = $"The list has reached its maximum capacity of {linkedList.maxCapacity} nodes. Cannot insert a new node.";
+            NotificationService.AddMessage($"The list has reached its maximum capacity of {linkedList.maxCapacity} nodes. Cannot insert a new node.");
             return;
         }
 
@@ -372,7 +395,6 @@
         try
         {
             isOperationInProgress = true;
-            linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
             var appendTask = linkedList.AppendAsync(tail, token);
             var jsTask = JSRuntime.InvokeVoidAsync("insertTailInSll", tailToInsert, timing).AsTask();
@@ -391,11 +413,10 @@
 
             await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
 
-            messageOutput = $"Visual cancelled. Value {inputValue} appended.";
+            NotificationService.AddMessage($"Visual cancelled. Value {inputValue} appended.");
         }
         finally
         {
-            linkedList.HighlightRequested -= HandleHighlightRequest; // Clean up event subscription
             JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
 
             await Task.Delay(operationCancellationTime);
@@ -417,8 +438,6 @@
         {
             isOperationInProgress = true;
 
-            linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
-
             var searchTask = linkedList.SearchByValueAsync(inputValue, token);
             var jsTask = JSRuntime.InvokeVoidAsync("searchValueInSLL", inputValue, timing).AsTask();
 
@@ -428,7 +447,7 @@
         {
             await JSRuntime.InvokeVoidAsync("SllCancelVisuals");
 
-            messageOutput = $"Visual cancelled.";
+            NotificationService.AddMessage($"Visual cancelled.");
 
             var linkedListData = ConvertListToJavaScriptFormat(linkedList);
 
@@ -436,7 +455,6 @@
         }
         finally
         {
-            linkedList.HighlightRequested -= HandleHighlightRequest; // Clean up event subscription
             JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
 
             await Task.Delay(operationCancellationTime);
@@ -456,7 +474,7 @@
 
         if (linkedList.Count == 0 || inputValue >= linkedList.Count)
         {
-            messageOutput = $"The index {inputValue} you are trying to delete does not exist.";
+            NotificationService.AddMessage($"The index {inputValue} you are trying to delete does not exist.");
             return;
         }
 
@@ -466,8 +484,6 @@
         try
         {
             isOperationInProgress = true;
-
-            linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
             var removeTask = linkedList.DeleteAtAsync(inputValue, token);
             var jsTask = JSRuntime.InvokeVoidAsync("removeValueInSll", nodeToBeDeleted, timing).AsTask();
@@ -488,11 +504,10 @@
 
             await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
 
-            messageOutput = $"Visual cancelled. Node at index {inputValue} removed.";
+            NotificationService.AddMessage($"Visual cancelled. Node at index {inputValue} removed.");
         }
         finally
         {
-            linkedList.HighlightRequested -= HandleHighlightRequest; // Clean up event subscription
             JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
 
             await Task.Delay(operationCancellationTime);
@@ -504,7 +519,7 @@
     {
         if (inputValue > linkedList.maxCapacity)
         {
-            messageOutput = $"The singly linked list can have a maximum number of {linkedList.maxCapacity} nodes. Please enter a smaller value.";
+            NotificationService.AddMessage($"The singly linked list can have a maximum number of {linkedList.maxCapacity} nodes. Please enter a smaller value.");
             return;
         }
 
@@ -542,7 +557,7 @@
 
     private async void CreateNewList()
     {
-        messageOutput = $"The list is empty. New list has been created.";
+        NotificationService.AddMessage($"The list is empty. New list has been created.");
         await CreateSinglyLinkedList();
         var linkedListData = ConvertListToJavaScriptFormat(linkedList);
         await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
@@ -573,15 +588,5 @@
             currentNode = currentNode.Next;
         }
         return nodes;
-    }
-
-    private void HighlightAllNodesOrDisplayMessage()
-    {
-        messageOutput = "The entered number is not in the singly linked list.";
-    }
-
-    private void ClearMessage()
-    {
-        messageOutput = "";
     }
 }

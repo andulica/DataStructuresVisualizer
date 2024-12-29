@@ -28,8 +28,10 @@ namespace BlazorAppForDataStructures
             builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<BlazorAppForDataStructuresContext>();
 
-            builder.Services.AddScoped<QuizService>();
+            builder.Services.AddScoped<QuizService>(); 
             builder.Services.AddTransient<CancellationService>();
+
+            builder.Services.AddScoped<NotificationService>();
 
             builder.Services.AddRazorPages();
             builder.Services.AddServerSideBlazor();
