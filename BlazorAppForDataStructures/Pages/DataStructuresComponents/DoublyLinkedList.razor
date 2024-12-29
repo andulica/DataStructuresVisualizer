@@ -3,6 +3,7 @@
 @using DataStructuresVisualizer.DataStructures;
 @using DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
 @using DataStructuresVisualizer.DataStructures.Enums.DoublyLinkedList
+@inject CancellationService CancellationService
 
 <head>
     <link rel="stylesheet" href="/css/styles.css" />
@@ -96,7 +97,6 @@
     private IEnumerable<string> currentCode = Enumerable.Empty<string>();
     VisualizationTiming timing = VisualizationTiming.Default;
     private DoublyLinkedList<int> doublyLinkedList = new DoublyLinkedList<int>();
-    private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
     bool isOperationInProgress = false;
 
 
@@ -114,10 +114,10 @@
         }
     }
 
-    private void InitializeNewOperation()
+    private CancellationToken InitializeNewOperation()
     {
-        _cancellationTokenSource.Cancel();
-        _cancellationTokenSource = new CancellationTokenSource();
+        CancellationService.ResetCancellationTokenSource();
+        return CancellationService.GetToken();
     }
 
     private void OnActionChanged(ChangeEventArgs e)
@@ -201,7 +201,7 @@
 
     private async Task PerformInsertion()
     {
-        InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
+        var token = InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
 
         if (doublyLinkedList.IsFull())
         {
@@ -230,7 +230,7 @@
 
             doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
-            var insertTask = doublyLinkedList.InsertAtAsync(nodeToInsert, insertPosition, _cancellationTokenSource.Token);
+            var insertTask = doublyLinkedList.InsertAtAsync(nodeToInsert, insertPosition, token);
             var jsTask = JSRuntime.InvokeVoidAsync("insertAtInDll", dllData, insertPosition, timing.JavaScriptDelay).AsTask();
 
             await Task.WhenAll(insertTask, jsTask); // Run both tasks concurrently
@@ -261,7 +261,7 @@
 
     private async Task PrependValue()
     {
-        InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
+        var token = InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
 
         if (doublyLinkedList.IsFull())
         {
@@ -284,7 +284,7 @@
 
             doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
-            var insertTask = doublyLinkedList.PrependAsync(nodeToInsert, _cancellationTokenSource.Token);
+            var insertTask = doublyLinkedList.PrependAsync(nodeToInsert, token);
             var jsTask = JSRuntime.InvokeVoidAsync("insertHeadInDll", dllData, timing.JavaScriptDelay).AsTask();
 
             await Task.WhenAll(insertTask, jsTask); // Run both tasks concurrently
@@ -316,7 +316,7 @@
     private async Task AppendValue()
     {
 
-        InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
+        var token = InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
 
         if (doublyLinkedList.IsFull())
         {
@@ -339,7 +339,7 @@
 
             doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
-            var appendTask = doublyLinkedList.AppendAsync(nodeToInsert, _cancellationTokenSource.Token);
+            var appendTask = doublyLinkedList.AppendAsync(nodeToInsert, token);
             var jsTask = JSRuntime.InvokeVoidAsync("insertTailInDll", dllData, timing.JavaScriptDelay).AsTask();
 
             await Task.WhenAll(appendTask, jsTask); // Run both tasks concurrently
@@ -370,7 +370,7 @@
 
     private async Task SearchValue()
     {
-        InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
+        var token = InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
 
         if (doublyLinkedList.Count == 0)
         {
@@ -384,7 +384,7 @@
 
             doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
-            var searchTask = doublyLinkedList.SearchAsync(inputValue, _cancellationTokenSource.Token);
+            var searchTask = doublyLinkedList.SearchAsync(inputValue, token);
             var jsTask = JSRuntime.InvokeVoidAsync("searchValueInDLL", inputValue, timing.JavaScriptDelay).AsTask();
 
             await Task.WhenAll(searchTask, jsTask); // Run both tasks concurrently
@@ -408,7 +408,7 @@
 
     private async Task RemoveValue()
     {
-        InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
+        var token = InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
 
         if (doublyLinkedList.Count == 0)
         {
@@ -431,7 +431,7 @@
 
             doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
-            var deleteTask = doublyLinkedList.DeleteAtAsync(inputValue, _cancellationTokenSource.Token);
+            var deleteTask = doublyLinkedList.DeleteAtAsync(inputValue, token);
             var jsTask = JSRuntime.InvokeVoidAsync("removeValueInDll", nodeToBeDeleted, timing.JavaScriptDelay).AsTask();
 
             await Task.WhenAll(deleteTask, jsTask); // Run both tasks concurrently for managing both JS visual and C# code highlighting
