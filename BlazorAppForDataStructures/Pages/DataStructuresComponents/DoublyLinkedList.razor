@@ -4,6 +4,8 @@
 @using DataStructuresVisualizer.DataStructures.DoublyLinkedListFile
 @using DataStructuresVisualizer.DataStructures.Enums.DoublyLinkedList
 @inject CancellationService CancellationService
+@inject NotificationService NotificationService
+@implements IDisposable
 
 <head>
     <link rel="stylesheet" href="/css/styles.css" />
@@ -131,6 +133,13 @@
         doublyLinkedList.Add(rand.Next(1, 30));
         doublyLinkedList.Add(rand.Next(1, 30));
         doublyLinkedList.Add(rand.Next(1, 30));
+
+        doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
+    }
+
+    public void Dispose()
+    {
+        doublyLinkedList.HighlightRequested -= HandleHighlightRequest; // Unsubscribe from highlight events
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -228,8 +237,6 @@
         {
             isOperationInProgress = true;
 
-            doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
-
             var insertTask = doublyLinkedList.InsertAtAsync(nodeToInsert, insertPosition, token);
             var jsTask = JSRuntime.InvokeVoidAsync("insertAtInDll", dllData, insertPosition, timing.JavaScriptDelay).AsTask();
 
@@ -251,7 +258,6 @@
         }
         finally
         {
-            doublyLinkedList.HighlightRequested -= HandleHighlightRequest; // Unsubscribe from highlight events
             JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
 
             await Task.Delay(1000);
@@ -282,8 +288,6 @@
         {
             isOperationInProgress = true;
 
-            doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
-
             var insertTask = doublyLinkedList.PrependAsync(nodeToInsert, token);
             var jsTask = JSRuntime.InvokeVoidAsync("insertHeadInDll", dllData, timing.JavaScriptDelay).AsTask();
 
@@ -306,7 +310,6 @@
         finally
         {
             JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
-            doublyLinkedList.HighlightRequested -= HandleHighlightRequest; // Unsubscribe from highlight events
 
             await Task.Delay(1000);
             isOperationInProgress = false;
@@ -337,8 +340,6 @@
         {
             isOperationInProgress = true; 
 
-            doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
-
             var appendTask = doublyLinkedList.AppendAsync(nodeToInsert, token);
             var jsTask = JSRuntime.InvokeVoidAsync("insertTailInDll", dllData, timing.JavaScriptDelay).AsTask();
 
@@ -361,7 +362,6 @@
         finally
         {
             JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
-            doublyLinkedList.HighlightRequested -= HandleHighlightRequest; // Unsubscribe from highlight events
 
             await Task.Delay(1000);
             isOperationInProgress = false;
@@ -382,8 +382,6 @@
         {
             isOperationInProgress = true;
 
-            doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
-
             var searchTask = doublyLinkedList.SearchAsync(inputValue, token);
             var jsTask = JSRuntime.InvokeVoidAsync("searchValueInDLL", inputValue, timing.JavaScriptDelay).AsTask();
 
@@ -399,7 +397,6 @@
         finally
         {
             JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
-            doublyLinkedList.HighlightRequested -= HandleHighlightRequest; // Unsubscribe from highlight events
 
             await Task.Delay(1000);
             isOperationInProgress = false;
@@ -429,8 +426,6 @@
         {
             isOperationInProgress = true;
 
-            doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
-
             var deleteTask = doublyLinkedList.DeleteAtAsync(inputValue, token);
             var jsTask = JSRuntime.InvokeVoidAsync("removeValueInDll", nodeToBeDeleted, timing.JavaScriptDelay).AsTask();
 
@@ -453,7 +448,6 @@
         finally
         {
             JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
-            doublyLinkedList.HighlightRequested -= HandleHighlightRequest; // Unsubscribe from highlight events
 
             await Task.Delay(1000);
             isOperationInProgress = false;
