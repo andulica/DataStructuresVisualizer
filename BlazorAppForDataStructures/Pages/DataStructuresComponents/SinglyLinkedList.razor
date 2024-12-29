@@ -114,6 +114,7 @@
     private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
     private int numberOfNodesForReplacingAnEmptyList = 3;
     bool isOperationInProgress = false;
+    private int operationCancellationTime = 500;
 
     VisualizationTiming timing = VisualizationTiming.Default;
 
@@ -292,7 +293,7 @@
             linkedList.HighlightRequested -= HandleHighlightRequest;
             await JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
 
-            await Task.Delay(1000);
+            await Task.Delay(operationCancellationTime);
             isOperationInProgress = false;
         }
     }
@@ -345,7 +346,7 @@
             linkedList.HighlightRequested -= HandleHighlightRequest;
             JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
 
-            await Task.Delay(1000);
+            await Task.Delay(operationCancellationTime);
             isOperationInProgress = false;
         }
     }
@@ -398,7 +399,7 @@
             linkedList.HighlightRequested -= HandleHighlightRequest; // Clean up event subscription
             JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
 
-            await Task.Delay(1000);
+            await Task.Delay(operationCancellationTime);
             isOperationInProgress = false;
         }
     }
@@ -439,7 +440,7 @@
             linkedList.HighlightRequested -= HandleHighlightRequest; // Clean up event subscription
             JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
 
-            await Task.Delay(1000);
+            await Task.Delay(operationCancellationTime);
             isOperationInProgress = false;
         }
     }
@@ -495,7 +496,7 @@
             linkedList.HighlightRequested -= HandleHighlightRequest; // Clean up event subscription
             JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
 
-            await Task.Delay(1000);
+            await Task.Delay(operationCancellationTime);
             isOperationInProgress = false;
         }
     }
