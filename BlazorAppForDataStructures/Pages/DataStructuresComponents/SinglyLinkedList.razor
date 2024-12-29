@@ -3,8 +3,9 @@
 @using DataStructuresVisualizer.DataStructures
 @using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
 @using DataStructuresVisualizer.Snapshot;
-@using BlazorAppForDataStructures.Shared;
+
 @inject IJSRuntime JSRuntime
+@inject CancellationService CancellationService
 
 <head>
     <link rel="stylesheet" href="/css/styles.css" />
@@ -100,7 +101,6 @@
 </div>
 
 @code {
-    private CodeDisplay? CodeDisplay;
     private SinglyLinkedList<int> linkedList = new SinglyLinkedList<int>();
     private Random rand = new Random();
     private string _selectedAction = "create";
@@ -111,7 +111,6 @@
     private List<Snapshot> snapshots = new();
     private int currentSnapshotIndex = 0;
     private bool isStack = false;
-    private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
     private int numberOfNodesForReplacingAnEmptyList = 3;
     bool isOperationInProgress = false;
     private int operationCancellationTime = 500;
@@ -132,10 +131,10 @@
         }
     }
 
-    private void InitializeNewOperation()
+    private CancellationToken InitializeNewOperation()
     {
-        _cancellationTokenSource.Cancel();
-        _cancellationTokenSource = new CancellationTokenSource();
+        CancellationService.ResetCancellationTokenSource();
+        return CancellationService.GetToken();
     }
 
     private void OnActionChanged(ChangeEventArgs e)
@@ -241,7 +240,7 @@
 
     private async Task PerformInsertion()
     {
-        InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
+        var token = InitializeNewOperation();
 
         if (linkedList.IsFull())
         {
@@ -270,7 +269,7 @@
 
             linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
-            var insertTask = linkedList.InsertAtAsync(insertPosition, newNode, _cancellationTokenSource.Token);
+            var insertTask = linkedList.InsertAtAsync(insertPosition, newNode, token);
             var jsTask = JSRuntime.InvokeVoidAsync("insertAtInSLL", insertedValue, insertPosition, timing.JavaScriptDelay).AsTask();
 
             await Task.WhenAll(insertTask, jsTask);
@@ -300,7 +299,7 @@
 
     private async Task PrependValue()
     {
-        InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
+        var token = InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
 
         if (linkedList.IsFull())
         {
@@ -322,7 +321,7 @@
             isOperationInProgress = true;
             linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
-            var prependTask = linkedList.PrependAsync(head, _cancellationTokenSource.Token);
+            var prependTask = linkedList.PrependAsync(head, token);
             var jsTask = JSRuntime.InvokeVoidAsync("insertHeadInSll", headForJSInsertion, timing, isStack = false).AsTask();
 
             await Task.WhenAll(prependTask, jsTask); // Run both tasks concurrently
@@ -353,7 +352,7 @@
 
     private async Task AppendValue()
     {
-        InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
+        var token = InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
 
         if (linkedList.IsFull())
         {
@@ -375,7 +374,7 @@
             isOperationInProgress = true;
             linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
-            var appendTask = linkedList.AppendAsync(tail, _cancellationTokenSource.Token);
+            var appendTask = linkedList.AppendAsync(tail, token);
             var jsTask = JSRuntime.InvokeVoidAsync("insertTailInSll", tailToInsert, timing).AsTask();
 
             await Task.WhenAll(appendTask, jsTask); // Run both tasks concurrently
@@ -406,7 +405,7 @@
 
     private async Task SearchValue()
     {
-        InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
+        var token = InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
 
         if (linkedList.Count == 0)
         {
@@ -420,7 +419,7 @@
 
             linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
-            var searchTask = linkedList.SearchByValueAsync(inputValue, _cancellationTokenSource.Token);
+            var searchTask = linkedList.SearchByValueAsync(inputValue, token);
             var jsTask = JSRuntime.InvokeVoidAsync("searchValueInSLL", inputValue, timing).AsTask();
 
             await Task.WhenAll(searchTask, jsTask); // Run both tasks concurrently
@@ -447,7 +446,7 @@
 
     private async Task RemoveValue()
     {
-        InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
+        var token = InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
 
         if (linkedList.Count == 0)
         {
@@ -470,7 +469,7 @@
 
             linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
 
-            var removeTask = linkedList.DeleteAtAsync(inputValue, _cancellationTokenSource.Token);
+            var removeTask = linkedList.DeleteAtAsync(inputValue, token);
             var jsTask = JSRuntime.InvokeVoidAsync("removeValueInSll", nodeToBeDeleted, timing).AsTask();
 
             await Task.WhenAll(removeTask, jsTask); // Run both tasks concurrently
