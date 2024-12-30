@@ -5,8 +5,9 @@
         max: maxValue,
         value: currentValue,
         slide: function (event, ui) {
-            dotNetObject.invokeMethodAsync('OnValueChanged', ui.value);
+            dotNetObject.invokeMethodAsync('HandleValueChanged', ui.value);
         }
+
     });
 };
 

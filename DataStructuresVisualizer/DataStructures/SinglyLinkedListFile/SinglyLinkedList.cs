@@ -6,6 +6,8 @@ using System.Threading;
 
 public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
 {
+    public List<SinglyLinkedList<T>> StateHistory { get; set; } = new List<SinglyLinkedList<T>>();
+
     private SinglyLinkedListNode<T>? _head;
     private SinglyLinkedListNode<T>? _tail;
 
@@ -35,6 +37,18 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
     /// The maximum capacity of the singly linked list.
     /// </summary>
     public readonly int maxCapacity = 6;
+
+    public SinglyLinkedList<T> Clone()
+    {
+        var newList = new SinglyLinkedList<T>();
+        var current = this.Head;
+        while (current != null)
+        {
+            newList.AppendInstant(new SinglyLinkedListNode<T>(current._data));
+            current = current.Next;
+        }
+        return newList;
+    }
 
     /// <summary>
     /// Inserts a new node at the specified index in the singly linked list.
@@ -182,13 +196,16 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
 
             // Invoke highlighting for visual effect
             await HighlightRequested.Invoke(AppendSteps.CreateVertex); // "Vertex vtx = new Vertex(v)"
-            cancellationToken.ThrowIfCancellationRequested();
+            cancellationToken.ThrowIfCancellationRequested(); 
+            this.StateHistory.Add(this.Clone());
+
 
             if (_head == null)
             {
                 _head = _tail = newNode; // Set both _head and _tail to the new node if list was empty
                 await HighlightRequested.Invoke(AppendSteps.UpdateTailNextPointer); // "_tail.next = vtx"
                 cancellationToken.ThrowIfCancellationRequested();
+                this.StateHistory.Add(this.Clone());
             }
             else
             {
@@ -199,6 +216,7 @@ public class SinglyLinkedList<T> : IEnumerable<SinglyLinkedListNode<T>>
                 _tail = newNode;
                 await HighlightRequested.Invoke(AppendSteps.UpdateTail); // "_tail = vtx"
                 cancellationToken.ThrowIfCancellationRequested();
+                this.StateHistory.Add(this.Clone());
             }
         }
         count++;

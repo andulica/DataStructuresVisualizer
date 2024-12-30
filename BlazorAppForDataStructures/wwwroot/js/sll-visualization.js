@@ -1,8 +1,6 @@
 ﻿(function () {
     let svg, nodes;
     let margin = { top: 20, right: 30, bottom: 40, left: 50 };
-    const delayDrawLinks = 1000;
-    const delayForVisual = 1000;
     const gapBetweenNodeAndFirstElement = 100;
 
     let timeouts = [];
@@ -44,6 +42,7 @@
         };
     }
 
+    
     // Draw line with arrow and assign an ID immediately
     function drawLineWithArrow(startX, startY, endX, endY, radius, strokeWidth, id, delay) {
         const adjustedPoints = adjustLineEndpoints(startX, startY, endX, endY, radius, strokeWidth);
@@ -149,7 +148,7 @@
         nodes.forEach((node, i) => {
             if (i < nodes.length - 1) {
                 let nextNode = nodes[i + 1];
-                drawLineWithArrow(node.x, node.y, nextNode.x, nextNode.y, 20, 2, `link-${node.id}-${nextNode.id}`, delayDrawLinks);
+                drawLineWithArrow(node.x, node.y, nextNode.x, nextNode.y, 20, 2, `link-${node.id}-${nextNode.id}`);
             }
         });
     };
@@ -457,7 +456,6 @@
             }, timing.highlightDelay);
         });
     }
-
 
     function setNodeColor(color, node) {
         svg.select(`#node-${node.id}`).

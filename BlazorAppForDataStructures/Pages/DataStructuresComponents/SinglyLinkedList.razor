@@ -92,8 +92,10 @@
 
     <CodeDisplay CodeLines="@currentCode" />
 
-    <ProgressBar MaxValue="@snapshots.Count" CurrentValue="@currentSnapshotIndex" OnValueChanged="RewindToSnapshot" />
 
+    <ProgressBar MaxValue="@(linkedList.StateHistory.Count - 1)"
+                 CurrentValue="@currentSnapshotIndex"
+                 OnValueChanged="RewindToSnapshot" />
 
     @if (!string.IsNullOrEmpty(messageOutput))
     {
@@ -151,9 +153,7 @@
         linkedList.Add(rand.Next(1, 30));
         linkedList.Add(rand.Next(1, 30));
 
-        NotificationService.OnMessageAdded += HandleMessageAdded;
-        NotificationService.OnMessageCleared += HandleMessageCleared;
-        linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
+        SubscribingNewList();
     }
 
     private void HandleMessageAdded(string message)
@@ -170,11 +170,15 @@
 
     public void Dispose()
     {
-        NotificationService.OnMessageAdded -= HandleMessageAdded;
-        NotificationService.OnMessageCleared -= HandleMessageCleared;
-        linkedList.HighlightRequested -= HandleHighlightRequest;
+        UnsubscribingOldList();
     }
 
+    private Dictionary<AppendSteps, List<int>> appendStepMap = new()
+{
+    { AppendSteps.CreateVertex, new List<int> { 0 } },
+    { AppendSteps.UpdateTailNextPointer, new List<int> { 1 } },
+    { AppendSteps.UpdateTail, new List<int> { 2, 3 } }
+};
 
     // private void CaptureSnapshot()
     // {
@@ -191,14 +195,23 @@
 
     private void RewindToSnapshot(int snapshotIndex)
     {
+
+        if (snapshotIndex < 0 || snapshotIndex >= linkedList.StateHistory.Count)
+            return;
+
         currentSnapshotIndex = snapshotIndex;
-        RenderSnapshot(snapshots[snapshotIndex]);
+        var desiredState = linkedList.StateHistory[snapshotIndex];
+
+        var linkedListData = ConvertListToJavaScriptFormat(desiredState);
+
+        JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
     }
 
-    private void RenderSnapshot(Snapshot snapshot)
-    {
-        // Render the linked list based on the snapshot state
-    }
+
+    // private void RenderSnapshot(Snapshot snapshot)
+    // {
+    //     Render the linked list based on the snapshot state
+    // }
 
     private IEnumerable<string> GetCodeByOperation(string operation)
     {
@@ -417,6 +430,9 @@
         {
             JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
 
+            currentSnapshotIndex = linkedList.StateHistory.Count - 1;
+            await InvokeAsync(StateHasChanged);
+
             await Task.Delay(Constants.operationCancellationTime);
             isOperationInProgress = false;
         }
@@ -526,11 +542,14 @@
             linkedList.Add(rand.Next(1, 30));
             linkedList.Add(rand.Next(1, 30));
             linkedList.Add(rand.Next(1, 30));
+            SubscribingNewList();
             return;
         }
 
 
         linkedList = new SinglyLinkedList<int>();
+        SubscribingNewList();
+        linkedList.StateHistory.Clear();
 
         for (int i = 0; i < inputValue; i++)
         {
@@ -561,6 +580,19 @@
         await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
     }
 
+    private void SubscribingNewList ()
+    {
+        NotificationService.OnMessageAdded += HandleMessageAdded;
+        NotificationService.OnMessageCleared += HandleMessageCleared;
+        linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
+    }
+
+    private void UnsubscribingOldList ()
+    {
+        NotificationService.OnMessageAdded -= HandleMessageAdded;
+        NotificationService.OnMessageCleared -= HandleMessageCleared;
+        linkedList.HighlightRequested -= HandleHighlightRequest;
+    }
     private object ConvertNodeToJavaScriptFormat(SinglyLinkedListNode<int> node)
     {
         return new

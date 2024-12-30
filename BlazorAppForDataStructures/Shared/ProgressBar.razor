@@ -9,10 +9,10 @@
 
 @code {
     [Parameter]
-    public int MaxValue { get; set; } = 100;
+    public int MaxValue { get; set; }
 
     [Parameter]
-    public int CurrentValue { get; set; } = 0;
+    public int CurrentValue { get; set; }
 
     [Parameter]
     public EventCallback<int> OnValueChanged { get; set; }
@@ -35,5 +35,4 @@
         CurrentValue = newValue;
         return OnValueChanged.InvokeAsync(newValue);
     }
-
 }
