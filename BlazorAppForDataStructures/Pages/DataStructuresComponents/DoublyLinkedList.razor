@@ -79,7 +79,7 @@
         {
             <div class="notification-container">
                 <span class="notification-message">@messageOutput</span>
-                <button class="notification-close" @onclick="ClearMessage">✖</button>
+                <button class="notification-close" @onclick="() => NotificationService.ClearMessage()">✖</button>
             </div>
         }
     </div>
@@ -212,7 +212,7 @@
 
         if (doublyLinkedList.IsFull())
         {
-            messageOutput = $"The list has reached its maximum capacity of {doublyLinkedList.maxCapacity} nodes. Cannot insert a new node.";
+            NotificationService.AddMessage($"The list has reached its maximum capacity of {doublyLinkedList.maxCapacity} nodes. Cannot insert a new node.");
             return;
         }
 
@@ -224,7 +224,7 @@
 
         if (insertPosition <= 0 || insertPosition > doublyLinkedList.Count - 1)
         {
-            messageOutput = $"The position to insert must be greater than 0 and no bigger than {doublyLinkedList.Count - 1}";
+            NotificationService.AddMessage($"The position to insert must be greater than 0 and no bigger than {doublyLinkedList.Count - 1}");
             return;
         }
 
@@ -252,7 +252,7 @@
             var doublyLinkedListData = ConvertListToJavaScriptFormat(doublyLinkedList);
             await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", doublyLinkedListData);
 
-            messageOutput = $"Visual cancelled. Value {inputValue} inserted at index {insertPosition}.";
+            NotificationService.AddMessage($"Visual cancelled. Value {inputValue} inserted at index {insertPosition}.");
         }
         finally
         {
@@ -269,7 +269,7 @@
 
         if (doublyLinkedList.IsFull())
         {
-            messageOutput = $"The list has reached its maximum capacity of {doublyLinkedList.maxCapacity} nodes. Cannot insert a new node.";
+            NotificationService.AddMessage($"The list has reached its maximum capacity of {doublyLinkedList.maxCapacity} nodes. Cannot insert a new node.");
             return;
         }
 
@@ -295,7 +295,7 @@
         {
             await JSRuntime.InvokeVoidAsync("DllCancelVisuals");
 
-            if(!doublyLinkedList.Contains(nodeToInsert))
+            if (!doublyLinkedList.Contains(nodeToInsert))
             {
                 doublyLinkedList.PrependInstant(nodeToInsert);
             }
@@ -303,7 +303,7 @@
             var doublyLinkedListData = ConvertListToJavaScriptFormat(doublyLinkedList);
             await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", doublyLinkedListData);
 
-            messageOutput = $"Visual cancelled. Value {inputValue} prepended.";
+            NotificationService.AddMessage($"Visual cancelled. Value {inputValue} prepended.");
         }
         finally
         {
@@ -321,7 +321,7 @@
 
         if (doublyLinkedList.IsFull())
         {
-            messageOutput = $"The list has reached its maximum capacity of {doublyLinkedList.maxCapacity} nodes. Cannot insert a new node.";
+            NotificationService.AddMessage($"The list has reached its maximum capacity of {doublyLinkedList.maxCapacity} nodes. Cannot insert a new node.");
             return;
         }
 
@@ -336,7 +336,7 @@
 
         try
         {
-            isOperationInProgress = true; 
+            isOperationInProgress = true;
 
             var appendTask = doublyLinkedList.AppendAsync(nodeToInsert, token);
             var jsTask = JSRuntime.InvokeVoidAsync("insertTailInDll", dllData, timing.JavaScriptDelay).AsTask();
@@ -347,7 +347,7 @@
         {
             await JSRuntime.InvokeVoidAsync("DllCancelVisuals");
 
-            if(!doublyLinkedList.Contains(nodeToInsert))
+            if (!doublyLinkedList.Contains(nodeToInsert))
             {
                 doublyLinkedList.AppendInstant(nodeToInsert);
             }
@@ -355,7 +355,7 @@
             var doublyLinkedListData = ConvertListToJavaScriptFormat(doublyLinkedList);
             await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", doublyLinkedListData);
 
-            messageOutput = $"Visual cancelled. Value {inputValue} appended.";
+            NotificationService.AddMessage($"Visual cancelled. Value {inputValue} appended.");
         }
         finally
         {
@@ -390,7 +390,7 @@
             await JSRuntime.InvokeVoidAsync("DllCancelVisuals");
             var doublyLinkedListData = ConvertListToJavaScriptFormat(doublyLinkedList);
             await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", doublyLinkedListData);
-            messageOutput = "Visual cancelled.";
+            NotificationService.AddMessage("Visual cancelled.");
         }
         finally
         {
@@ -413,7 +413,7 @@
 
         if (doublyLinkedList.Count() == 0 || inputValue >= doublyLinkedList.Count)
         {
-            messageOutput = $"The index {inputValue} you are trying to delete does not exist. Please enter a smaller value.";
+            NotificationService.AddMessage($"The index {inputValue} you are trying to delete does not exist. Please enter a smaller value.");
             return;
         }
 
@@ -441,7 +441,7 @@
             var doublyLinkedListData = ConvertListToJavaScriptFormat(doublyLinkedList);
             await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", doublyLinkedListData);
 
-            messageOutput = $"Visual cancelled. Value at index {inputValue} deleted.";
+            NotificationService.AddMessage($"Visual cancelled. Value at index {inputValue} deleted.");
         }
         finally
         {
@@ -454,7 +454,7 @@
 
     private async void CreateNewList()
     {
-        messageOutput = $"The list is empty. New list has been created.";
+        NotificationService.AddMessage($"The list is empty. New list has been created.");
         await CreateDoublyLinkedList();
         var doublyLinkedListData = ConvertListToJavaScriptFormat(this.doublyLinkedList);
         await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", doublyLinkedListData);
@@ -464,7 +464,7 @@
     {
         if (inputValue > doublyLinkedList.maxCapacity)
         {
-            messageOutput = $"The doubly linked list can have a maximum number of {doublyLinkedList.maxCapacity} nodes. Please enter a smaller value.";
+            NotificationService.AddMessage($"The doubly linked list can have a maximum number of {doublyLinkedList.maxCapacity} nodes. Please enter a smaller value.");
             return;
         }
 
@@ -476,25 +476,15 @@
             return;
         }
 
-        try
-        {
-            doublyLinkedList = new DoublyLinkedList<int>();
+        doublyLinkedList = new DoublyLinkedList<int>();
 
-            for (int i = 0; i < inputValue; i++)
-            {
-                doublyLinkedList.Add(rand.Next(1, 30));
-            }
+        for (int i = 0; i < inputValue; i++)
+        {
+            doublyLinkedList.Add(rand.Next(1, 30));
+        }
 
-            var dllData = ConvertListToJavaScriptFormat(doublyLinkedList);
-            await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", dllData);
-        }
-        catch (Exception ex)
-        {
-            // Handle exception
-        }
-        finally
-        {
-        }
+        var dllData = ConvertListToJavaScriptFormat(doublyLinkedList);
+        await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", dllData);
     }
 
     private async Task HandleHighlightRequest(Enum step)
@@ -530,10 +520,5 @@
             currentNode = currentNode.Next;
         }
         return nodes;
-    }
-
-    private void ClearMessage()
-    {
-        messageOutput = "";
     }
 }
