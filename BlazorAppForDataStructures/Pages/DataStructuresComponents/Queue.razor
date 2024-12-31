@@ -61,6 +61,9 @@
     @* Render the queue here *@
 </div>
 
+    <CodeDisplay CodeLines="@currentCode" />
+
+
 @if (!string.IsNullOrEmpty(messageOutput))
 {
     <div class="notification-container">
@@ -72,12 +75,28 @@
 
 @code {
     private QueueStructure<int> queue = new QueueStructure<int>();
-    private string selectedAction = "Peek";
     private int inputValue;
     private string messageOutput;
     private bool isOperationInProgress = false;
     Random rand = new Random();
     const int delayValueForAnimation = 1000;
+    private string _selectedAction = "create";
+    private string subSelectedAction = "";
+    private IEnumerable<string> currentCode = Enumerable.Empty<string>();
+
+    public string selectedAction
+    {
+        get => _selectedAction;
+        set
+        {
+            if (_selectedAction != value)
+            {
+                _selectedAction = value;
+                currentCode = GetCodeByOperation(value);
+                StateHasChanged();
+            }
+        }
+    }
 
     protected override void OnInitialized()
     {
@@ -93,6 +112,42 @@
             var queueData = ConvertQueueToJavaScriptFormat(queue);
             await JSRuntime.InvokeVoidAsync("drawLinkedList", queueData);
         }
+    }
+
+    private IEnumerable<string> GetCodeByOperation(string operation)
+    {
+        Dictionary<string, IEnumerable<string>> codeSnippets = new Dictionary<string, IEnumerable<string>>
+            {
+                ["peek front"] = new List<string>
+                {
+                    "if empty, return NOT_FOUND",
+                    "return head.item"
+                },
+                ["peek back"] = new List<string>
+                {
+                    "if empty, return NOT_FOUND",
+                    "return tail.item"
+                },
+                ["Enqueue"] = new List<string>
+                {
+                    "Vertex vtx = new Vertex(v)",
+                    "tail.next = vtx",
+                    "tail = vtx"
+                },
+                ["Dequeue"] = new List<string>
+                {
+                    "for (i = 0; i < K; ++i)",
+                    "tmp = head",
+                    "head = head.next",
+                    "delete tmp"
+                }
+            };
+
+        if (codeSnippets.TryGetValue(operation, out var code))
+        {
+            return code;
+        }
+        return new List<string> { "Select an operation to view the code." };
     }
 
     private object ConvertNodeToJavaScriptFormat(SinglyLinkedListNode<int> node)
@@ -216,6 +271,8 @@
 
         isOperationInProgress = true;
         StateHasChanged();
+        subSelectedAction = "peek back";
+        currentCode = GetCodeByOperation("peek back");
 
         try
         {
@@ -244,6 +301,8 @@
 
         isOperationInProgress = true;
         StateHasChanged();
+        subSelectedAction = "peek front";
+        currentCode = GetCodeByOperation("peek front");
 
         try
         {
