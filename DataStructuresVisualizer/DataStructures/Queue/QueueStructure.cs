@@ -26,14 +26,12 @@ public class QueueStructure<T> : SinglyLinkedList<T>, IEnumerable<T>
     /// </summary>
     /// <returns>The item at the front of the queue.</returns>
     /// <exception cref="InvalidOperationException">Thrown if the queue is empty.</exception>
-    public T Peek()
+    public async void Peek(CancellationToken token)
     {
         if (Count == 0)
         {
             throw new InvalidOperationException("The queue is empty.");
         }
-
-        return Head._data;
     }
 
     /// <summary>
