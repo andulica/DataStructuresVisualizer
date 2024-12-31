@@ -93,9 +93,9 @@
     <CodeDisplay CodeLines="@currentCode" />
 
 
-    <ProgressBar MaxValue="@(linkedList.StateHistory.Count - 1)"
-                 CurrentValue="@currentSnapshotIndex"
-                 OnValueChanged="RewindToSnapshot" />
+@*      <ProgressBar MaxValue="@(linkedList.StateHistory.Count - 1)"
+                  CurrentValue="@currentSnapshotIndex"
+                  OnValueChanged="RewindToSnapshot" /> *@
 
     @if (!string.IsNullOrEmpty(messageOutput))
     {
