@@ -92,11 +92,6 @@
 
     <CodeDisplay CodeLines="@currentCode" />
 
-
-@*      <ProgressBar MaxValue="@(linkedList.StateHistory.Count - 1)"
-                  CurrentValue="@currentSnapshotIndex"
-                  OnValueChanged="RewindToSnapshot" /> *@
-
     @if (!string.IsNullOrEmpty(messageOutput))
     {
         <div class="notification-container">
@@ -179,39 +174,6 @@
     { AppendSteps.UpdateTailNextPointer, new List<int> { 1 } },
     { AppendSteps.UpdateTail, new List<int> { 2, 3 } }
 };
-
-    // private void CaptureSnapshot()
-    // {
-    //     var nodes = linkedList.Nodes.Select(node => new NodeState(node.Id, node.Value, node.X, node.Y, node.FillColor)).ToList();
-    //     var links = linkedList.Links.Select(link => new LinkState(link.Id, link.StartX, link.StartY, link.EndX, link.EndY)).ToList();
-
-    //     Guid? highlightedNodeId = linkedList.HighlightedNode?.Id;
-    //     Guid? highlightedLinkId = linkedList.HighlightedLink?.Id;
-
-    //     var snapshot = new Snapshot(nodes, links, highlightedNodeId, highlightedLinkId);
-    //     snapshots.Add(snapshot);
-    // }
-
-
-    private void RewindToSnapshot(int snapshotIndex)
-    {
-
-        if (snapshotIndex < 0 || snapshotIndex >= linkedList.StateHistory.Count)
-            return;
-
-        currentSnapshotIndex = snapshotIndex;
-        var desiredState = linkedList.StateHistory[snapshotIndex];
-
-        var linkedListData = ConvertListToJavaScriptFormat(desiredState);
-
-        JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
-    }
-
-
-    // private void RenderSnapshot(Snapshot snapshot)
-    // {
-    //     Render the linked list based on the snapshot state
-    // }
 
     private IEnumerable<string> GetCodeByOperation(string operation)
     {
