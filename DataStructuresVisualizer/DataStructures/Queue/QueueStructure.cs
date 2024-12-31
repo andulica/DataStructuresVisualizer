@@ -4,10 +4,16 @@ using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DataStructuresVisualizer.DataStructures.Enums.Queue;
+using System.Threading;
 
 public class QueueStructure<T> : SinglyLinkedList<T>, IEnumerable<T>
 {
     public QueueStructure() : base() { }
+
+    /// A delegate for highlighting steps during asynchronous operations.
+    /// </summary>
+    public Func<Enum, Task> HighlightRequested;
 
     /// <summary>
     /// Adds an item to the end of the queue.
@@ -20,18 +26,20 @@ public class QueueStructure<T> : SinglyLinkedList<T>, IEnumerable<T>
         return nodeToBeEnqueued;
     }
 
-
     /// <summary>
     /// Returns the item at the front of the queue without removing it.
     /// </summary>
     /// <returns>The item at the front of the queue.</returns>
     /// <exception cref="InvalidOperationException">Thrown if the queue is empty.</exception>
-    public async void Peek(CancellationToken token)
+    public async Task PeekFront()
     {
         if (Count == 0)
         {
-            throw new InvalidOperationException("The queue is empty.");
+            await HighlightRequested.Invoke(PeekFrontSteps.CheckEmptyReturnNotFound);
+            return;
         }
+
+        await HighlightRequested.Invoke(PeekFrontSteps.ReturnHeadItem);
     }
 
     /// <summary>

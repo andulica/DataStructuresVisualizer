@@ -1,76 +1,80 @@
 ﻿@using DataStructuresVisualizer.DataStructures.Queue;
 @using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
+@using DataStructuresVisualizer.DataStructures;
+
 @inject IJSRuntime JSRuntime
+@inject CancellationService CancellationService
+
 
 <head>
     <link rel="stylesheet" href="/css/styles.css" />
 </head>
 
 <div id="linked-list" class="container">
-<h3>Queue</h3>
+    <h3>Queue</h3>
 
-<div class="operation-selection">
-    <select @bind="selectedAction">
-        <option value="Peek">Peek</option>
-        <option value="Enqueue">Enqueue</option>
-        <option value="Dequeue">Dequeue</option>
-        <option value="Create">Create</option>
-    </select>
-    @switch (selectedAction)
-    {
-        case "Peek":
-            <div class="insertion-fields">
-                <label for="inputValue">Input Value</label>
-                <input type="number" id="inputValue" @bind="inputValue" placeholder="Enter Value" />
+    <div class="operation-selection">
+        <select @bind="selectedAction">
+            <option value="Peek">Peek</option>
+            <option value="Enqueue">Enqueue</option>
+            <option value="Dequeue">Dequeue</option>
+            <option value="Create">Create</option>
+        </select>
+        @switch (selectedAction)
+        {
+            case "Peek":
+                <div class="insertion-fields">
+                    <label for="inputValue">Input Value</label>
+                    <input type="number" id="inputValue" @bind="inputValue" placeholder="Enter Value" />
 
-                <button class="custom-button" @onclick="PeekFront" disabled="@isOperationInProgress">Peek Front</button>
-                <button class="custom-button" @onclick="PeekBack" disabled="@isOperationInProgress">Peek Back</button>
+                    <button class="custom-button" @onclick="PeekFront" disabled="@isOperationInProgress">Peek Front</button>
+                    <button class="custom-button" @onclick="PeekBack" disabled="@isOperationInProgress">Peek Back</button>
 
-            </div>
-            break;
-        case "Enqueue":
-            <div class="insertion-fields">
-                <label for="inputValue">Input Value</label>
-                <input type="number" id="inputValue" @bind="inputValue" placeholder="Enter Value" />
+                </div>
+                break;
+            case "Enqueue":
+                <div class="insertion-fields">
+                    <label for="inputValue">Input Value</label>
+                    <input type="number" id="inputValue" @bind="inputValue" placeholder="Enter Value" />
 
-                <button class="custom-button" @onclick="Enqueue" disabled="@isOperationInProgress">Enqueue</button>
-            </div>
-            break;
-        case "Dequeue":
-            <div class="insertion-fields">
-                <label for="inputValue">Kx (Dequeue)</label>
-                <input type="number" id="inputValue" @bind="inputValue" placeholder="Enter Value" />
+                    <button class="custom-button" @onclick="Enqueue" disabled="@isOperationInProgress">Enqueue</button>
+                </div>
+                break;
+            case "Dequeue":
+                <div class="insertion-fields">
+                    <label for="inputValue">Kx (Dequeue)</label>
+                    <input type="number" id="inputValue" @bind="inputValue" placeholder="Enter Value" />
 
-                <button class="custom-button" @onclick="Dequeue" disabled="@isOperationInProgress">Dequeue</button>
-            </div>
-            break;
-        case "Create":
-            <div class="insertion-fields">
-                <label for="inputValue">Input Value</label>
-                <input type="number" id="inputValue" @bind="inputValue" placeholder="Enter Value" />
+                    <button class="custom-button" @onclick="Dequeue" disabled="@isOperationInProgress">Dequeue</button>
+                </div>
+                break;
+            case "Create":
+                <div class="insertion-fields">
+                    <label for="inputValue">Input Value</label>
+                    <input type="number" id="inputValue" @bind="inputValue" placeholder="Enter Value" />
 
-                <button class="custom-button" @onclick="CreateQueue" disabled="@isOperationInProgress">Create</button>
-            </div>
-            break;
-        default:
-            break;
-    }
-</div>
+                    <button class="custom-button" @onclick="CreateQueue" disabled="@isOperationInProgress">Create</button>
+                </div>
+                break;
+            default:
+                break;
+        }
+    </div>
 
-<div id="sll-display">
-    @* Render the queue here *@
-</div>
+    <div id="sll-display">
+        @* Render the queue here *@
+    </div>
 
     <CodeDisplay CodeLines="@currentCode" />
 
 
-@if (!string.IsNullOrEmpty(messageOutput))
-{
-    <div class="notification-container">
-        <span class="notification-message">@messageOutput</span>
-        <button class="notification-close" @onclick="ClearMessage">✖</button>
-    </div>
-}
+    @if (!string.IsNullOrEmpty(messageOutput))
+    {
+        <div class="notification-container">
+            <span class="notification-message">@messageOutput</span>
+            <button class="notification-close" @onclick="ClearMessage">✖</button>
+        </div>
+    }
 </div>
 
 @code {
@@ -83,6 +87,8 @@
     private string _selectedAction = "create";
     private string subSelectedAction = "";
     private IEnumerable<string> currentCode = Enumerable.Empty<string>();
+    VisualizationTiming timing = VisualizationTiming.Default;
+
 
     public string selectedAction
     {
@@ -103,6 +109,19 @@
         queue.Enqueue(rand.Next(1, 30));
         queue.Enqueue(rand.Next(1, 30));
         queue.Enqueue(rand.Next(1, 30));
+
+        SubscribingNewList();
+    }
+
+    public void Dispose()
+    {
+        UnsubscribingOldList();
+    }
+
+    private CancellationToken InitializeNewOperation()
+    {
+        CancellationService.ResetCancellationTokenSource();
+        return CancellationService.GetToken();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -196,9 +215,8 @@
             {
                 queue.Add(rand.Next(1, 30));
             }
-
+            SubscribingNewList();
             await UpdateDisplay(queue);
-
         }
         finally
         {
@@ -228,7 +246,7 @@
                 var nodeToBeRemovedFromSVG = ConvertNodeToJavaScriptFormat(nodeToRemove);
                 // var removeTask = queue.DeleteAtAsync(0, 0);
                 // var jsTask = JSRuntime.InvokeVoidAsync("removeValueInSll", nodeToBeRemovedFromSVG, delayValueForAnimation).AsTask();
-                // await Task.WhenAll(removeTask, jsTask); // Run both tasks concurrently      
+                // await Task.WhenAll(removeTask, jsTask); // Run both tasks concurrently
                 // await Task.Delay(delayValueForAnimation); // Optional delay to ensure smooth transitions
             }
         }
@@ -297,32 +315,32 @@
 
     private async Task PeekFront()
     {
-        if (isOperationInProgress) return;
-
-        isOperationInProgress = true;
-        StateHasChanged();
         subSelectedAction = "peek front";
         currentCode = GetCodeByOperation("peek front");
 
-        try
-        {
-            await JSRuntime.InvokeVoidAsync("highlightHead");
-        }
-        catch (JSException jsEx)
-        {
-            // Handle JavaScript-related exceptions
-            Console.Error.WriteLine($"JavaScript error: {jsEx.Message}");
-        }
-        catch (Exception ex)
-        {
-            // Handle any other exceptions
-            Console.Error.WriteLine($"Unexpected error: {ex.Message}");
-        }
-        finally
-        {
-            isOperationInProgress = false;
-            StateHasChanged();
-        }
+        var peekFront = queue.PeekFront();
+        var jsTask = JSRuntime.InvokeVoidAsync("highlightHead").AsTask();
+        await Task.WhenAll(peekFront, jsTask);
+        await Task.Delay(Constants.operationCancellationTime);
+        var resetCodeLineHighlight = JSRuntime.InvokeVoidAsync("resetCodeLineHighlight").AsTask();
+        var resetNodeColour = JSRuntime.InvokeVoidAsync("resetNodeColoursFromCS").AsTask();
+        await Task.WhenAll(resetCodeLineHighlight, resetNodeColour);
+    }
+
+    private async Task HandleHighlightRequest(Enum step)
+    {
+        await JSRuntime.InvokeVoidAsync("highlightLine", step);
+        await Task.Delay(timing.HighlightDelay);
+    }
+
+    private void SubscribingNewList()
+    {
+        queue.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
+    }
+
+    private void UnsubscribingOldList()
+    {
+        queue.HighlightRequested -= HandleHighlightRequest;
     }
 
     private async Task UpdateDisplay(SinglyLinkedList<int> list)

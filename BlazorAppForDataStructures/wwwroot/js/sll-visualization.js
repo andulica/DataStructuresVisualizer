@@ -193,7 +193,6 @@
         });
     }
 
-
     function highlightLinkAndArrowhead(sourceNodeId, targetNodeId, delay) {
         let linkId = `#link-${sourceNodeId}-${targetNodeId}`;
         return new Promise((resolve) => {
@@ -401,7 +400,7 @@
                             refreshSinglyLinkedList(isStack);
 
                             setCheckedTimeout(() => {
-                                resetNodeColors();
+                                resetNodeColours();
                                 resolve();
                             }, delay);
                         }, delay);
@@ -448,7 +447,7 @@
 
                         // Reset colors and resolve the operation
                         setCheckedTimeout(() => {
-                            resetNodeColors();
+                            resetNodeColours();
                             resolve();
                         }, timing.javaScriptDelay);
                     }, timing.nodeMovementDelay);
@@ -488,7 +487,7 @@
                         setNodeColor('green', newNode);
 
                         setCheckedTimeout(() => {
-                            resetNodeColors();
+                            resetNodeColours();
                             resolve();
                         }, timing.javaScriptDelay);
                     }, timing.javaScriptDelay);
@@ -499,7 +498,7 @@
                     setNodeColor('green', newNode);
 
                     setCheckedTimeout(() => {
-                        resetNodeColors();
+                        resetNodeColours();
                         resolve();
                     }, timing.javaScriptDelay);
                 }, timing.javaScriptDelay);
@@ -554,7 +553,7 @@
         });
     }
 
-    function resetNodeColors() {
+    function resetNodeColours() {
         nodes.forEach(node => {
             svg.select(`#node-${node.id}`)
                 .transition()
@@ -563,7 +562,7 @@
         });
     }
 
-    function resetLinkColors() {
+    function resetLinkColours() {
         // Select all links and reset their styles
         svg.selectAll(".link")
             .transition().duration(500)
@@ -660,49 +659,53 @@
     };
 
     window.searchValueInSLL = function (value, timing) {
-        resetNodeColors();
-        resetLinkColors();
+        resetNodeColours();
+        resetLinkColours();
         highlightNodes(value, timing.highlightDelay * 2); // Double the delay for highlighting
     };
 
     window.insertAtInSLL = function (value, selectedIndex, timing, isStack = false) {
-        resetNodeColors();
-        resetLinkColors();
+        resetNodeColours();
+        resetLinkColours();
         insertNode(value, selectedIndex, timing, isStack);
     };
 
     window.removeValueInSll = function (nodeToBeRemoved, timing, isStack) {
         removeNodeInSll(nodeToBeRemoved, timing, isStack); // Return the promise
-        resetNodeColors();
-        resetLinkColors();
+        resetNodeColours();
+        resetLinkColours();
     };
 
     window.highlightTail = function () {
-        resetNodeColors();
-        resetLinkColors();
+        resetNodeColours();
+        resetLinkColours();
         highlightTailNode();
     }
 
     window.highlightHead = function () {
-        resetNodeColors();
-        resetLinkColors();
+        resetNodeColours();
+        resetLinkColours();
         highlightHeadNode();
     }
 
     window.insertTailInSll = function (value, timing) {
-        resetNodeColors();
-        resetLinkColors();
+        resetNodeColours();
+        resetLinkColours();
         insertNodeAtTail(value, timing);
     }
 
     window.insertHeadInSll = function (value, timing, isStack) {
-        resetNodeColors();
-        resetLinkColors();
+        resetNodeColours();
+        resetLinkColours();
         insertNodeAtHead(value, timing, isStack);
     }
 
     window.resetSllColours = function () {
-        resetNodeColors();
-        resetLinkColors();
+        resetNodeColours();
+        resetLinkColours();
+    }
+
+    window.resetNodeColoursFromCS = function () {
+        resetNodeColours();
     }
 })();
