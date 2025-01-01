@@ -19,11 +19,15 @@ public class QueueStructure<T> : SinglyLinkedList<T>, IEnumerable<T>
     /// Adds an item to the end of the queue.
     /// </summary>
     /// <param name="value">The item to add to the queue.</param>
-    public SinglyLinkedListNode<T> Enqueue(T value)
+    public async Task Enqueue(SinglyLinkedListNode<T> nodeToEnqueue)
     {
-        // Add to the end of the linked list
-        SinglyLinkedListNode<T> nodeToBeEnqueued = Add(value);
-        return nodeToBeEnqueued;
+        AppendInstant(nodeToEnqueue);
+        await HighlightRequested.Invoke(EnqueueSteps.CreateVertex);
+
+        await HighlightRequested.Invoke(EnqueueSteps.UpdateTailNextPointer);
+
+        await HighlightRequested.Invoke(EnqueueSteps.UpdateTail);
+
     }
 
     /// <summary>

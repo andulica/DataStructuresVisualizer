@@ -83,7 +83,6 @@
     private string messageOutput;
     private bool isOperationInProgress = false;
     Random rand = new Random();
-    const int delayValueForAnimation = 1000;
     private string _selectedAction = "create";
     private string subSelectedAction = "";
     private IEnumerable<string> currentCode = Enumerable.Empty<string>();
@@ -106,9 +105,9 @@
 
     protected override void OnInitialized()
     {
-        queue.Enqueue(rand.Next(1, 30));
-        queue.Enqueue(rand.Next(1, 30));
-        queue.Enqueue(rand.Next(1, 30));
+        queue.Add(rand.Next(1, 30));
+        queue.Add(rand.Next(1, 30));
+        queue.Add(rand.Next(1, 30));
 
         SubscribingNewList();
     }
@@ -205,24 +204,15 @@
             messageOutput = $"The queue can have a maximum number of {queue.maxCapacity} nodes. Please enter a smaller value.";
             return;
         }
-        isOperationInProgress = true;
-        StateHasChanged();
-        try
-        {
-            queue = new QueueStructure<int>();
 
-            for (int i = 0; i < inputValue; i++)
-            {
-                queue.Add(rand.Next(1, 30));
-            }
-            SubscribingNewList();
-            await UpdateDisplay(queue);
-        }
-        finally
+        queue = new QueueStructure<int>();
+
+        for (int i = 0; i < inputValue; i++)
         {
-            isOperationInProgress = false;
-            StateHasChanged();
+            queue.Add(rand.Next(1, 30));
         }
+        SubscribingNewList();
+        await UpdateDisplay(queue);
     }
 
     private async Task Dequeue()
@@ -272,12 +262,17 @@
 
         try
         {
-            var nodeToEnqueue = queue.Enqueue(inputValue);
+            var nodeToEnqueue = new SinglyLinkedListNode<int>(inputValue);
             var nodeToBeEnqueuedOnSVG = ConvertNodeToJavaScriptFormat(nodeToEnqueue);
-            await JSRuntime.InvokeVoidAsync("insertTailInSll", nodeToBeEnqueuedOnSVG, delayValueForAnimation);
+            var queueTask = queue.Enqueue(nodeToEnqueue);
+            var JSTask =  JSRuntime.InvokeVoidAsync("insertTailInSll", nodeToBeEnqueuedOnSVG, timing).AsTask();
+
+            await Task.WhenAll(queueTask, JSTask);
         }
         finally
         {
+            var resetCodeLineHighlight = JSRuntime.InvokeVoidAsync("resetCodeLineHighlight").AsTask();
+
             isOperationInProgress = false;
             StateHasChanged();
         }

@@ -484,7 +484,7 @@
                     );
 
                     setCheckedTimeout(() => {
-                        setNodeColor('green', newNode);
+                        setNodeColor('orange', newNode);
 
                         setCheckedTimeout(() => {
                             resetNodeColours();
@@ -495,7 +495,7 @@
             } else {
                 // If there is no previous node, directly color and reset
                 setCheckedTimeout(() => {
-                    setNodeColor('green', newNode);
+                    setNodeColor('orange', newNode);
 
                     setCheckedTimeout(() => {
                         resetNodeColours();
