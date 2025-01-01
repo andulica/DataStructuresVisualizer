@@ -285,32 +285,16 @@
 
     private async Task PeekBack()
     {
-        if (isOperationInProgress) return;
-
-        isOperationInProgress = true;
-        StateHasChanged();
         subSelectedAction = "peek back";
         currentCode = GetCodeByOperation("peek back");
 
-        try
-        {
-            await JSRuntime.InvokeVoidAsync("highlightTail");
-        }
-        catch (JSException jsEx)
-        {
-            // Handle JavaScript-related exceptions
-            Console.Error.WriteLine($"JavaScript error: {jsEx.Message}");
-        }
-        catch (Exception ex)
-        {
-            // Handle any other exceptions
-            Console.Error.WriteLine($"Unexpected error: {ex.Message}");
-        }
-        finally
-        {
-            isOperationInProgress = false;
-            StateHasChanged();
-        }
+        var peekFront = queue.PeekBack();
+        var jsTask = JSRuntime.InvokeVoidAsync("highlightTail").AsTask();
+        await Task.WhenAll(peekFront, jsTask);
+        await Task.Delay(Constants.operationCancellationTime);
+        var resetCodeLineHighlight = JSRuntime.InvokeVoidAsync("resetCodeLineHighlight").AsTask();
+        var resetNodeColour = JSRuntime.InvokeVoidAsync("resetNodeColoursFromCS").AsTask();
+        await Task.WhenAll(resetCodeLineHighlight, resetNodeColour);
     }
 
     private async Task PeekFront()

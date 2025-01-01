@@ -30,7 +30,6 @@ public class QueueStructure<T> : SinglyLinkedList<T>, IEnumerable<T>
     /// Returns the item at the front of the queue without removing it.
     /// </summary>
     /// <returns>The item at the front of the queue.</returns>
-    /// <exception cref="InvalidOperationException">Thrown if the queue is empty.</exception>
     public async Task PeekFront()
     {
         if (Count == 0)
@@ -40,6 +39,20 @@ public class QueueStructure<T> : SinglyLinkedList<T>, IEnumerable<T>
         }
 
         await HighlightRequested.Invoke(PeekFrontSteps.ReturnHeadItem);
+    }
+
+    /// <summary>
+    /// Returns the item at the back of the queue without removing it.
+    /// </summary>
+    /// <returns>The item at the back of the queue.</returns>
+    public async Task PeekBack()
+    {
+        if (Count == 0)
+        {
+            await HighlightRequested.Invoke(PeekBackSteps.CheckEmptyReturnNotFound);
+        }
+
+        await HighlightRequested.Invoke(PeekBackSteps.ReturnTailItem);
     }
 
     /// <summary>
