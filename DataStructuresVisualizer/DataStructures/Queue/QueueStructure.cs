@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using DataStructuresVisualizer.DataStructures.Enums.Queue;
 using System.Threading;
+using System.Reflection;
 
 public class QueueStructure<T> : SinglyLinkedList<T>, IEnumerable<T>
 {
@@ -28,6 +29,23 @@ public class QueueStructure<T> : SinglyLinkedList<T>, IEnumerable<T>
 
         await HighlightRequested.Invoke(EnqueueSteps.UpdateTail);
 
+    }
+
+    public async Task Dequeue(SinglyLinkedListNode<T> nodeToDequeue, CancellationToken cancellationToken)
+    {
+        DeleteAtInstant(nodeToDequeue);
+
+        await HighlightRequested.Invoke(DequeueSteps.LoopKTimes); // "for (i = 0; i < K; ++i)"
+        cancellationToken.ThrowIfCancellationRequested();
+
+        await HighlightRequested.Invoke(DequeueSteps.SaveHeadInTmp); // "tmp = head"
+        cancellationToken.ThrowIfCancellationRequested();
+
+        await HighlightRequested.Invoke(DequeueSteps.MoveHeadToNext); // "head = head.next"
+        cancellationToken.ThrowIfCancellationRequested();
+
+        await HighlightRequested.Invoke(DequeueSteps.DeleteTmp); // "delete tmp"
+        cancellationToken.ThrowIfCancellationRequested();
     }
 
     /// <summary>

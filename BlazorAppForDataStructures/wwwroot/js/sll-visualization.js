@@ -42,7 +42,7 @@
         };
     }
 
-    
+
     // Draw line with arrow and assign an ID immediately
     function drawLineWithArrow(startX, startY, endX, endY, radius, strokeWidth, id, delay) {
         const adjustedPoints = adjustLineEndpoints(startX, startY, endX, endY, radius, strokeWidth);
@@ -570,7 +570,7 @@
             .attr('marker-end', 'url(#arrowhead)'); // Default arrowhead, not the highlighted one
     }
 
-    async function removeNodeInSll(nodeToBeRemoved, timing, isStack) {
+    async function removeNodeInSll(nodeToBeRemoved, timing, isStack, lastNodeBoolFlag) {
 
         await highlightNodes(nodeToBeRemoved.id, timing.highlightDelay * 2);
 
@@ -591,20 +591,23 @@
                             .style('opacity', 0)
                             .on('end', () => {
                                 svg.select(`#textId-${nodeToBeRemoved.id}`).remove();
+                                updateLinksAfterRemoval(nodeToBeRemoved);
+                                
 
                                 // Remove the node from the nodes array
                                 const nodeIndex = nodes.findIndex(node => node.id === nodeToBeRemoved.id);
                                 if (nodeIndex !== -1) {
                                     nodes.splice(nodeIndex, 1);
                                 }
+                                if (lastNodeBoolFlag) {
+                                    // Update links and refresh the list
+                                    setCheckedTimeout(() => {
+                                        updateLinksAfterRemoval(nodeToBeRemoved);
+                                        refreshSinglyLinkedList(isStack);
 
-                                // Update links and refresh the list
-                                setCheckedTimeout(() => {
-                                    updateLinksAfterRemoval(nodeToBeRemoved);
-                                    refreshSinglyLinkedList(isStack);
-
-                                    // Complete the operation
-                                }, timing.javaScriptDelay);
+                                        // Complete the operation
+                                    }, timing.javaScriptDelay);
+                                }
                             });
                     }, timing.javaScriptDelay);
                 });
@@ -670,11 +673,14 @@
         insertNode(value, selectedIndex, timing, isStack);
     };
 
-    window.removeValueInSll = function (nodeToBeRemoved, timing, isStack) {
-        removeNodeInSll(nodeToBeRemoved, timing, isStack); // Return the promise
-        resetNodeColours();
-        resetLinkColours();
-    };
+    window.removeValueInSll = async function (nodeToBeRemoved, timing, isStack, lastNodeBoolFlag) {
+        await highlightHeadNode();
+        removeNodeInSll(nodeToBeRemoved, timing, isStack, lastNodeBoolFlag); // Return the promise
+        if (lastNodeBoolFlag) {
+            resetNodeColours();
+            resetLinkColours();
+        }
+    }
 
     window.highlightTail = function () {
         resetNodeColours();

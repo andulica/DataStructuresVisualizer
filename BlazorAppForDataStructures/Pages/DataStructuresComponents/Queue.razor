@@ -217,6 +217,8 @@
 
     private async Task Dequeue()
     {
+        var token = InitializeNewOperation(); // Ensure ongoing operation is cancelled before starting a new one
+
         if (isOperationInProgress) return;
 
         if (inputValue >= queue.Count)
@@ -228,21 +230,35 @@
         isOperationInProgress = true;
         StateHasChanged();
 
+        bool lastNodeToBeRemovedBoolFlag = false;
         try
         {
-            for (int i = 1; i <= inputValue; i++) // i starts from 1 to dequeue the number of nodes specified by the user
+            for (int i = 1; i <= inputValue; i++)
             {
+                if (i == inputValue)
+                {
+                    lastNodeToBeRemovedBoolFlag = true;
+                }
                 var nodeToRemove = queue.Head;
                 var nodeToBeRemovedFromSVG = ConvertNodeToJavaScriptFormat(nodeToRemove);
-                // var removeTask = queue.DeleteAtAsync(0, 0);
-                // var jsTask = JSRuntime.InvokeVoidAsync("removeValueInSll", nodeToBeRemovedFromSVG, delayValueForAnimation).AsTask();
-                // await Task.WhenAll(removeTask, jsTask); // Run both tasks concurrently
-                // await Task.Delay(delayValueForAnimation); // Optional delay to ensure smooth transitions
+                var removeTask = queue.Dequeue(nodeToRemove, token);
+                var jsTask = JSRuntime.InvokeVoidAsync("removeValueInSll", nodeToBeRemovedFromSVG, timing, false, lastNodeToBeRemovedBoolFlag).AsTask();
+                await Task.WhenAll(removeTask, jsTask); // Run both tasks concurrently
+                await Task.Delay(timing.HighlightDelay);
             }
+        }
+        catch (OperationCanceledException)
+        {
+            messageOutput = $"The visual was cancelled. A number of {inputValue} where dequeued.";
+            var queueData = ConvertQueueToJavaScriptFormat(queue);
+
+            await JSRuntime.InvokeVoidAsync("SllCancelVisuals");
+            await JSRuntime.InvokeVoidAsync("drawLinkedList", queueData, false);
         }
         finally
         {
             isOperationInProgress = false;
+            var resetCodeLineHighlight = JSRuntime.InvokeVoidAsync("resetCodeLineHighlight").AsTask();
             StateHasChanged();
         }
     }
