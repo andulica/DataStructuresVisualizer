@@ -133,11 +133,26 @@
         doublyLinkedList.Add(rand.Next(1, 30));
 
         doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
+        NotificationService.OnMessageAdded += HandleMessageAdded;
+        NotificationService.OnMessageCleared += HandleMessageCleared;
     }
 
     public void Dispose()
     {
+        NotificationService.OnMessageAdded -= HandleMessageAdded;
+        NotificationService.OnMessageCleared -= HandleMessageCleared;
         doublyLinkedList.HighlightRequested -= HandleHighlightRequest; // Unsubscribe from highlight events
+    }
+    private void HandleMessageAdded(string message)
+    {
+        messageOutput = message;
+        StateHasChanged();
+    }
+
+    private void HandleMessageCleared()
+    {
+        messageOutput = string.Empty;
+        StateHasChanged();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

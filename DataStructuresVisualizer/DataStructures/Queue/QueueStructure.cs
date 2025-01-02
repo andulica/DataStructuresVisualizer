@@ -28,7 +28,6 @@ public class QueueStructure<T> : SinglyLinkedList<T>, IEnumerable<T>
         await HighlightRequested.Invoke(EnqueueSteps.UpdateTailNextPointer);
 
         await HighlightRequested.Invoke(EnqueueSteps.UpdateTail);
-
     }
 
     public async Task Dequeue(SinglyLinkedListNode<T> nodeToDequeue, CancellationToken cancellationToken)
@@ -67,14 +66,16 @@ public class QueueStructure<T> : SinglyLinkedList<T>, IEnumerable<T>
     /// Returns the item at the back of the queue without removing it.
     /// </summary>
     /// <returns>The item at the back of the queue.</returns>
-    public async Task PeekBack()
+    public async Task PeekBack(CancellationToken cancellationToken)
     {
         if (Count == 0)
         {
             await HighlightRequested.Invoke(PeekBackSteps.CheckEmptyReturnNotFound);
+            cancellationToken.ThrowIfCancellationRequested();
         }
 
         await HighlightRequested.Invoke(PeekBackSteps.ReturnTailItem);
+        cancellationToken.ThrowIfCancellationRequested();
     }
 
     /// <summary>

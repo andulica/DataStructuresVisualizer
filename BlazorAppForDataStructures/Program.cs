@@ -29,7 +29,7 @@ namespace BlazorAppForDataStructures
                 .AddEntityFrameworkStores<BlazorAppForDataStructuresContext>();
 
             builder.Services.AddScoped<QuizService>(); 
-            builder.Services.AddTransient<CancellationService>();
+            builder.Services.AddScoped<CancellationService>();
 
             builder.Services.AddScoped<NotificationService>();
 
