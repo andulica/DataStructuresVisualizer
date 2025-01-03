@@ -47,6 +47,14 @@ public class QueueStructure<T> : SinglyLinkedList<T>, IEnumerable<T>
         cancellationToken.ThrowIfCancellationRequested();
     }
 
+    public void DequeueInstant(int numberOfNodesToDequeue)
+    {
+        for (int i = 0; i < numberOfNodesToDequeue; i++)
+        {
+            DeleteAtInstant(FindHead());
+        }
+    }
+
     /// <summary>
     /// Returns the item at the front of the queue without removing it.
     /// </summary>
