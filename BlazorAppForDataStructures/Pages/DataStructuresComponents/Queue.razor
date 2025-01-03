@@ -25,9 +25,6 @@
         {
             case "Peek":
                 <div class="insertion-fields">
-                    <label for="inputValue">Input Value</label>
-                    <input type="number" id="inputValue" @bind="inputValue" placeholder="Enter Value" />
-
                     <button class="custom-button" @onclick="PeekFront" disabled="@isOperationInProgress">Peek Front</button>
                     <button class="custom-button" @onclick="PeekBack" disabled="@isOperationInProgress">Peek Back</button>
 
