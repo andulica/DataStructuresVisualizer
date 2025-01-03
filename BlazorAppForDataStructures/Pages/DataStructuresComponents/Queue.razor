@@ -4,6 +4,7 @@
 
 @inject IJSRuntime JSRuntime
 @inject CancellationService CancellationService
+@inject NotificationService NotificationService
 
 
 <head>
@@ -70,7 +71,7 @@
     {
         <div class="notification-container">
             <span class="notification-message">@messageOutput</span>
-            <button class="notification-close" @onclick="ClearMessage">✖</button>
+            <button class="notification-close" @onclick="() => NotificationService.ClearMessage()">✖</button>
         </div>
     }
 </div>
@@ -205,7 +206,7 @@
 
         if (inputValue > queue.maxCapacity)
         {
-            messageOutput = $"The queue can have a maximum number of {queue.maxCapacity} nodes. Please enter a smaller value.";
+            NotificationService.AddMessage($"The queue can have a maximum number of {queue.maxCapacity} nodes. Please enter a smaller value.");
             return;
         }
 
@@ -227,7 +228,7 @@
 
         if (inputValue > queue.Count)
         {
-            messageOutput = $"The queue has {queue.Count} nodes. Please enter a smaller value to dequeue.";
+            NotificationService.AddMessage($"The queue has {queue.Count} nodes. Please enter a smaller value to dequeue.");
             return;
         }
 
@@ -235,6 +236,7 @@
         StateHasChanged();
         int remainingNumberOfNodesToBeRemoved = inputValue;
         bool lastNodeToBeRemovedBoolFlag = false;
+
         try
         {
             for (int i = 1; i <= inputValue; i++)
@@ -255,7 +257,7 @@
         }
         catch (OperationCanceledException)
         {
-            messageOutput = $"The visual was cancelled. A number of {inputValue} where dequeued.";
+            NotificationService.AddMessage($"The visual was cancelled. A number of {inputValue} where dequeued.");
             queue.DequeueInstant(remainingNumberOfNodesToBeRemoved);
 
             var queueData = ConvertQueueToJavaScriptFormat(queue);
@@ -266,7 +268,7 @@
         finally
         {
             isOperationInProgress = false;
-            var resetCodeLineHighlight = JSRuntime.InvokeVoidAsync("resetCodeLineHighlight").AsTask();
+            await JSRuntime.InvokeVoidAsync("resetCodeLineHighlight").AsTask();
             StateHasChanged();
         }
     }
@@ -279,7 +281,7 @@
 
         if (queue.Count == queue.maxCapacity)
         {
-            messageOutput = $"The queue has reached maximum number of nodes. Please dequeue a value or create a smaller queue.";
+            NotificationService.AddMessage($"The queue has reached maximum number of nodes. Please dequeue a value or create a smaller queue.");
             return;
         }
 
@@ -297,14 +299,14 @@
         }
         catch (OperationCanceledException)
         {
-            messageOutput = $"Visual cancelled. Node with value {inputValue} was enqueued";
+            NotificationService.AddMessage($"Visual cancelled. Node with value {inputValue} was enqueued");
 
             var queueData = ConvertQueueToJavaScriptFormat(queue);
             await JSRuntime.InvokeVoidAsync("drawLinkedList", queueData, false);
         }
         finally
         {
-            var resetCodeLineHighlight = JSRuntime.InvokeVoidAsync("resetCodeLineHighlight").AsTask();
+            await JSRuntime.InvokeVoidAsync("resetCodeLineHighlight").AsTask();
 
             isOperationInProgress = false;
             StateHasChanged();
@@ -366,21 +368,32 @@
     private void SubscribingNewList()
     {
         queue.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
+        NotificationService.OnMessageAdded += HandleMessageAdded;
+        NotificationService.OnMessageCleared += HandleMessageCleared;
     }
 
     private void UnsubscribingOldList()
     {
+        NotificationService.OnMessageAdded -= HandleMessageAdded;
+        NotificationService.OnMessageCleared -= HandleMessageCleared;
         queue.HighlightRequested -= HandleHighlightRequest;
+    }
+
+    private void HandleMessageAdded(string message)
+    {
+        messageOutput = message;
+        StateHasChanged();
+    }
+
+    private void HandleMessageCleared()
+    {
+        messageOutput = string.Empty;
+        StateHasChanged();
     }
 
     private async Task UpdateDisplay(SinglyLinkedList<int> list)
     {
         var queueData = ConvertQueueToJavaScriptFormat(queue);
         await JSRuntime.InvokeVoidAsync("drawLinkedList", queueData);
-    }
-
-    private void ClearMessage()
-    {
-        messageOutput = "";
     }
 }
