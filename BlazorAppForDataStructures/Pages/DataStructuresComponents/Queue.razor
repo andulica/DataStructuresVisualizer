@@ -245,7 +245,7 @@
                 }
                 var nodeToRemove = queue.Head;
                 var nodeToBeRemovedFromSVG = ConvertNodeToJavaScriptFormat(nodeToRemove);
-                var removeTask = queue.Dequeue(nodeToRemove, token);
+                var removeTask = queue.DequeueAsync(nodeToRemove, token);
                 remainingNumberOfNodesToBeRemoved -= i;
 
                 var jsTask = JSRuntime.InvokeVoidAsync("removeValueInSll", nodeToBeRemovedFromSVG, timing, false, lastNodeToBeRemovedBoolFlag).AsTask();
@@ -275,6 +275,8 @@
     {
         if (isOperationInProgress) return;
 
+        var token = InitializeNewOperation();
+
         if (queue.Count == queue.maxCapacity)
         {
             messageOutput = $"The queue has reached maximum number of nodes. Please dequeue a value or create a smaller queue.";
@@ -288,10 +290,17 @@
         {
             var nodeToEnqueue = new SinglyLinkedListNode<int>(inputValue);
             var nodeToBeEnqueuedOnSVG = ConvertNodeToJavaScriptFormat(nodeToEnqueue);
-            var queueTask = queue.Enqueue(nodeToEnqueue);
-            var JSTask =  JSRuntime.InvokeVoidAsync("insertTailInSll", nodeToBeEnqueuedOnSVG, timing).AsTask();
+            var queueTask = queue.EnqueueAsync(nodeToEnqueue, token);
+            var JSTask = JSRuntime.InvokeVoidAsync("insertTailInSll", nodeToBeEnqueuedOnSVG, timing).AsTask();
 
             await Task.WhenAll(queueTask, JSTask);
+        }
+        catch (OperationCanceledException)
+        {
+            messageOutput = $"Visual cancelled. Node with value {inputValue} was enqueued";
+
+            var queueData = ConvertQueueToJavaScriptFormat(queue);
+            await JSRuntime.InvokeVoidAsync("drawLinkedList", queueData, false);
         }
         finally
         {
@@ -304,8 +313,6 @@
 
     private async Task PeekBack()
     {
-        var token = InitializeNewOperation();
-
         if (isOperationInProgress)
         {
             return;
@@ -316,18 +323,13 @@
         subSelectedAction = "peek back";
         currentCode = GetCodeByOperation("peek back");
 
-        try
-        {
-            var peekFront = queue.PeekBack(token);
-            var jsTask = JSRuntime.InvokeVoidAsync("highlightTail").AsTask();
-            await Task.WhenAll(peekFront, jsTask);
-            await Task.Delay(Constants.operationCancellationTime);
-            var resetCodeLineHighlight = JSRuntime.InvokeVoidAsync("resetCodeLineHighlight").AsTask();
-            var resetNodeColour = JSRuntime.InvokeVoidAsync("resetNodeColoursFromCS").AsTask();
-            await Task.WhenAll(resetCodeLineHighlight, resetNodeColour);
-        } catch (OperationCanceledException)
-        {
-        }
+        var peekFront = queue.PeekBack();
+        var jsTask = JSRuntime.InvokeVoidAsync("highlightTail").AsTask();
+
+        await Task.WhenAll(peekFront, jsTask);
+
+        await JSRuntime.InvokeVoidAsync("resetNodeColoursFromCS");
+        await JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
 
         isOperationInProgress = false;
     }
@@ -346,11 +348,11 @@
 
         var peekFront = queue.PeekFront();
         var jsTask = JSRuntime.InvokeVoidAsync("highlightHead").AsTask();
+
         await Task.WhenAll(peekFront, jsTask);
-        await Task.Delay(Constants.operationCancellationTime);
-        var resetCodeLineHighlight = JSRuntime.InvokeVoidAsync("resetCodeLineHighlight").AsTask();
-        var resetNodeColour = JSRuntime.InvokeVoidAsync("resetNodeColoursFromCS").AsTask();
-        await Task.WhenAll(resetCodeLineHighlight, resetNodeColour);
+
+        await JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
+        await JSRuntime.InvokeVoidAsync("resetNodeColoursFromCS");
 
         isOperationInProgress = false;
     }

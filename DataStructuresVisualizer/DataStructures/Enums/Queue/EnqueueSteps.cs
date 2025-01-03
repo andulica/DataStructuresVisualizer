@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace DataStructuresVisualizer.DataStructures.Enums.Queue
 {
     /// <summary>
-    /// Enum representing the steps involved in an Enqueue operation on a Queue.
+    /// Enum representing the steps involved in an EnqueueAsync operation on a Queue.
     /// </summary>
     public enum EnqueueSteps
     {

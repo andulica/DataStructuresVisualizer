@@ -20,17 +20,20 @@ public class QueueStructure<T> : SinglyLinkedList<T>, IEnumerable<T>
     /// Adds an item to the end of the queue.
     /// </summary>
     /// <param name="value">The item to add to the queue.</param>
-    public async Task Enqueue(SinglyLinkedListNode<T> nodeToEnqueue)
+    public async Task EnqueueAsync(SinglyLinkedListNode<T> nodeToEnqueue, CancellationToken cancellationToken)
     {
         AppendInstant(nodeToEnqueue);
         await HighlightRequested.Invoke(EnqueueSteps.CreateVertex);
+        cancellationToken.ThrowIfCancellationRequested();
 
         await HighlightRequested.Invoke(EnqueueSteps.UpdateTailNextPointer);
+        cancellationToken.ThrowIfCancellationRequested();
 
         await HighlightRequested.Invoke(EnqueueSteps.UpdateTail);
+        cancellationToken.ThrowIfCancellationRequested();
     }
 
-    public async Task Dequeue(SinglyLinkedListNode<T> nodeToDequeue, CancellationToken cancellationToken)
+    public async Task DequeueAsync(SinglyLinkedListNode<T> nodeToDequeue, CancellationToken cancellationToken)
     {
         DeleteAtInstant(nodeToDequeue);
 
@@ -74,16 +77,14 @@ public class QueueStructure<T> : SinglyLinkedList<T>, IEnumerable<T>
     /// Returns the item at the back of the queue without removing it.
     /// </summary>
     /// <returns>The item at the back of the queue.</returns>
-    public async Task PeekBack(CancellationToken cancellationToken)
+    public async Task PeekBack()
     {
         if (Count == 0)
         {
             await HighlightRequested.Invoke(PeekBackSteps.CheckEmptyReturnNotFound);
-            cancellationToken.ThrowIfCancellationRequested();
         }
 
         await HighlightRequested.Invoke(PeekBackSteps.ReturnTailItem);
-        cancellationToken.ThrowIfCancellationRequested();
     }
 
     /// <summary>
