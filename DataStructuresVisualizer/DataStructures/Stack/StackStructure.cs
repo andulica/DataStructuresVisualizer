@@ -1,37 +1,44 @@
 ﻿using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
-using DataStructuresVisualizer.DataStructures.Enums;
-using DataStructuresVisualizer.DataStructures;
+using DataStructuresVisualizer.DataStructures.Enums.SinglyLinkedList;
+using DataStructuresVisualizer.DataStructures.Enums.Queue;
+using System.Threading;
 
 namespace DataStructuresVisualizer.DataStructures.Stack
 {
     public class StackStructure <T> : SinglyLinkedList<T>/*,IEnumerable<T>*/
     {
-        // Internal linked list to store the elements of the stack.
-        private SinglyLinkedList<T> list = new SinglyLinkedList<T>();
-        
-        /// <summary>
-        /// Adds an item to the top of the stack.
-        /// </summary>
-        /// <param name="node">The node to add to the stack.</param>
-        /// <returns>The node that was added to the stack.</returns>
-        //public async Task<SinglyLinkedListNode<T>> PushAsync(T value)
-        //{
-        //    var nodeToPush = new SinglyLinkedListNode<T>(value);
-        //    await list.PrependAsync(nodeToPush);
 
-        //    return nodeToPush;
-        //}
+        /// A delegate for highlighting steps during asynchronous operations.
+        /// </summary>
+        public Func<Enum, Task> HighlightRequested;
 
         /// <summary>
         /// Removes and returns the item at the top of the stack.
         /// </summary>
         /// <returns>The item at the top of the stack.</returns>
         /// <exception cref="InvalidOperationException">Thrown if the stack is empty.</exception>
-        public void Pop()
+        public async Task PopAsync(SinglyLinkedListNode <T> nodeToPop, CancellationToken cancellationToken)
         {
-            if (list.Count == 0)
+            DeleteAtInstant(nodeToPop);
+
+            await HighlightRequested.Invoke(DequeueSteps.LoopKTimes); // "for (i = 0; i < K; ++i)"
+            cancellationToken.ThrowIfCancellationRequested();
+
+            await HighlightRequested.Invoke(DequeueSteps.SaveHeadInTmp); // "tmp = head"
+            cancellationToken.ThrowIfCancellationRequested();
+
+            await HighlightRequested.Invoke(DequeueSteps.MoveHeadToNext); // "head = head.next"
+            cancellationToken.ThrowIfCancellationRequested();
+
+            await HighlightRequested.Invoke(DequeueSteps.DeleteTmp); // "delete tmp"
+            cancellationToken.ThrowIfCancellationRequested();
+        }
+
+        public void DequeueInstant(int numberOfNodesToDequeue)
+        {
+            for (int i = 0; i < numberOfNodesToDequeue; i++)
             {
-                throw new InvalidOperationException("The stack is empty.");
+                DeleteAtInstant(FindHead());
             }
         }
 
@@ -40,29 +47,32 @@ namespace DataStructuresVisualizer.DataStructures.Stack
         /// </summary>
         /// <returns>The item at the top of the stack.</returns>
         /// <exception cref="InvalidOperationException">Thrown if the stack is empty.</exception>
-        public void Peek()
+        public async Task Peek(CancellationToken cancellationToken)
         {
-            if (list.Count == 0)
+            if (Count == 0)
             {
-                throw new InvalidOperationException("The stack is empty.");
+                await HighlightRequested.Invoke(PeekFrontSteps.CheckEmptyReturnNotFound);
+                cancellationToken.ThrowIfCancellationRequested();
             }
-        }
-        /// <summary>
-        /// Returns an enumerator that iterates through the stack.
-        /// </summary>
-        /// <returns>An enumerator for the stack.</returns>
-        //public IEnumerator<T> GetEnumerator()
-        //{
-        //    return list.GetEnumerator();
-        //}
 
-        /// <summary>
-        /// Returns an enumerator that iterates through a collection.
-        /// </summary>
-        /// <returns>An IEnumerator object that can be used to iterate through the collection.</returns>
-        //System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-        //{
-        //    return list.GetEnumerator();
-        //}
+            await HighlightRequested.Invoke(PeekFrontSteps.ReturnHeadItem);
+            cancellationToken.ThrowIfCancellationRequested();
+        }
+
+        public async Task PushAsync(SinglyLinkedListNode<T> nodeToPush, CancellationToken cancellationToken)
+        {
+            await HighlightRequested.Invoke(PrependSteps.CreateVertex);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            await HighlightRequested.Invoke(PrependSteps.SetNextPointer);
+            cancellationToken.ThrowIfCancellationRequested();
+            nodeToPush.Next = Head;
+
+            await HighlightRequested.Invoke(PrependSteps.SetHead);
+            cancellationToken.ThrowIfCancellationRequested();
+            _head = nodeToPush;
+
+            count++;
+        }
     }
 }

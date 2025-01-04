@@ -109,9 +109,7 @@
     private int inputValue;
     private string messageOutput = "";
     private IEnumerable<string> currentCode = Enumerable.Empty<string>();
-    private List<Snapshot> snapshots = new();
-    private int currentSnapshotIndex = 0;
-    private bool isStack = false;
+    private const bool isStack = false;
     bool isOperationInProgress = false;
 
     VisualizationTiming timing = VisualizationTiming.Default;
@@ -130,6 +128,15 @@
         }
     }
 
+    protected override void OnInitialized()
+    {
+        linkedList.Add(rand.Next(1, 30));
+        linkedList.Add(rand.Next(1, 30));
+        linkedList.Add(rand.Next(1, 30));
+
+        SubscribingNewList();
+    }
+
     private CancellationToken InitializeNewOperation()
     {
         CancellationService.ResetCancellationTokenSource();
@@ -140,15 +147,6 @@
     {
         selectedAction = e.Value.ToString();
         InitializeNewOperation(); // Cancel the ongoing operation when a new action is selected
-    }
-
-    protected override void OnInitialized()
-    {
-        linkedList.Add(rand.Next(1, 30));
-        linkedList.Add(rand.Next(1, 30));
-        linkedList.Add(rand.Next(1, 30));
-
-        SubscribingNewList();
     }
 
     private void HandleMessageAdded(string message)
@@ -168,12 +166,37 @@
         UnsubscribingOldList();
     }
 
-    private Dictionary<AppendSteps, List<int>> appendStepMap = new()
-{
-    { AppendSteps.CreateVertex, new List<int> { 0 } },
-    { AppendSteps.UpdateTailNextPointer, new List<int> { 1 } },
-    { AppendSteps.UpdateTail, new List<int> { 2, 3 } }
-};
+    private async Task HandleHighlightRequest(Enum step)
+    {
+        await JSRuntime.InvokeVoidAsync("highlightLine", step);
+        await Task.Delay(timing.HighlightDelay);
+    }
+
+    private async Task UpdateDisplay(SinglyLinkedList<int> list)
+    {
+        var linkedListData = ConvertListToJavaScriptFormat(list);
+        await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
+    }
+
+    private async void CreateNewList()
+    {
+        NotificationService.AddMessage($"The list is empty. New list has been created.");
+        await CreateSinglyLinkedList();
+    }
+
+    private void SubscribingNewList()
+    {
+        NotificationService.OnMessageAdded += HandleMessageAdded;
+        NotificationService.OnMessageCleared += HandleMessageCleared;
+        linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
+    }
+
+    private void UnsubscribingOldList()
+    {
+        NotificationService.OnMessageAdded -= HandleMessageAdded;
+        NotificationService.OnMessageCleared -= HandleMessageCleared;
+        linkedList.HighlightRequested -= HandleHighlightRequest;
+    }
 
     private IEnumerable<string> GetCodeByOperation(string operation)
     {
@@ -233,9 +256,7 @@
     {
         if (firstRender)
         {
-            // Convert the linked list to a format suitable for JavaScript
-            var linkedListData = ConvertListToJavaScriptFormat(linkedList);
-            await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
+            await UpdateDisplay(linkedList);
         }
     }
 
@@ -281,17 +302,13 @@
                 linkedList.InsertAtInstant(insertPosition, newNode);
             }
 
-            var linkedListData = ConvertListToJavaScriptFormat(linkedList);
-            await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
+            await UpdateDisplay(linkedList);
 
             NotificationService.AddMessage($"Visual cancelled. Value {inputValue} inserted at index {insertPosition}.");
         }
         finally
         {
-            await JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
-
-            await Task.Delay(Constants.operationCancellationTime);
-            isOperationInProgress = false;
+            FinishVisual();
         }
     }
 
@@ -319,7 +336,7 @@
             isOperationInProgress = true;
 
             var prependTask = linkedList.PrependAsync(head, token);
-            var jsTask = JSRuntime.InvokeVoidAsync("insertHeadInSll", headForJSInsertion, timing, isStack = false).AsTask();
+            var jsTask = JSRuntime.InvokeVoidAsync("insertHeadInSll", headForJSInsertion, timing, isStack).AsTask();
 
             await Task.WhenAll(prependTask, jsTask); // Run both tasks concurrently
         }
@@ -331,18 +348,13 @@
             {
                 linkedList.PrependInstant(head); // Insert the node instantly in case of an exception)
             }
-            var linkedListData = ConvertListToJavaScriptFormat(linkedList);
-
-            await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
+            await UpdateDisplay(linkedList);
 
             NotificationService.AddMessage($"Visual cancelled. Value {inputValue} prepended.");
         }
         finally
         {
-            JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
-
-            await Task.Delay(Constants.operationCancellationTime);
-            isOperationInProgress = false;
+            FinishVisual();
         }
     }
 
@@ -382,21 +394,13 @@
                 linkedList.AppendInstant(tail); // Insert the node instantly in case of an exception)
             }
 
-            var linkedListData = ConvertListToJavaScriptFormat(linkedList);
-
-            await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
+            await UpdateDisplay(linkedList);
 
             NotificationService.AddMessage($"Visual cancelled. Value {inputValue} appended.");
         }
         finally
         {
-            JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
-
-            currentSnapshotIndex = linkedList.StateHistory.Count - 1;
-            await InvokeAsync(StateHasChanged);
-
-            await Task.Delay(Constants.operationCancellationTime);
-            isOperationInProgress = false;
+            FinishVisual();
         }
     }
 
@@ -425,16 +429,11 @@
 
             NotificationService.AddMessage($"Visual cancelled.");
 
-            var linkedListData = ConvertListToJavaScriptFormat(linkedList);
-
-            await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
+            await UpdateDisplay(linkedList);
         }
         finally
         {
-            JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
-
-            await Task.Delay(Constants.operationCancellationTime);
-            isOperationInProgress = false;
+            FinishVisual();
         }
     }
 
@@ -476,19 +475,22 @@
                 linkedList.DeleteAtInstant(nodeToRemove);
             }
 
-            var linkedListData = ConvertListToJavaScriptFormat(linkedList);
-
-            await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
+            await UpdateDisplay(linkedList);
 
             NotificationService.AddMessage($"Visual cancelled. Node at index {inputValue} removed.");
         }
         finally
         {
-            JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
-
-            await Task.Delay(Constants.operationCancellationTime);
-            isOperationInProgress = false;
+            FinishVisual();
         }
+    }
+
+    private async void FinishVisual()
+    {
+        await JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
+
+        await Task.Delay(Constants.operationCancellationTime);
+        isOperationInProgress = false;
     }
 
     private async Task CreateSinglyLinkedList()
@@ -505,12 +507,12 @@
             linkedList.Add(rand.Next(1, 30));
             linkedList.Add(rand.Next(1, 30));
             SubscribingNewList();
+            await UpdateDisplay(linkedList);
             return;
         }
 
         linkedList = new SinglyLinkedList<int>();
         SubscribingNewList();
-        linkedList.StateHistory.Clear();
 
         for (int i = 0; i < inputValue; i++)
         {
@@ -518,42 +520,8 @@
         }
 
         await UpdateDisplay(linkedList);
-        await InvokeAsync(StateHasChanged);
     }
 
-    private async Task HandleHighlightRequest(Enum step)
-    {
-        await JSRuntime.InvokeVoidAsync("highlightLine", step);
-        await Task.Delay(timing.HighlightDelay);
-    }
-
-    private async Task UpdateDisplay(SinglyLinkedList<int> list)
-    {
-        var linkedListData = ConvertListToJavaScriptFormat(list);
-        await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
-    }
-
-    private async void CreateNewList()
-    {
-        NotificationService.AddMessage($"The list is empty. New list has been created.");
-        await CreateSinglyLinkedList();
-        var linkedListData = ConvertListToJavaScriptFormat(linkedList);
-        await JSRuntime.InvokeVoidAsync("drawLinkedList", linkedListData, false);
-    }
-
-    private void SubscribingNewList ()
-    {
-        NotificationService.OnMessageAdded += HandleMessageAdded;
-        NotificationService.OnMessageCleared += HandleMessageCleared;
-        linkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
-    }
-
-    private void UnsubscribingOldList ()
-    {
-        NotificationService.OnMessageAdded -= HandleMessageAdded;
-        NotificationService.OnMessageCleared -= HandleMessageCleared;
-        linkedList.HighlightRequested -= HandleHighlightRequest;
-    }
     private object ConvertNodeToJavaScriptFormat(SinglyLinkedListNode<int> node)
     {
         return new

@@ -114,6 +114,22 @@
         }
     }
 
+    protected override void OnInitialized()
+    {
+        doublyLinkedList.Add(rand.Next(1, 30));
+        doublyLinkedList.Add(rand.Next(1, 30));
+        doublyLinkedList.Add(rand.Next(1, 30));
+
+        SubscribingNewList();
+    }
+
+    private void SubscribingNewList()
+    {
+        doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
+        NotificationService.OnMessageAdded += HandleMessageAdded;
+        NotificationService.OnMessageCleared += HandleMessageCleared;
+    }
+
     private CancellationToken InitializeNewOperation()
     {
         CancellationService.ResetCancellationTokenSource();
@@ -124,17 +140,6 @@
     {
         selectedAction = e.Value.ToString();
         InitializeNewOperation(); // Cancel the ongoing operation when a new action is selected
-    }
-
-    protected override void OnInitialized()
-    {
-        doublyLinkedList.Add(rand.Next(1, 30));
-        doublyLinkedList.Add(rand.Next(1, 30));
-        doublyLinkedList.Add(rand.Next(1, 30));
-
-        doublyLinkedList.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
-        NotificationService.OnMessageAdded += HandleMessageAdded;
-        NotificationService.OnMessageCleared += HandleMessageCleared;
     }
 
     public void Dispose()
@@ -153,6 +158,12 @@
     {
         messageOutput = string.Empty;
         StateHasChanged();
+    }
+
+    private async Task HandleHighlightRequest(Enum step)
+    {
+        await JSRuntime.InvokeVoidAsync("highlightLine", step);
+        await Task.Delay(timing.HighlightDelay);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -264,17 +275,13 @@
                 doublyLinkedList.InsertAtInstant(nodeToInsert, insertPosition);
             }
 
-            var doublyLinkedListData = ConvertListToJavaScriptFormat(doublyLinkedList);
-            await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", doublyLinkedListData);
+            await UpdateDisplay();
 
             NotificationService.AddMessage($"Visual cancelled. Value {inputValue} inserted at index {insertPosition}.");
         }
         finally
         {
-            JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
-
-            await Task.Delay(Constants.operationCancellationTime);
-            isOperationInProgress = false;
+            FinishVisual();
         }
     }
 
@@ -315,17 +322,13 @@
                 doublyLinkedList.PrependInstant(nodeToInsert);
             }
 
-            var doublyLinkedListData = ConvertListToJavaScriptFormat(doublyLinkedList);
-            await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", doublyLinkedListData);
+            await UpdateDisplay();
 
             NotificationService.AddMessage($"Visual cancelled. Value {inputValue} prepended.");
         }
         finally
         {
-            JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
-
-            await Task.Delay(Constants.operationCancellationTime);
-            isOperationInProgress = false;
+            FinishVisual();
         }
     }
 
@@ -367,17 +370,13 @@
                 doublyLinkedList.AppendInstant(nodeToInsert);
             }
 
-            var doublyLinkedListData = ConvertListToJavaScriptFormat(doublyLinkedList);
-            await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", doublyLinkedListData);
+            await UpdateDisplay();
 
             NotificationService.AddMessage($"Visual cancelled. Value {inputValue} appended.");
         }
         finally
         {
-            JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
-
-            await Task.Delay(Constants.operationCancellationTime);
-            isOperationInProgress = false;
+            FinishVisual();
         }
     }
 
@@ -403,16 +402,14 @@
         catch (OperationCanceledException)
         {
             await JSRuntime.InvokeVoidAsync("DllCancelVisuals");
-            var doublyLinkedListData = ConvertListToJavaScriptFormat(doublyLinkedList);
-            await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", doublyLinkedListData);
+
+            await UpdateDisplay();
+
             NotificationService.AddMessage("Visual cancelled.");
         }
         finally
         {
-            JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
-
-            await Task.Delay(Constants.operationCancellationTime);
-            isOperationInProgress = false;
+            FinishVisual();
         }
     }
 
@@ -453,26 +450,28 @@
                 doublyLinkedList.DeleteAtInstant(nodeToRemove);
             }
 
-            var doublyLinkedListData = ConvertListToJavaScriptFormat(doublyLinkedList);
-            await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", doublyLinkedListData);
+            await UpdateDisplay();
 
             NotificationService.AddMessage($"Visual cancelled. Value at index {inputValue} deleted.");
         }
         finally
         {
-            JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
-
-            await Task.Delay(Constants.operationCancellationTime);
-            isOperationInProgress = false;
+            FinishVisual();
         }
+    }
+
+    private async void FinishVisual()
+    {
+        await JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
+
+        await Task.Delay(Constants.operationCancellationTime);
+        isOperationInProgress = false;
     }
 
     private async void CreateNewList()
     {
         NotificationService.AddMessage($"The list is empty. New list has been created.");
         await CreateDoublyLinkedList();
-        var doublyLinkedListData = ConvertListToJavaScriptFormat(this.doublyLinkedList);
-        await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", doublyLinkedListData);
     }
 
     private async Task CreateDoublyLinkedList()
@@ -488,24 +487,26 @@
             doublyLinkedList.Add(rand.Next(1, 30));
             doublyLinkedList.Add(rand.Next(1, 30));
             doublyLinkedList.Add(rand.Next(1, 30));
+            SubscribingNewList();
+            await UpdateDisplay();
             return;
         }
 
         doublyLinkedList = new DoublyLinkedList<int>();
+        SubscribingNewList();
 
         for (int i = 0; i < inputValue; i++)
         {
             doublyLinkedList.Add(rand.Next(1, 30));
         }
 
-        var dllData = ConvertListToJavaScriptFormat(doublyLinkedList);
-        await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", dllData);
+        await UpdateDisplay();
     }
 
-    private async Task HandleHighlightRequest(Enum step)
+    private async Task UpdateDisplay ()
     {
-        await JSRuntime.InvokeVoidAsync("highlightLine", step);
-        await Task.Delay(timing.HighlightDelay);
+        var dllData = ConvertListToJavaScriptFormat(doublyLinkedList);
+        await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", dllData);
     }
 
     private object ConvertNodeToJavaScriptFormat(DoublyLinkedListNode<int> node)

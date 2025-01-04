@@ -137,6 +137,12 @@
         }
     }
 
+    private async void CreateNewQueue()
+    {
+        NotificationService.AddMessage($"The queue is empty. New queue has been created.");
+        await CreateQueue();
+    }
+
     private IEnumerable<string> GetCodeByOperation(string operation)
     {
         Dictionary<string, IEnumerable<string>> codeSnippets = new Dictionary<string, IEnumerable<string>>
@@ -202,21 +208,29 @@
 
     private async Task CreateQueue()
     {
-        if (isOperationInProgress) return;
-
         if (inputValue > queue.maxCapacity)
         {
             NotificationService.AddMessage($"The queue can have a maximum number of {queue.maxCapacity} nodes. Please enter a smaller value.");
             return;
         }
 
+        if (queue.Count == 0)
+        {
+            queue.Add(rand.Next(1, 30));
+            queue.Add(rand.Next(1, 30));
+            queue.Add(rand.Next(1, 30));
+            SubscribingNewList();
+            await UpdateDisplay(queue);
+            return;
+        }
+
         queue = new QueueStructure<int>();
+        SubscribingNewList();
 
         for (int i = 0; i < inputValue; i++)
         {
             queue.Add(rand.Next(1, 30));
         }
-        SubscribingNewList();
         await UpdateDisplay(queue);
     }
 
@@ -232,13 +246,19 @@
             return;
         }
 
-        isOperationInProgress = true;
-        StateHasChanged();
+        if (queue.Count == 0)
+        {
+            CreateNewQueue();
+            return;
+        }
+
         int remainingNumberOfNodesToBeRemoved = inputValue;
         bool lastNodeToBeRemovedBoolFlag = false;
 
         try
         {
+            isOperationInProgress = true;
+
             for (int i = 1; i <= inputValue; i++)
             {
                 if (i == inputValue)
@@ -260,16 +280,13 @@
             NotificationService.AddMessage($"The visual was cancelled. A number of {inputValue} where dequeued.");
             queue.DequeueInstant(remainingNumberOfNodesToBeRemoved);
 
-            var queueData = ConvertQueueToJavaScriptFormat(queue);
-
             await JSRuntime.InvokeVoidAsync("SllCancelVisuals");
-            await JSRuntime.InvokeVoidAsync("drawLinkedList", queueData, false);
+
+            await UpdateDisplay(queue);
         }
         finally
         {
-            isOperationInProgress = false;
-            await JSRuntime.InvokeVoidAsync("resetCodeLineHighlight").AsTask();
-            StateHasChanged();
+            FinishVisual();
         }
     }
 
@@ -285,11 +302,16 @@
             return;
         }
 
-        isOperationInProgress = true;
-        StateHasChanged();
+        if (queue.Count == 0)
+        {
+            CreateNewQueue();
+            return;
+        }
 
         try
         {
+            isOperationInProgress = true;
+
             var nodeToEnqueue = new SinglyLinkedListNode<int>(inputValue);
             var nodeToBeEnqueuedOnSVG = ConvertNodeToJavaScriptFormat(nodeToEnqueue);
             var queueTask = queue.EnqueueAsync(nodeToEnqueue, token);
@@ -301,15 +323,11 @@
         {
             NotificationService.AddMessage($"Visual cancelled. Node with value {inputValue} was enqueued");
 
-            var queueData = ConvertQueueToJavaScriptFormat(queue);
-            await JSRuntime.InvokeVoidAsync("drawLinkedList", queueData, false);
+            await UpdateDisplay(queue);
         }
         finally
         {
-            await JSRuntime.InvokeVoidAsync("resetCodeLineHighlight").AsTask();
-
-            isOperationInProgress = false;
-            StateHasChanged();
+            FinishVisual();      
         }
     }
 
@@ -320,9 +338,14 @@
             return;
         }
 
+        if (queue.Count == 0)
+        {
+            CreateNewQueue();
+            return;
+        }
+
         isOperationInProgress = true;
 
-        subSelectedAction = "peek back";
         currentCode = GetCodeByOperation("peek back");
 
         var peekFront = queue.PeekBack();
@@ -343,9 +366,14 @@
             return;
         }
 
+        if (queue.Count == 0)
+        {
+            CreateNewQueue();
+            return;
+        }
+
         isOperationInProgress = true;
 
-        subSelectedAction = "peek front";
         currentCode = GetCodeByOperation("peek front");
 
         var peekFront = queue.PeekFront();
@@ -356,6 +384,14 @@
         await JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
         await JSRuntime.InvokeVoidAsync("resetNodeColoursFromCS");
 
+        isOperationInProgress = false;
+    }
+
+    private async void FinishVisual()
+    {
+        await JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
+
+        await Task.Delay(Constants.operationCancellationTime);
         isOperationInProgress = false;
     }
 

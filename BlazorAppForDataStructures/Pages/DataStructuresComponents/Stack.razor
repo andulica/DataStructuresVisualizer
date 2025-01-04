@@ -2,8 +2,11 @@
 @using DataStructuresVisualizer.DataStructures.Stack;
 @using DataStructuresVisualizer.DataStructures.SinglyLinkedListFile;
 @using DataStructuresVisualizer.DataStructures;
-@inject IJSRuntime JSRuntime
 
+@inject IJSRuntime JSRuntime
+@inject CancellationService CancellationService
+@inject NotificationService NotificationService
+@implements IDisposable
 
 <head>
     <link rel="stylesheet" href="/css/styles.css" />
@@ -14,7 +17,8 @@
 
     <!-- Operation list selection -->
     <div class="operation-selection">
-        <select @bind="selectedAction">
+        <select @onchange="OnActionChanged">
+            <option value="" disabled selected>Select an Operation</option> <!-- Initial message -->
             <option value="Peek">Peek</option>
             <option value="Push">Push</option>
             <option value="Pop">Pop</option>
@@ -23,23 +27,22 @@
         @switch (selectedAction)
         {
             case "Peek":
-                <div class="insertion-fields">
-                    <label for="inputValue">Input Value</label>
-
-                    <button class="custom-button" @onclick="Peek" disabled="@isOperationInProgress">Peek</button>
+                <div>
+                    <button class="custom-button" @onclick="Peek" disabled="@isOperationInProgress">Peek Top</button>
                 </div>
                 break;
-@*              case "Push":
+             case "Push":
                  <div class="insertion-fields">
                      <label for="inputValue">Input Value</label>
                      <input type="number" id="inputValue" @bind="inputValue" placeholder="Enter Value" />
 
                      <button class="custom-button" @onclick="Push" disabled="@isOperationInProgress">Push</button>
                  </div>
-                break; *@
+                break;
             case "Pop":
                 <div class="insertion-fields">
                     <label for="inputValue">Kx (Pop)</label>
+                    <input type="number" id="inputValue" @bind="inputValue" placeholder="Enter Value" />
 
                     <button class="custom-button" @onclick="Pop" disabled="@isOperationInProgress">Pop</button>
                 </div>
@@ -61,139 +64,309 @@
         @* Render the linked list here *@
     </div>
 
-    <div>@messageOutput</div>
+    <CodeDisplay CodeLines="@currentCode" />
+
+    @if (!string.IsNullOrEmpty(messageOutput))
+    {
+        <div class="notification-container">
+            <span class="notification-message">@messageOutput</span>
+            <button class="notification-close" @onclick="() => NotificationService.ClearMessage()">✖</button>
+        </div>
+    }
 </div>
 
 
 @code {
-    private SinglyLinkedList<int> stack = new SinglyLinkedList<int>();
-    private string selectedAction = "Peek";
+    private StackStructure<int> stack = new StackStructure<int>();
+    private string _selectedAction = "";
     private int inputValue;
-    private string messageOutput;
+    private string messageOutput= "";
     private bool isOperationInProgress = false;
-    private bool isStack = true;
+    private const bool isStack = true;
     Random rand = new Random();
-
+    private IEnumerable<string> currentCode = Enumerable.Empty<string>();
+    VisualizationTiming timing = VisualizationTiming.Default;
+    public string selectedAction
+    {
+        get => _selectedAction;
+        set
+        {
+            if (_selectedAction != value)
+            {
+                _selectedAction = value;
+                currentCode = GetCodeByOperation(value);
+                StateHasChanged();
+            }
+        }
+    }
 
     protected override void OnInitialized()
     {
         stack.Add(rand.Next(1, 30));
         stack.Add(rand.Next(1, 30));
         stack.Add(rand.Next(1, 30));
+
+        SubscribingNewList();
+    }
+
+    private CancellationToken InitializeNewOperation()
+    {
+        CancellationService.ResetCancellationTokenSource();
+        return CancellationService.GetToken();
+    }
+
+    private void OnActionChanged(ChangeEventArgs e)
+    {
+        selectedAction = e.Value.ToString();
+        InitializeNewOperation(); // Cancel the ongoing operation when a new action is selected
+    }
+
+    public void Dispose()
+    {
+        UnsubscribingOldList();
+    }
+
+    private void HandleMessageAdded(string message)
+    {
+        messageOutput = message;
+        StateHasChanged();
+    }
+
+    private void HandleMessageCleared()
+    {
+        messageOutput = string.Empty;
+        StateHasChanged();
+    }
+
+    private async Task HandleHighlightRequest(Enum step)
+    {
+        await JSRuntime.InvokeVoidAsync("highlightLine", step);
+        await Task.Delay(timing.HighlightDelay);
+    }
+
+    private async void FinishVisual()
+    {
+        await JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
+
+        await Task.Delay(Constants.operationCancellationTime);
+        isOperationInProgress = false;
+    }
+
+    private void SubscribingNewList()
+    {
+        NotificationService.OnMessageAdded += HandleMessageAdded;
+        NotificationService.OnMessageCleared += HandleMessageCleared;
+        stack.HighlightRequested += HandleHighlightRequest; // Subscribe to highlight events
+    }
+
+    private void UnsubscribingOldList()
+    {
+        NotificationService.OnMessageAdded -= HandleMessageAdded;
+        NotificationService.OnMessageCleared -= HandleMessageCleared;
+        stack.HighlightRequested -= HandleHighlightRequest;
+    }
+
+    private IEnumerable<string> GetCodeByOperation(string operation)
+    {
+        Dictionary<string, IEnumerable<string>> codeSnippets = new Dictionary<string, IEnumerable<string>>
+            {
+                ["Peek"] = new List<string>
+                {
+                    "if empty, return NOT_FOUND",
+                    "return head.item"
+                },
+                ["Push"] = new List<string>
+                {
+                    "Vertex vtx = new Vertex(v)",
+                    "vtx.next = head",
+                    "head = vtx"
+                },
+                ["Pop"] = new List<string>
+                {
+                    "for (i = 0; i < K; ++i)",
+                    "tmp = head",
+                    "head = head.next",
+                    "delete tmp"
+                }
+            };
+
+        if (codeSnippets.TryGetValue(operation, out var code))
+        {
+            return code;
+        }
+        return new List<string> { "Select an operation to view the code." };
     }
 
     private async Task Peek()
     {
         if (isOperationInProgress) return;
 
-        isOperationInProgress = true;
-        StateHasChanged();
+        if (stack.Count == 0)
+        {
+            CreateNewStack();
+            return;
+        }
+
+        var token = InitializeNewOperation();
 
         try
         {
-            await JSRuntime.InvokeVoidAsync("highlightHead");
+            isOperationInProgress = true;
+
+            var peekTask = stack.Peek(token);
+            var jsPeekTask = JSRuntime.InvokeVoidAsync("highlightHead").AsTask();
+
+            await Task.WhenAll(peekTask, jsPeekTask);
         }
-        catch (JSException jsEx)
+        catch (OperationCanceledException)
         {
-            // Handle JavaScript-related exceptions
-            Console.Error.WriteLine($"JavaScript error: {jsEx.Message}");
-        }
-        catch (Exception ex)
-        {
-            // Handle any other exceptions
-            Console.Error.WriteLine($"Unexpected error: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync("SllCancelVisuals");
         }
         finally
         {
+            await JSRuntime.InvokeVoidAsync("resetNodeColoursFromCS");
+            await JSRuntime.InvokeVoidAsync("resetCodeLineHighlight");
+
             isOperationInProgress = false;
-            StateHasChanged();
         }
     }
 
-    // private async Task Push()
-    // {
-    //     if (isOperationInProgress) return;
+    private async Task Push()
+    {
+        if (isOperationInProgress) return;
 
-    //     if (stack.Count == stack.maxCapacity)
-    //     {
-    //         messageOutput = $"The stack has reached the maximum number of nodes. Please pop a value or create a smaller stack.";
-    //         return;
-    //     }
+        if (stack.Count == stack.maxCapacity)
+        {
+            NotificationService.AddMessage($"The stack has reached the maximum number of nodes. Please pop a value or create a smaller stack.");
+            return;
+        }
 
-    //     isOperationInProgress = true;
-    //     StateHasChanged();
+        if (stack.Count == 0)
+        {
+            CreateNewStack();
+            return;
+        }
 
-    //     try
-    //     {
+        var token = InitializeNewOperation();
+        var newHeadToInsert = new SinglyLinkedListNode<int>(inputValue);
+        var nodeToBePushedOnSVG = ConvertNodeToJavaScriptFormat(newHeadToInsert);
 
-    //         var head = new SinglyLinkedListNode<int>(inputValue);
+        try
+        {
+            isOperationInProgress = true;
 
-    //         var timing = new VisualizationTiming
-    //             {
-    //                 HighlightDelay = 1000, // Set appropriate delay values
-    //                 NodeMovementDelay = 1500,
-    //                 JavaScriptDelay = 2000
-    //             };
-    //         await stack.PrependAsync(head); // Wait for the node to be pushed onto the stack
-    //         var nodeToBePushedOnSVG = ConvertNodeToJavaScriptFormat(head);
-    //         await JSRuntime.InvokeVoidAsync("insertAtInSLL", nodeToBePushedOnSVG, 0, 1000, isStack); // Then update the UI
-    //     }
-    //     finally
-    //     {
-    //         isOperationInProgress = false;
-    //         StateHasChanged();
-    //     }
-    // }
+            var pushTask = stack.PushAsync(newHeadToInsert, token);
+            var jsPushTask = JSRuntime.InvokeVoidAsync("insertHeadInSll", nodeToBePushedOnSVG, timing, isStack).AsTask();
+
+            await Task.WhenAll(pushTask, jsPushTask);
+        } 
+        catch (OperationCanceledException)
+        {
+            await JSRuntime.InvokeVoidAsync("SllCancelVisuals");
+
+            if (!stack.Contains(newHeadToInsert))
+            {
+                stack.PrependInstant(newHeadToInsert); // Insert the node instantly in case of an exception)
+            }
+
+            await UpdateDisplay(stack);
+
+            NotificationService.AddMessage($"Visual cancelled. Value {inputValue} prepended.");
+        }
+        finally
+        {
+            FinishVisual();
+        }
+    }
 
     private async Task Pop()
     {
         if (isOperationInProgress) return;
 
-        isOperationInProgress = true;
-        StateHasChanged();
+        if (stack.Count < inputValue)
+        {
+            NotificationService.AddMessage($"Can't pop {inputValue} nodes because stack has a number of {stack.Count} nodes. Enter a smaller number");
+            return;
+        }
+
+        if (stack.Count == 0)
+        {
+            CreateNewStack();
+            return;
+        }
+
+        int remainingNumberOfNodesToBeRemoved = inputValue;
+        bool lastNodeToBeRemovedBoolFlag = false;
+        var token = InitializeNewOperation();
 
         try
         {
-            var nodeToBeRemoved = stack.Head;
-            var nodeToBeRemovedOnSVG = ConvertNodeToJavaScriptFormat(nodeToBeRemoved);
-            // await stack.DeleteAtAsync(0, 0);
-            await JSRuntime.InvokeVoidAsync("removeValueInSll", nodeToBeRemovedOnSVG, 1000, true);
+            isOperationInProgress = true;
+
+            for (int i = 1; i <= inputValue; i++)
+            {
+                if (i == inputValue)
+                {
+                    lastNodeToBeRemovedBoolFlag = true;
+                }
+                var nodeToRemove = stack.Head;
+                var nodeToBeRemovedFromSVG = ConvertNodeToJavaScriptFormat(nodeToRemove);
+                var removeTask = stack.PopAsync(nodeToRemove, token);
+                remainingNumberOfNodesToBeRemoved -= i;
+
+                var jsTask = JSRuntime.InvokeVoidAsync("removeValueInSll", nodeToBeRemovedFromSVG, timing, false, lastNodeToBeRemovedBoolFlag).AsTask();
+                await Task.WhenAll(removeTask, jsTask); // Run both tasks concurrently
+                await Task.Delay(timing.HighlightDelay, token);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            NotificationService.AddMessage($"The visual was cancelled. A number of {inputValue} nodes where popped.");
+            stack.DequeueInstant(remainingNumberOfNodesToBeRemoved);
+
+            await JSRuntime.InvokeVoidAsync("SllCancelVisuals");
+
+            await UpdateDisplay(stack);
         }
         finally
         {
-            isOperationInProgress = false;
-            StateHasChanged();
+            FinishVisual();
         }
     }
 
     private async Task CreateStack()
     {
-        if (isOperationInProgress) return; // Prevent multiple operations
-
         if (inputValue > stack.maxCapacity)
         {
             messageOutput = $"The stack can have a maximum number of {stack.maxCapacity} nodes. Please enter a smaller value.";
             return;
         }
-        isOperationInProgress = true;
-        StateHasChanged();
-        try
+
+        if (stack.Count == 0)
         {
-            stack = new StackStructure<int>();
-
-            for (int i = 0; i < inputValue; i++)
-            {
-                stack.Add(rand.Next(1, 30));
-            }
-
+            stack.Add(rand.Next(1, 30));
+            stack.Add(rand.Next(1, 30));
+            stack.Add(rand.Next(1, 30));
             await UpdateDisplay(stack);
-            await InvokeAsync(StateHasChanged);
+            SubscribingNewList();
+            return;
         }
-        finally
+
+        stack = new StackStructure<int>();
+        SubscribingNewList();
+
+        for (int i = 0; i < inputValue; i++)
         {
-            isOperationInProgress = false; // Reset flag after operation
-            StateHasChanged();
+            stack.Add(rand.Next(1, 30));
         }
+
+        await UpdateDisplay(stack);
+    }
+
+    private async void CreateNewStack()
+    {
+        NotificationService.AddMessage($"The stack is empty. New stack has been created.");
+        await CreateStack();
     }
 
     private async Task UpdateDisplay(SinglyLinkedList<int> stack)
