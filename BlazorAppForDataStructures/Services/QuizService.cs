@@ -1,26 +1,24 @@
-﻿using BlazorAppForDataStructures.Data;
-using BlazorAppForDataStructures.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using BlazorAppForDataStructures.Models;
+using System.Net.Http;
+using System.Net.Http.Json;
 
 public class QuizService
 {
-    private readonly BlazorAppForDataStructuresContext _context;
+    private readonly HttpClient _httpClient;
 
-    public QuizService(BlazorAppForDataStructuresContext context)
+    public QuizService(HttpClient httpClient)
     {
-        _context = context;
+        _httpClient = httpClient;
     }
-
     public async Task<List<Question>> GetQuestionsAsync(string topicName)
     {
-        return await _context.Questions
-            .Include(q => q.Answers)
-            .Where(q => q.Topic.Name == topicName)
-            .ToListAsync();
-    }
+        // Temporary solution to remove "Quiz" from the topic name. Need to update the API to add quiz substring for all topics.
+        string topicNameWithoutSubstringQuiz = topicName.Replace("Quiz", "");
 
-    public Question? GetQuestionByIndex(int index)
-    {
-        return _context.Questions.Include(q => q.Answers).Skip(index).FirstOrDefault();
+        var url = $"https://datastructviz-quiz-api-001-hbcza9gdbpb7gzew.canadacentral-01.azurewebsites.net/api/Topics/{topicNameWithoutSubstringQuiz}/questions";
+
+        var questions = await _httpClient.GetFromJsonAsync<List<Question>>(url);
+
+        return questions ?? new List<Question>();
     }
 }

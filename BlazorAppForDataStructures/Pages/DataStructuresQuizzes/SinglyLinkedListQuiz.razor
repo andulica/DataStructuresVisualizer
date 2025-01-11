@@ -1,7 +1,6 @@
 ﻿@page "/SinglyLinkedListQuiz"
-
 @using BlazorAppForDataStructures.Models
-@inject QuizService QuizService
+@inject QuizService QuizService 
 @inject NavigationManager NavigationManager
 
 <h3>Singly Linked List Quiz</h3>
@@ -23,7 +22,8 @@
             @foreach (var answer in currentQuestion.Answers)
             {
                 <div>
-                    <input type="radio" id="@answer.AnswerId" name="answer" value="@answer.AnswerId" @onchange="OnAnswerSelected" />
+                    <input type="radio" id="@answer.AnswerId" name="answer" 
+                           value="@answer.AnswerId" @onchange="OnAnswerSelected" />
                     <label for="@answer.AnswerId">@answer.AnswerText</label>
                 </div>
             }
@@ -49,7 +49,6 @@
     </div>
 </div>
 
-
 @code {
     private Question? currentQuestion;
     private int currentIndex = 1;
@@ -67,19 +66,18 @@
 
     private async Task LoadQuizData()
     {
-        isLoading = true; // Show the spinner
-        StateHasChanged();
+        isLoading = true;
+        StateHasChanged(); // show spinner
 
-        // Fetch questions for this quiz
-        questions = await QuizService.GetQuestionsAsync("Singly Linked List");
+        questions = await QuizService.GetQuestionsAsync("SinglyLinkedList");
         if (questions != null && questions.Any())
         {
             currentQuestion = questions[0];
             totalQuestions = questions.Count;
         }
 
-        isLoading = false; // Hide the spinner
-        StateHasChanged();
+        isLoading = false;
+        StateHasChanged(); // hide spinner
     }
 
     private void OnAnswerSelected(ChangeEventArgs e)
@@ -92,11 +90,11 @@
         if (selectedAnswerId != -1 && currentQuestion != null)
         {
             // Check if the selected answer is correct
-            var isCorrect = currentQuestion.Answers.Any(a => a.AnswerId == selectedAnswerId && a.IsCorrect);
+            var isCorrect = currentQuestion.Answers
+                .Any(a => a.AnswerId == selectedAnswerId && a.IsCorrect);
+
             if (isCorrect)
-            {
                 score++;
-            }
 
             currentIndex++;
             if (currentIndex <= totalQuestions)
@@ -110,7 +108,7 @@
                 currentQuestion = null;
             }
 
-            selectedAnswerId = -1; // Reset selection
+            selectedAnswerId = -1;
         }
     }
 
@@ -120,6 +118,6 @@
         score = 0;
         quizCompleted = false;
 
-        await LoadQuizData(); // Reinitialize data for the quiz
+        await LoadQuizData();
     }
 }

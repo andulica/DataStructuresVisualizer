@@ -28,14 +28,16 @@ namespace BlazorAppForDataStructures
             builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<BlazorAppForDataStructuresContext>();
 
-            builder.Services.AddScoped<QuizService>(); 
+            builder.Services.AddScoped<QuizService>();
             builder.Services.AddScoped<CancellationService>();
 
             builder.Services.AddScoped<NotificationService>();
 
+
             builder.Services.AddRazorPages();
             builder.Services.AddServerSideBlazor();
 
+            builder.Services.AddScoped(sp =>new HttpClient { BaseAddress = new Uri("https://datastructviz-quiz-api-001-hbcza9gdbpb7gzew.canadacentral-01.azurewebsites.net/") } );
 
             var app = builder.Build();
 
