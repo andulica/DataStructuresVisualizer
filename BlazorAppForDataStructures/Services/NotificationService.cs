@@ -1,23 +1,21 @@
-﻿
-    public class NotificationService
+﻿public class NotificationService
+{
+    public event Action<string>? OnMessageAdded;
+    public event Action? OnMessageCleared;
+
+    /// <summary>
+    /// Adds a new message and notifies subscribers.
+    /// </summary>
+    public void AddMessage(string message)
     {
-        public event Action<string>? OnMessageAdded;
-        public event Action? OnMessageCleared;
-
-        /// <summary>
-        /// Adaugă un mesaj nou și notifică subscriitorii.
-        /// </summary>
-        public void AddMessage(string message)
-        {
-            OnMessageAdded?.Invoke(message);
-        }
-
-        /// <summary>
-        /// Golește mesajele și notifică subscriitorii.
-        /// </summary>
-        public void ClearMessage()
-        {
-            OnMessageCleared?.Invoke();
-        }
+        OnMessageAdded?.Invoke(message);
     }
 
+    /// <summary>
+    /// Clears the messages and notifies subscribers.
+    /// </summary>
+    public void ClearMessage()
+    {
+        OnMessageCleared?.Invoke();
+    }
+}
