@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using BlazorAppForDataStructures.Data;
 using BlazorAppForDataStructures.Models;
@@ -33,6 +32,11 @@ namespace BlazorAppForDataStructures
             builder.Services.AddScoped<CancellationService>();
             builder.Services.AddScoped<SecureStorageService>();
 
+            if (builder.Environment.IsDevelopment())
+            {
+                builder.Configuration.AddUserSecrets<Program>();
+            }
+
             builder.Services.AddScoped<NotificationService>();
 
 
@@ -40,6 +44,8 @@ namespace BlazorAppForDataStructures
             builder.Services.AddServerSideBlazor();
 
             builder.Services.AddScoped(sp =>new HttpClient { BaseAddress = new Uri("https://datastructviz-quiz-api-001-hbcza9gdbpb7gzew.canadacentral-01.azurewebsites.net/") } );
+            builder.Configuration.AddUserSecrets<Program>();
+
 
             var app = builder.Build();
 

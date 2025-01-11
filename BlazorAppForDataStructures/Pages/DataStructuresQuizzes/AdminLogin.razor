@@ -36,7 +36,9 @@
     {
         try
         {
-            var response = await Http.PostAsJsonAsync("https://your-api-url/api/auth/login", loginModel);
+            var response = await Http.PostAsJsonAsync("https://datastructviz-quiz-api-001-hbcza9gdbpb7gzew.canadacentral-01.azurewebsites.net/api/Auth/login",
+                    new { email = loginModel.Username, password = loginModel.Password });
+
             if (response.IsSuccessStatusCode)
             {
                 var tokenResponse = await response.Content.ReadFromJsonAsync<TokenResponse>();

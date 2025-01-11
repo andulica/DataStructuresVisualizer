@@ -1,32 +1,40 @@
-﻿using Microsoft.JSInterop;
-namespace BlazorAppForDataStructures.Services
+﻿using BlazorAppForDataStructures.Helpers;
+using Microsoft.JSInterop;
 
+namespace BlazorAppForDataStructures.Services
 {
     public class SecureStorageService
     {
         private readonly IJSRuntime _jsRuntime;
+        private readonly string _encryptionKey;
 
-        public SecureStorageService(IJSRuntime jsRuntime)
+        public SecureStorageService(IJSRuntime jsRuntime, IConfiguration configuration)
         {
             _jsRuntime = jsRuntime;
+            _encryptionKey = configuration["SuperSecretKey"]
+                ?? throw new InvalidOperationException("Encryption key is not configured.");
         }
 
-        // Save a key-value pair in local storage
         public async Task SetAsync(string key, string value)
         {
-            await _jsRuntime.InvokeVoidAsync("localStorage.setItem", key, value);
+            var encryptedValue = EncryptionHelper.Encrypt(value, _encryptionKey);
+            await _jsRuntime.InvokeVoidAsync("localStorage.setItem", key, encryptedValue);
         }
 
-        // Retrieve a value from local storage
-        public async Task<string?> GetAsync(string key)
+        public async Task<string> GetAsync(string key)
         {
-            return await _jsRuntime.InvokeAsync<string?>("localStorage.getItem", key);
+            var encryptedValue = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", key);
+            return encryptedValue != null ? EncryptionHelper.Decrypt(encryptedValue, _encryptionKey) : string.Empty;
         }
 
-        // Remove a key-value pair from local storage
         public async Task RemoveAsync(string key)
         {
             await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", key);
+        }
+
+        public async Task ClearAsync()
+        {
+            await _jsRuntime.InvokeVoidAsync("localStorage.clear");
         }
     }
 }
