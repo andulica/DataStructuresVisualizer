@@ -1,0 +1,66 @@
+﻿@page "/admin/login"
+@using BlazorAppForDataStructures.Models
+@using BlazorAppForDataStructures.Services
+
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject SecureStorageService SecureStorage
+
+
+<h3>Admin Login</h3>
+
+@if (errorMessage != null)
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+<div>
+    <form @onsubmit="HandleLogin">
+        <div class="mb-3">
+            <label for="username" class="form-label">Username/Email</label>
+            <input type="text" id="username" class="form-control" @bind="loginModel.Username" required />
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" id="password" class="form-control" @bind="loginModel.Password" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+</div>
+
+@code {
+    private LoginModel loginModel = new LoginModel();
+    private string? errorMessage;
+
+    private async Task HandleLogin()
+    {
+        try
+        {
+            var response = await Http.PostAsJsonAsync("https://your-api-url/api/auth/login", loginModel);
+            if (response.IsSuccessStatusCode)
+            {
+                var tokenResponse = await response.Content.ReadFromJsonAsync<TokenResponse>();
+                if (tokenResponse != null)
+                {
+                    // Save token locally
+                    await SecureStorage.SetAsync("authToken", tokenResponse.Token);
+                    NavigationManager.NavigateTo("/admin/dashboard");
+                }
+            }
+            else
+            {
+                errorMessage = "Invalid login credentials.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"An error occurred: {ex.Message}";
+        }
+    }
+
+    private async Task Logout()
+    {
+        await SecureStorage.RemoveAsync("authToken");
+        NavigationManager.NavigateTo("/admin/login");
+    }
+}

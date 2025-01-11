@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using BlazorAppForDataStructures.Data;
 using BlazorAppForDataStructures.Models;
+using BlazorAppForDataStructures.Services;
 
 namespace BlazorAppForDataStructures
 {
@@ -30,6 +31,7 @@ namespace BlazorAppForDataStructures
 
             builder.Services.AddScoped<QuizService>();
             builder.Services.AddScoped<CancellationService>();
+            builder.Services.AddScoped<SecureStorageService>();
 
             builder.Services.AddScoped<NotificationService>();
 

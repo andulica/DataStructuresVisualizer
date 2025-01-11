@@ -1,0 +1,72 @@
+﻿@page "/admin/topics"
+@inject HttpClient Http
+@using BlazorAppForDataStructures.Models
+
+<h3>Manage Topics</h3>
+
+<div>
+    <button class="btn btn-success" @onclick="ShowAddTopicModal">Add New Topic</button>
+</div>
+
+@if (topics.Any())
+{
+    <table class="table mt-3">
+        <thead>
+            <tr>
+                <th>Topic ID</th>
+                <th>Topic Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var topic in topics)
+            {
+                <tr>
+                    <td>@topic.TopicId</td>
+                    <td>@topic.Name</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => EditTopic(topic)">Edit</button>
+                        <button class="btn btn-danger" @onclick="() => DeleteTopic(topic.TopicId)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No topics available.</p>
+}
+
+@code {
+    private List<Topic> topics = new List<Topic>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTopics();
+    }
+
+    private async Task LoadTopics()
+    {
+        topics = await Http.GetFromJsonAsync<List<Topic>>("https://datastructviz-quiz-api-001-hbcza9gdbpb7gzew.canadacentral-01.azurewebsites.net/api/Topics");
+    }
+
+    private async Task DeleteTopic(int topicId)
+    {
+        var response = await Http.DeleteAsync($"https://datastructviz-quiz-api-001-hbcza9gdbpb7gzew.canadacentral-01.azurewebsites.net/api/Topics/{topicId}");
+        if (response.IsSuccessStatusCode)
+        {
+            await LoadTopics();
+        }
+    }
+
+    private void ShowAddTopicModal()
+    {
+        // Show modal for adding topics (not implemented here)
+    }
+
+    private void EditTopic(Topic topic)
+    {
+        // Navigate to an edit topic page or show an edit modal (not implemented here)
+    }
+}
