@@ -1,10 +1,15 @@
-﻿namespace BlazorAppForDataStructures.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+
+namespace BlazorAppForDataStructures.Models
 {
     public class Question
     {
         public int QuestionId { get; set; } // Primary Key
         public int TopicId { get; set; }    // Foreign Key
 
+        [MinLength(5, ErrorMessage = "Question text must be at least 5 characters long.")]
+        [Required(ErrorMessage = "Question text is required.")]
         public string QuestionText { get; set; } = string.Empty;
 
         // Navigation Properties

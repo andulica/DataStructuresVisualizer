@@ -55,7 +55,7 @@ namespace BlazorAppForDataStructures.Data
                 .HasMaxLength(200);
 
             modelBuilder.Entity<Answer>()
-                .HasOne(a => a.Question)
+                .HasOne(a => a.ParentQuestion)
                 .WithMany(q => q.Answers)
                 .HasForeignKey(a => a.QuestionId); // Foreign Key
         }

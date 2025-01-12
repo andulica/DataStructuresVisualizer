@@ -49,7 +49,6 @@ else
     @message
 </div>
 
-<!-- Modal for adding new topic -->
 @if (isAddTopicModalVisible)
 {
     <div class="modal show d-block" tabindex="-1" role="dialog">
@@ -59,38 +58,52 @@ else
                     <h5 class="modal-title">Add New Topic</h5>
                     <button type="button" class="btn-close" @onclick="CloseAddTopicModal"></button>
                 </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="topicName">Topic Name</label>
-                        <input type="text" id="topicName" class="form-control" @bind="newTopic.Name" required />
-                    </div>
-
-                    <h5>Questions</h5>
-                    @foreach (var question in newTopic.Questions)
-                    {
+                <EditForm Model="newTopic" OnValidSubmit="AddTopic">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+                    <div class="modal-body">
+                        <!-- Topic Name -->
                         <div class="mb-3">
-                            <label for="questionText">Question Text</label>
-                            <input type="text" id="questionText" class="form-control" @bind="question.QuestionText" required />
-
-                            <h6>Answers</h6>
-                            @foreach (var answer in question.Answers)
-                            {
-                                <div class="d-flex mb-2">
-                                    <input type="text" class="form-control me-2" @bind="answer.AnswerText" placeholder="Answer Text" />
-                                    <input type="checkbox" @bind="answer.IsCorrect" /> Correct
-                                    <button class="btn btn-danger ms-2" @onclick="() => RemoveAnswer(question, answer)">Remove</button>
-                                </div>
-                            }
-                            <button class="btn btn-secondary mb-3" @onclick="() => AddAnswer(question)">Add Answer</button>
+                            <label for="topicName">Topic Name</label>
+                            <InputText id="topicName" class="form-control" @bind-Value="newTopic.Name" />
+                            <ValidationMessage For="@(() => newTopic.Name)" />
                         </div>
-                        <button class="btn btn-danger mb-3" @onclick="() => RemoveQuestion(question)">Remove Question</button>
-                    }
-                    <button class="btn btn-secondary" @onclick="AddQuestion">Add Question</button>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="CloseAddTopicModal">Close</button>
-                    <button type="button" class="btn btn-primary" @onclick="AddTopic">Add Topic</button>
-                </div>
+
+                        <!-- Questions -->
+                        <h5>Questions</h5>
+                        @foreach (var question in newTopic.Questions)
+                        {
+                            <div class="mb-3">
+                                <label for="questionText">Question Text</label>
+                                <InputText id="questionText" class="form-control" @bind-Value="question.QuestionText" />
+                                <ValidationMessage For="@(() => question.QuestionText)" />
+
+                                <!-- Answers -->
+                                <h6>Answers</h6>
+                                @foreach (var answer in question.Answers)
+                                {
+                                    <div class="d-flex align-items-center mb-2">
+                                        <InputText class="form-control me-2" @bind-Value="answer.AnswerText" placeholder="Answer Text" />
+                                        <ValidationMessage For="@(() => answer.AnswerText)" />
+                                        <input type="radio" name="@($"correctAnswer_{question.QuestionId}")"
+                                               checked="@answer.IsCorrect"
+                                               @onchange="() => MarkAnswerAsCorrect(question, answer)" /> Correct
+                                        <button type="button" class="btn btn-danger ms-2" @onclick="() => RemoveAnswer(question, answer)">Remove</button>
+                                    </div>
+                                }
+                                <button type="button" class="btn btn-secondary mb-3" @onclick="() => AddAnswer(question)">Add Answer</button>
+                            </div>
+                            <button type="button" class="btn btn-danger mb-3" @onclick="() => RemoveQuestion(question)">Remove Question</button>
+                        }
+                        <button type="button" class="btn btn-secondary" @onclick="AddQuestion">Add Question</button>
+                    </div>
+                    <div class="modal-footer">
+                        <!-- Close button -->
+                        <button type="button" class="btn btn-secondary" @onclick="CloseAddTopicModal">Close</button>
+                        <!-- Submit button -->
+                        <button type="submit" class="btn btn-primary">Add Topic</button>
+                    </div>
+                </EditForm>
             </div>
         </div>
     </div>
@@ -98,19 +111,17 @@ else
 }
 
 
-
 @code {
-    private List<Topic> topics = new List<Topic>();
+    private EditForm? editFormRef;
+    private List<Topic>? topics;
     private string? message;
     private bool isVisible = false;
     private bool isAddTopicModalVisible = false;
     private bool isLoading = false;
     private Topic newTopic = new Topic
-
         {
             Questions = new List<Question>()
         };
-
 
     protected override async Task OnInitializedAsync()
     {
@@ -187,9 +198,19 @@ else
         newTopic.Questions.Remove(question);
     }
 
+    private void MarkAnswerAsCorrect(Question question, Answer selectedAnswer)
+    {
+        foreach (var answer in question.Answers)
+        {
+            answer.IsCorrect = false; // Unselect all other answers
+        }
+        selectedAnswer.IsCorrect = true; // Select the clicked answer
+    }
+
     private void AddAnswer(Question question)
     {
-        question.Answers.Add(new Answer());
+        var answer = new Answer { ParentQuestion = question };
+        question.Answers.Add(answer);
     }
 
     private void RemoveAnswer(Question question, Answer answer)
@@ -203,6 +224,15 @@ else
         {
             NotificationService.AddMessage("Topic name cannot be empty.");
             return;
+        }
+
+        foreach (var question in newTopic.Questions)
+        {
+            if (!question.Answers.Any(a => a.IsCorrect))
+            {
+                NotificationService.AddMessage($"Each question must have one correct answer. Missing for question: {question.QuestionText}");
+                return;
+            }
         }
 
         try
@@ -263,5 +293,13 @@ else
     private void EditTopic(Topic topic)
     {
         NavigationManager.NavigateTo($"/admin/topics/{topic.TopicId}/questions");
+    }
+
+    private async Task TriggerAddTopic()
+    {
+        if (editFormRef != null)
+        {
+            await AddTopic();
+        }
     }
 }
