@@ -1,7 +1,9 @@
 ﻿@page "/admin/topics"
 @inject HttpClient Http
 @inject NotificationService NotificationService
+@inject NavigationManager NavigationManager
 @inject SecureStorageService SecureStorage
+@inject IJSRuntime JsRuntime
 @using BlazorAppForDataStructures.Models
 @using BlazorAppForDataStructures.Services
 
@@ -9,22 +11,39 @@
 <h3>Manage Topics</h3>
 
 <!-- Button to open modal -->
-<button class="btn btn-primary" @onclick="ShowAddTopicModal">Add New Topic</button>
+<div>
+    <button class="btn btn-primary mb-3" @onclick="ShowAddTopicModal">Add New Topic</button>
+</div>
 
-<!-- List of topics -->
-@if (topics == null)
+@if (isLoading)
 {
-    <p>Loading topics...</p>
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
 }
 else
 {
-    <ul>
-        @foreach (var topic in topics)
+    <ul class="list-group">
+        @if (topics != null && topics.Any())
         {
-            <li>@topic.Name</li>
+            @foreach (var topic in topics)
+            {
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>@topic.Name</span>
+                    <div>
+                        <button class="btn btn-warning btn-sm me-2" @onclick="() => EditTopic(topic)">Edit</button>
+                        <button class="btn btn-danger btn-sm" @onclick="() => RemoveTopic(topic.TopicId)">Remove</button>
+                    </div>
+                </li>
+            }
+        }
+        else
+        {
+            <li class="list-group-item">No topics available.</li>
         }
     </ul>
 }
+
 
 <div class="alert alert-info" role="alert" style="display: @(isVisible ? "block" : "none")">
     @message
@@ -81,11 +100,13 @@ else
 
 
 @code {
-    private List<Topic>? topics;
+    private List<Topic> topics = new List<Topic>();
     private string? message;
     private bool isVisible = false;
     private bool isAddTopicModalVisible = false;
+    private bool isLoading = false;
     private Topic newTopic = new Topic
+
         {
             Questions = new List<Question>()
         };
@@ -93,7 +114,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadTopics();
+        await LoadTopicsAsync();
         NotificationService.OnMessageAdded += ShowMessage;
         NotificationService.OnMessageCleared += ClearMessage;
     }
@@ -122,15 +143,20 @@ else
         NotificationService.OnMessageCleared -= ClearMessage;
     }
 
-    private async Task LoadTopics()
+    private async Task LoadTopicsAsync()
     {
+        isLoading = true;
         try
         {
-            topics = await Http.GetFromJsonAsync<List<Topic>>("api/Topics");
+            topics = await Http.GetFromJsonAsync<List<Topic>>("api/topics") ?? new List<Topic>();
         }
         catch (Exception ex)
         {
             NotificationService.AddMessage($"Failed to load topics: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
         }
     }
 
@@ -195,7 +221,7 @@ else
             if (response.IsSuccessStatusCode)
             {
                 NotificationService.AddMessage("Topic added successfully.");
-                await LoadTopics();
+                await LoadTopicsAsync();
                 CloseAddTopicModal();
             }
             else
@@ -208,5 +234,34 @@ else
         {
             NotificationService.AddMessage($"An error occurred: {ex.Message}");
         }
+    }
+
+    private async Task RemoveTopic(int topicId)
+    {
+        if (!await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to remove this topic?"))
+            return;
+
+        try
+        {
+            var response = await Http.DeleteAsync($"api/topics/{topicId}");
+            if (response.IsSuccessStatusCode)
+            {
+                topics.RemoveAll(t => t.TopicId == topicId);
+                NotificationService.AddMessage("Topic removed successfully.");
+            }
+            else
+            {
+                NotificationService.AddMessage($"Failed to remove topic: {response.ReasonPhrase}");
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.AddMessage($"Error removing topic: {ex.Message}");
+        }
+    }
+
+    private void EditTopic(Topic topic)
+    {
+        NavigationManager.NavigateTo($"/admin/topics/{topic.TopicId}/questions");
     }
 }
