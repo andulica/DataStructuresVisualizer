@@ -292,7 +292,7 @@ else
 
     private void EditTopic(Topic topic)
     {
-        NavigationManager.NavigateTo($"/admin/topics/{topic.TopicId}/questions");
+        NavigationManager.NavigateTo($"/admin/topics/{topic.Name}/questions");
     }
 
     private async Task TriggerAddTopic()

@@ -28,15 +28,23 @@
     </form>
 </div>
 
+@if (isLoading)
+{
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+}
+
 @code {
     private LoginModel loginModel = new LoginModel();
     private string? errorMessage;
-
+    private bool isLoading = false;
 
     private async Task HandleLogin()
     {
         try
         {
+            isLoading = true;
             var response = await Http.PostAsJsonAsync("api/Auth/login", loginModel);
             if (response.IsSuccessStatusCode)
             {
@@ -61,5 +69,9 @@
         {
             errorMessage = $"An error occurred: {ex.Message}";
         }
+        finally
+        {
+            isLoading = false;
+        }
     }
-    }
+}

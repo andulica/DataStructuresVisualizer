@@ -7,8 +7,6 @@
 
 <div>
     <button class="btn btn-primary" @onclick="NavigateToTopics">Manage Topics</button>
-    <button class="btn btn-primary" @onclick="NavigateToQuestions">Manage Questions</button>
-    <button class="btn btn-primary" @onclick="NavigateToAnswers">Manage Answers</button>
 </div>
 
 <div class="mt-3">
@@ -19,16 +17,6 @@
     private void NavigateToTopics()
     {
         NavigationManager.NavigateTo("/admin/topics");
-    }
-
-    private void NavigateToQuestions()
-    {
-        NavigationManager.NavigateTo("/admin/questions");
-    }
-
-    private void NavigateToAnswers()
-    {
-        NavigationManager.NavigateTo("/admin/answers");
     }
 
     private async Task Logout()
