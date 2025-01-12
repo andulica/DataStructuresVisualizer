@@ -1,45 +1,86 @@
 ﻿@page "/admin/topics"
 @inject HttpClient Http
+@inject NotificationService NotificationService
+@inject SecureStorageService SecureStorage
 @using BlazorAppForDataStructures.Models
+@using BlazorAppForDataStructures.Services
+
 
 <h3>Manage Topics</h3>
 
-<div>
-    <button class="btn btn-success" @onclick="ShowAddTopicModal">Add New Topic</button>
-</div>
+<!-- Button to open modal -->
+<button class="btn btn-primary" @onclick="ShowAddTopicModal">Add New Topic</button>
 
-@if (topics.Any())
+<!-- List of topics -->
+@if (topics == null)
 {
-    <table class="table mt-3">
-        <thead>
-            <tr>
-                <th>Topic ID</th>
-                <th>Topic Name</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var topic in topics)
-            {
-                <tr>
-                    <td>@topic.TopicId</td>
-                    <td>@topic.Name</td>
-                    <td>
-                        <button class="btn btn-primary" @onclick="() => EditTopic(topic)">Edit</button>
-                        <button class="btn btn-danger" @onclick="() => DeleteTopic(topic.TopicId)">Delete</button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <p>Loading topics...</p>
 }
 else
 {
-    <p>No topics available.</p>
+    <ul>
+        @foreach (var topic in topics)
+        {
+            <li>@topic.Name</li>
+        }
+    </ul>
+}
+
+<!-- Modal for adding new topic -->
+@if (isAddTopicModalVisible)
+{
+    <div class="modal show d-block" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Topic</h5>
+                    <button type="button" class="btn-close" @onclick="CloseAddTopicModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="topicName">Topic Name</label>
+                        <input type="text" id="topicName" class="form-control" @bind="newTopic.Name" required />
+                    </div>
+
+                    <h5>Questions</h5>
+                    @foreach (var question in newTopic.Questions)
+                    {
+                        <div class="mb-3">
+                            <label for="questionText">Question Text</label>
+                            <input type="text" id="questionText" class="form-control" @bind="question.QuestionText" required />
+
+                            <h6>Answers</h6>
+                            @foreach (var answer in question.Answers)
+                            {
+                                <div class="d-flex mb-2">
+                                    <input type="text" class="form-control me-2" @bind="answer.AnswerText" placeholder="Answer Text" />
+                                    <input type="checkbox" @bind="answer.IsCorrect" /> Correct
+                                    <button class="btn btn-danger ms-2" @onclick="() => RemoveAnswer(question, answer)">Remove</button>
+                                </div>
+                            }
+                            <button class="btn btn-secondary mb-3" @onclick="() => AddAnswer(question)">Add Answer</button>
+                        </div>
+                        <button class="btn btn-danger mb-3" @onclick="() => RemoveQuestion(question)">Remove Question</button>
+                    }
+                    <button class="btn btn-secondary" @onclick="AddQuestion">Add Question</button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseAddTopicModal">Close</button>
+                    <button type="button" class="btn btn-primary" @onclick="AddTopic">Add Topic</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
 }
 
 @code {
-    private List<Topic> topics = new List<Topic>();
+    private List<Topic>? topics;
+    private bool isAddTopicModalVisible = false;
+    private Topic newTopic = new Topic
+        {
+            Questions = new List<Question>()
+        };
 
     protected override async Task OnInitializedAsync()
     {
@@ -48,25 +89,89 @@ else
 
     private async Task LoadTopics()
     {
-        topics = await Http.GetFromJsonAsync<List<Topic>>("https://datastructviz-quiz-api-001-hbcza9gdbpb7gzew.canadacentral-01.azurewebsites.net/api/Topics");
-    }
-
-    private async Task DeleteTopic(int topicId)
-    {
-        var response = await Http.DeleteAsync($"https://datastructviz-quiz-api-001-hbcza9gdbpb7gzew.canadacentral-01.azurewebsites.net/api/Topics/{topicId}");
-        if (response.IsSuccessStatusCode)
+        try
         {
-            await LoadTopics();
+            topics = await Http.GetFromJsonAsync<List<Topic>>("api/Topics");
+        }
+        catch (Exception ex)
+        {
+            NotificationService.AddMessage($"Failed to load topics: {ex.Message}");
         }
     }
 
     private void ShowAddTopicModal()
     {
-        // Show modal for adding topics (not implemented here)
+        newTopic = new Topic
+            {
+                Questions = new List<Question>()
+            };
+        isAddTopicModalVisible = true;
     }
 
-    private void EditTopic(Topic topic)
+    private void CloseAddTopicModal()
     {
-        // Navigate to an edit topic page or show an edit modal (not implemented here)
+        isAddTopicModalVisible = false;
+    }
+
+    private void AddQuestion()
+    {
+        newTopic.Questions.Add(new Question
+            {
+                Answers = new List<Answer>()
+            });
+    }
+
+    private void RemoveQuestion(Question question)
+    {
+        newTopic.Questions.Remove(question);
+    }
+
+    private void AddAnswer(Question question)
+    {
+        question.Answers.Add(new Answer());
+    }
+
+    private void RemoveAnswer(Question question, Answer answer)
+    {
+        question.Answers.Remove(answer);
+    }
+
+    private async Task AddTopic()
+    {
+        if (string.IsNullOrWhiteSpace(newTopic.Name))
+        {
+            NotificationService.AddMessage("Topic name cannot be empty.");
+            return;
+        }
+
+        try
+        {
+            var token = await SecureStorage.GetAsync("authToken");
+
+            var request = new HttpRequestMessage(HttpMethod.Post, "api/Topics")
+                {
+                    Content = JsonContent.Create(newTopic)
+                };
+
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            var response = await Http.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                NotificationService.AddMessage("Topic added successfully.");
+                await LoadTopics();
+                CloseAddTopicModal();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                NotificationService.AddMessage($"Failed to add topic: {error}");
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.AddMessage($"An error occurred: {ex.Message}");
+        }
     }
 }

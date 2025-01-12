@@ -18,7 +18,7 @@
     <form @onsubmit="HandleLogin">
         <div class="mb-3">
             <label for="username" class="form-label">Username/Email</label>
-            <input type="text" id="username" class="form-control" @bind="loginModel.Username" required />
+            <input type="text" id="username" class="form-control" @bind="loginModel.Email" required />
         </div>
         <div class="mb-3">
             <label for="password" class="form-label">Password</label>
@@ -32,20 +32,23 @@
     private LoginModel loginModel = new LoginModel();
     private string? errorMessage;
 
+
     private async Task HandleLogin()
     {
         try
         {
-            var response = await Http.PostAsJsonAsync("https://datastructviz-quiz-api-001-hbcza9gdbpb7gzew.canadacentral-01.azurewebsites.net/api/Auth/login",
-                    new { email = loginModel.Username, password = loginModel.Password });
-
+            var response = await Http.PostAsJsonAsync("api/Auth/login", loginModel);
             if (response.IsSuccessStatusCode)
             {
                 var tokenResponse = await response.Content.ReadFromJsonAsync<TokenResponse>();
                 if (tokenResponse != null)
                 {
-                    // Save token locally
                     await SecureStorage.SetAsync("authToken", tokenResponse.Token);
+
+                    // Add the token to HttpClient headers as the JSInterop call to SecureStorage in Program.cs won't work due to the lack of a browser context
+                    Http.DefaultRequestHeaders.Authorization =
+                        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenResponse.Token);
+
                     NavigationManager.NavigateTo("/admin/dashboard");
                 }
             }
@@ -59,10 +62,4 @@
             errorMessage = $"An error occurred: {ex.Message}";
         }
     }
-
-    private async Task Logout()
-    {
-        await SecureStorage.RemoveAsync("authToken");
-        NavigationManager.NavigateTo("/admin/login");
     }
-}

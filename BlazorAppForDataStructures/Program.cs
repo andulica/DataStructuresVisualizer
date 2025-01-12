@@ -42,10 +42,17 @@ namespace BlazorAppForDataStructures
 
             builder.Services.AddRazorPages();
             builder.Services.AddServerSideBlazor();
+            builder.Services.AddScoped<HttpClient>(sp =>
+            {
+                var httpClient = new HttpClient
+                {
+                    BaseAddress = new Uri("https://datastructviz-quiz-api-001-hbcza9gdbpb7gzew.canadacentral-01.azurewebsites.net/")
+                };
 
-            builder.Services.AddScoped(sp =>new HttpClient { BaseAddress = new Uri("https://datastructviz-quiz-api-001-hbcza9gdbpb7gzew.canadacentral-01.azurewebsites.net/") } );
+                return httpClient;
+            });
+
             builder.Configuration.AddUserSecrets<Program>();
-
 
             var app = builder.Build();
 
