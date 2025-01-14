@@ -11,22 +11,14 @@ namespace BlazorAppForDataStructures
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-            builder.Services.AddDbContext<BlazorAppForDataStructuresContext>(options =>
-                options.UseSqlServer(connectionString));
+           
 
-            if (string.IsNullOrEmpty(connectionString))
-            {
-                throw new InvalidOperationException("Connection string not found. Please set the environment variable 'MYAPP_CONNECTION_STRING'.");
-            }
+      
 
-            // Configure Entity Framework and Identity
-            builder.Services.AddDbContext<BlazorAppForDataStructuresContext>(options =>
-            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+            
 
 
-            builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<BlazorAppForDataStructuresContext>();
+            
 
             builder.Services.AddScoped<QuizService>();
             builder.Services.AddScoped<CancellationService>();
