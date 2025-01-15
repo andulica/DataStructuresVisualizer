@@ -144,6 +144,8 @@
 
     public void Dispose()
     {
+        CancellationService.ResetCancellationTokenSource();
+
         NotificationService.OnMessageAdded -= HandleMessageAdded;
         NotificationService.OnMessageCleared -= HandleMessageCleared;
         doublyLinkedList.HighlightRequested -= HandleHighlightRequest; // Unsubscribe from highlight events

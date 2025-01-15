@@ -163,6 +163,8 @@
 
     public void Dispose()
     {
+        CancellationService.ResetCancellationTokenSource();
+
         UnsubscribingOldList();
     }
 
