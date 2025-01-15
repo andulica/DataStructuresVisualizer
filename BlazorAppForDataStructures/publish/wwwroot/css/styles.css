@@ -1,0 +1,119 @@
+﻿
+
+.operation-selection {
+    margin-bottom: 20px;
+}
+
+.insertion-fields {
+    margin-top: 10px;
+}
+
+.custom-button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+    .custom-button:hover {
+        background-color: #0056b3;
+    }
+
+.notification-container {
+    position: fixed;
+    top: 60%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #f44336;
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 9999;
+}
+
+.notification-message {
+    flex-grow: 1;
+}
+
+.notification-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: #555;
+}
+
+.code-line {
+    font-family: 'Consolas', 'Courier New', monospace;
+    white-space: pre; /* Preserves whitespace for alignment */
+}
+
+.highlight {
+    background-color: yellow; /* Highlight color */
+}
+
+
+.node {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.highlighted-node {
+    background-color: yellow;
+}
+
+.arrow-container {
+    position: relative;
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+}
+
+.left-arrow {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.right-arrow {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+}
+
+svg {
+    display: block;
+}
+
+.insertion-fields {
+    margin: 10px 0;
+}
+
+.linked-list {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 100px;
+}
+
+.ui-slider-handle {
+    width: 20px;
+    height: 20px;
+    background-color: #fff;
+    border-radius: 50%;
+    position: absolute;
+    top: -5px;
+    z-index: 2;
+    cursor: pointer;
+    border: 2px solid #000;
+}

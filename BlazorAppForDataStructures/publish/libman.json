@@ -1,0 +1,10 @@
+{
+  "version": "1.0",
+  "defaultProvider": "cdnjs",
+  "libraries": [
+    {
+      "library": "d3@7.8.5",
+      "destination": "wwwroot/js/d3/"
+    }
+  ]
+}
