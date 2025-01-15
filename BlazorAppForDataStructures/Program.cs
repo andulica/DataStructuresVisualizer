@@ -1,6 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using BlazorAppForDataStructures.Data;
-using BlazorAppForDataStructures.Models;
 using BlazorAppForDataStructures.Services;
 
 namespace BlazorAppForDataStructures
@@ -10,15 +7,6 @@ namespace BlazorAppForDataStructures
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
-           
-
-      
-
-            
-
-
-            
 
             builder.Services.AddScoped<QuizService>();
             builder.Services.AddScoped<CancellationService>();
