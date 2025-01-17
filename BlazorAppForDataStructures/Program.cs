@@ -12,7 +12,8 @@ namespace BlazorAppForDataStructures
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            var connectionString = builder.Configuration["DefaultConnection"];
+            var connectionString = builder.Configuration["DefaultConnection"] ??
+                                   Environment.GetEnvironmentVariable("SQLCONNSTR_DefaultConnection");
 
             if (string.IsNullOrEmpty(connectionString))
             {
