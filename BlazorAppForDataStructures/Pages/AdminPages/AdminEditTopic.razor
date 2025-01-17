@@ -44,7 +44,9 @@ else
                             <ValidationMessage For="@(() => answer.AnswerText)" />
 
                             <input type="radio" name="@($"correctAnswer_{question.QuestionId}")"
-                                   @bind="answer.IsCorrect" /> Correct
+                                    @onclick="() => SetCorrectAnswer(question, answer)" /> Correct
+
+
 
                             <!-- Add `type="button"` here -->
                             <button type="button" class="btn btn-danger ms-2" @onclick="() => RemoveAnswer(question, answer)">Remove</button>
@@ -106,6 +108,16 @@ else
         StateHasChanged();
     }
 
+    private void SetCorrectAnswer(Question question, Answer selectedAnswer)
+    {
+        foreach (var answer in question.Answers)
+        {
+            answer.IsCorrect = false; // Deselect all answers
+        }
+
+        selectedAnswer.IsCorrect = true; // Set the selected answer as correct
+    }
+
     public void Dispose()
     {
         NotificationService.OnMessageAdded -= ShowMessage;
@@ -159,6 +171,16 @@ else
     {
         try
         {
+            // Validation: Ensure each question has one correct answer
+            foreach (var question in topic?.Questions ?? new List<Question>())
+            {
+                if (!question.Answers.Any(a => a.IsCorrect))
+                {
+                    NotificationService.AddMessage($"Question '{question.QuestionText}' must have at least one correct answer.");
+                    return;
+                }
+            }
+
             var token = await SecureStorage.GetAsync("authToken");
             var request = new HttpRequestMessage(HttpMethod.Put, $"api/topics/{TopicName}")
                 {

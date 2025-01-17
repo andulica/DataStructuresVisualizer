@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using BlazorAppForDataStructures.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace BlazorAppForDataStructures.Data
 {
-    public class BlazorAppForDataStructuresContext : IdentityDbContext<ApplicationUser>
+    public class BlazorAppForDataStructuresContext : IdentityDbContext<IdentityUser>
     {
         public BlazorAppForDataStructuresContext(DbContextOptions<BlazorAppForDataStructuresContext> options)
             : base(options)

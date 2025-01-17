@@ -1,4 +1,9 @@
+using BlazorAppForDataStructures.Data;
+using BlazorAppForDataStructures.Models;
 using BlazorAppForDataStructures.Services;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace BlazorAppForDataStructures
 {
@@ -7,6 +12,33 @@ namespace BlazorAppForDataStructures
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddDbContext<BlazorAppForDataStructuresContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
+            {
+                // Add any specific options here
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequiredLength = 6;
+            })
+            .AddEntityFrameworkStores<BlazorAppForDataStructuresContext>()
+            .AddDefaultTokenProviders();
+            //  jejp sdyp vigu bxvb
+
+            builder.Services.Configure<IdentityOptions>(options =>
+            {
+                options.SignIn.RequireConfirmedEmail = true;
+            });
+
+
+            builder.Services.AddTransient<IEmailSender>(sp =>
+            new SmtpEmailSender(
+            smtpHost: "smtp.gmail.com",       // Gmail's SMTP server
+            smtpPort: 587,                   // Port for TLS
+            emailFrom: "datastructviz@gmail.com", // Replace with your Gmail address
+            emailPassword: "jejp sdyp vigu bxvb")); // Replace with your Gmail password or App Password
 
             builder.Services.AddScoped<QuizService>();
             builder.Services.AddScoped<CancellationService>();
@@ -50,6 +82,8 @@ namespace BlazorAppForDataStructures
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.MapRazorPages();
 
             app.MapBlazorHub();
             app.MapFallbackToPage("/_Host");
