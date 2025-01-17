@@ -14,8 +14,13 @@ namespace BlazorAppForDataStructures
             var builder = WebApplication.CreateBuilder(args);
             var connectionString = builder.Configuration["DefaultConnection"];
 
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                throw new Exception("DefaultConnection is not configured.");
+            }
+
             builder.Services.AddDbContext<BlazorAppForDataStructuresContext>(options =>
-                options.UseSqlServer(builder.Configuration["DefaultConnection"]));
+                options.UseSqlServer(connectionString));
 
             builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
             {
