@@ -23,20 +23,27 @@ namespace BlazorAppForDataStructures.Services
 
         public async Task SendEmailAsync(string email, string subject, string htmlMessage)
         {
-            var emailMessage = new MimeMessage();
-            emailMessage.From.Add(new MailboxAddress("DataStructViz", _emailFrom));
-            emailMessage.To.Add(new MailboxAddress("", email));
-            emailMessage.Subject = subject;
-            emailMessage.Body = new TextPart("html") { Text = htmlMessage };
-
-            using (var client = new SmtpClient())
+            try
             {
-                await client.ConnectAsync(_smtpHost, _smtpPort, MailKit.Security.SecureSocketOptions.StartTls);
-                await client.AuthenticateAsync(_emailFrom, _emailPassword);
-                await client.SendAsync(emailMessage);
-                await client.DisconnectAsync(true);
+                var emailMessage = new MimeMessage();
+                emailMessage.From.Add(new MailboxAddress("DataStructViz", _emailFrom));
+                emailMessage.To.Add(new MailboxAddress("", email));
+                emailMessage.Subject = subject;
+                emailMessage.Body = new TextPart("html") { Text = htmlMessage };
+
+                using (var client = new SmtpClient())
+                {
+                    await client.ConnectAsync(_smtpHost, _smtpPort, MailKit.Security.SecureSocketOptions.StartTls);
+                    await client.AuthenticateAsync(_emailFrom, _emailPassword);
+                    await client.SendAsync(emailMessage);
+                    await client.DisconnectAsync(true);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to send email: {ex.Message}");
+                throw;
             }
         }
     }
-
 }

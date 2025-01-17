@@ -12,9 +12,10 @@ namespace BlazorAppForDataStructures
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            var connectionString = builder.Configuration["DefaultConnection"];
 
             builder.Services.AddDbContext<BlazorAppForDataStructuresContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(builder.Configuration["DefaultConnection"]));
 
             builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
             {
@@ -25,7 +26,6 @@ namespace BlazorAppForDataStructures
             })
             .AddEntityFrameworkStores<BlazorAppForDataStructuresContext>()
             .AddDefaultTokenProviders();
-            //  jejp sdyp vigu bxvb
 
             builder.Services.Configure<IdentityOptions>(options =>
             {
