@@ -1,7 +1,24 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.Components.Authorization
 @inject NavigationManager NavigationManager
 
-<div class="page-container"> </div>
+<AuthorizeView>
+    <Authorized>
+        @if (showWelcomeMessage)
+        {
+            <div class="alert alert-info welcome-alert" role="alert">
+                Welcome back, @context.User.Identity.Name!
+            </div>
+        }
+    </Authorized>
+    <NotAuthorized>
+        <!-- Not logged in -->
+    </NotAuthorized>
+</AuthorizeView>
+
+<div class="page-container">
+</div>
+
 <h1 class="page-title">Select a Data Structure to Visualize</h1>
 
 <div class="button-container">
@@ -31,15 +48,19 @@
             {
                 <img src="/images/stack_visual.gif" alt="Stack Visualization" class="img-thumbnail" />
             }
-
         </div>
     }
 </div>
 
 <style>
+    .welcome-alert {
+        max-width: 400px;
+        margin: 20px auto; /* Center horizontally */
+        text-align: center;
+    }
+
     .page-container {
         background-image: url('/images/home_page_img_bckg.png');
-        height: 100vh;
         display: block;
         margin-left: auto;
         margin-right: auto;
@@ -58,7 +79,7 @@
     }
 
     .page-title {
-        color: #FFA500; /* Orange */
+        color: #FFA500;
         margin-bottom: 20px;
     }
 
@@ -72,13 +93,13 @@
     .data-structure-wrapper {
         text-align: center;
         margin-bottom: 20px;
-        width: 200px; /* Ensure consistent width for alignment */
+        width: 200px;
     }
 
     .data-structure-button {
         background-color: skyblue;
         border: none;
-        color: #004D40; /* Dark Green */
+        color: #004D40;
         padding: 10px 20px;
         border-radius: 5px;
         cursor: pointer;
@@ -87,21 +108,30 @@
     }
 
         .data-structure-button:hover {
-            background-color: deepskyblue; /* Green */
+            background-color: deepskyblue;
             transform: scale(1.1);
         }
 
-    .ds-gif {
-        margin-top: 10px;
-        max-width: 100%;
-        width: 100%; /* Match the button width */
-        height: 150px; /* Adjust height accordingly */
-        border:
-    }
 </style>
 
 @code {
-    private string[] dataStructures = { "SinglyLinkedList", "DoublyLinkedList", "BinarySearchTree", "Queue", "Stack"};
+    private string[] dataStructures = { "SinglyLinkedList", "DoublyLinkedList", "BinarySearchTree", "Queue", "Stack" };
+    private bool showWelcomeMessage = false;
+
+    protected override void OnInitialized()
+    {
+        showWelcomeMessage = true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && showWelcomeMessage)
+        {
+            await Task.Delay(5000);
+            showWelcomeMessage = false;
+            StateHasChanged();
+        }
+    }
 
     private void NavigateToVisualizer(string dataStructure)
     {

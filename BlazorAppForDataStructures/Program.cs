@@ -1,5 +1,4 @@
 using BlazorAppForDataStructures.Data;
-using BlazorAppForDataStructures.Models;
 using BlazorAppForDataStructures.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -25,7 +24,6 @@ namespace BlazorAppForDataStructures
 
             builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
             {
-                // Add any specific options here
                 options.Password.RequireDigit = true;
                 options.Password.RequireLowercase = true;
                 options.Password.RequiredLength = 6;
@@ -41,10 +39,10 @@ namespace BlazorAppForDataStructures
 
             builder.Services.AddTransient<IEmailSender>(sp =>
             new SmtpEmailSender(
-            smtpHost: "smtp.gmail.com",       // Gmail's SMTP server
-            smtpPort: 587,                   // Port for TLS
-            emailFrom: "datastructviz@gmail.com", // Replace with your Gmail address
-            emailPassword: "jejp sdyp vigu bxvb")); // Replace with your Gmail password or App Password
+            smtpHost: "smtp.gmail.com",       
+            smtpPort: 587,                   
+            emailFrom: "datastructviz@gmail.com",
+            emailPassword: "jejp sdyp vigu bxvb"));
 
             builder.Services.AddScoped<QuizService>();
             builder.Services.AddScoped<CancellationService>();
@@ -74,7 +72,6 @@ namespace BlazorAppForDataStructures
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Error");

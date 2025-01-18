@@ -22,24 +22,48 @@
 
         <!-- Add links for Identity pages -->
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="Identity/Account/Login">
-                <span class="oi oi-account-login" aria-hidden="true"></span> Users Login
-            </NavLink>
-        </div>
+        <AuthorizeView>
+            <NotAuthorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Identity/Account/Login">
+                        <span class="oi oi-account-login" aria-hidden="true"></span> Users Login
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Identity/Account/Register">
+                        <span class="oi oi-account-logout" aria-hidden="true"></span> Register
+                    </NavLink>
+                </div>
+            </NotAuthorized>
+        </AuthorizeView>
 
-          <div class="nav-item px-3">
-            <NavLink class="nav-link" href="Identity/Account/Register">
-                <span class="oi oi-account-logout" aria-hidden="true"></span> Register
-            </NavLink>
-        </div>
+        <AuthorizeView>
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Identity/Account/Logout">
+                        <span class="oi oi-account-logout" aria-hidden="true"></span> Logout
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
 
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="/admin/login">
                 <span class="oi oi-account-login" aria-hidden="true"></span> Admin Login
             </NavLink>
         </div>
-            
+
+        <AuthorizeView>
+            <Authorized>
+                <div class="navbar-text text-white">
+                    Hi, @context.User.Identity.Name!
+                    &nbsp;
+                    <button class="btn btn-sm btn-outline-light" @onclick="CheckUserScore">
+                        Check your user score
+                    </button>
+                </div>
+            </Authorized>
+        </AuthorizeView>
     </nav>
 </div>
 
@@ -51,5 +75,9 @@
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+    }
+
+    private void CheckUserScore()
+    {
     }
 }
