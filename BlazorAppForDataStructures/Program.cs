@@ -33,7 +33,7 @@ namespace BlazorAppForDataStructures
 
             builder.Services.Configure<IdentityOptions>(options =>
             {
-                options.SignIn.RequireConfirmedEmail = true;
+                options.SignIn.RequireConfirmedEmail = false;
             });
 
 
