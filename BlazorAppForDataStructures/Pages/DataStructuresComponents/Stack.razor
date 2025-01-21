@@ -12,8 +12,10 @@
     <link rel="stylesheet" href="/css/styles.css" />
 </head>
 
-<div id="linked-list" class="container">
-    <h3>Stack</h3>
+<div class="blueprint-bg">
+
+    <div id="linked-list" class="linked-list-container">
+        <h3>Stack</h3>
 
     <!-- Operation list selection -->
     <div class="operation-selection">
@@ -73,6 +75,8 @@
             <button class="notification-close" @onclick="() => NotificationService.ClearMessage()">✖</button>
         </div>
     }
+</div>
+
 </div>
 
 
@@ -316,7 +320,7 @@
                 var removeTask = stack.PopAsync(nodeToRemove, token);
                 remainingNumberOfNodesToBeRemoved -= i;
 
-                var jsTask = JSRuntime.InvokeVoidAsync("removeValueInSll", nodeToBeRemovedFromSVG, timing, false, lastNodeToBeRemovedBoolFlag).AsTask();
+                var jsTask = JSRuntime.InvokeVoidAsync("removeValueInSll", nodeToBeRemovedFromSVG, timing, isStack,lastNodeToBeRemovedBoolFlag).AsTask();
                 await Task.WhenAll(removeTask, jsTask); // Run both tasks concurrently
                 await Task.Delay(timing.HighlightDelay, token);
             }

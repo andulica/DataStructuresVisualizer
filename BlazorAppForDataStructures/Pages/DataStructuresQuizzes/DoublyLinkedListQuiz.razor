@@ -7,55 +7,58 @@
 
 <h3>Doubly Linked List Quiz</h3>
 
-<div>
-    @if (isLoading)
-    {
-        <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-        </div>
-    }
-    else if (currentQuestion != null)
-    {
-        <div>
-            <p><strong>Question @currentIndex:</strong> @currentQuestion.QuestionText</p>
+<div class="blueprint-bg">
 
-            @foreach (var answer in currentQuestion.Answers)
-            {
-                <div>
-                    <input type="radio" id="@answer.AnswerId" name="answer"
-                           value="@answer.AnswerId" @onchange="OnAnswerSelected" />
-                    <label for="@answer.AnswerId">@answer.AnswerText</label>
+    <div class="quiz-container">
+        @if (isLoading)
+        {
+            <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
                 </div>
-            }
+            </div>
+        }
+        else if (currentQuestion != null)
+        {
+            <div>
+                <p><strong>Question @currentIndex:</strong> @currentQuestion.QuestionText</p>
 
-            <button @onclick="NextQuestion">Next</button>
-        </div>
-    }
-    else if (quizCompleted)
-    {
-        <div>
-            <h4>Quiz Completed!</h4>
-            <p>Your Score: @score / @totalQuestions</p>
-            <button @onclick="RestartQuiz">Retry Quiz</button>
-        </div>
-    }
-    else
-    {
-        <p>Loading...</p>
-    }
+                @foreach (var answer in currentQuestion.Answers)
+                {
+                    <div>
+                        <input type="radio" id="@answer.AnswerId" name="answer"
+                               value="@answer.AnswerId" @onchange="OnAnswerSelected" />
+                        <label for="@answer.AnswerId">@answer.AnswerText</label>
+                    </div>
+                }
 
-    <div style="margin-top: 20px;">
-        <p>Question @((currentIndex)) of @questions.Count</p>
+                <button @onclick="NextQuestion">Next</button>
+            </div>
+        }
+        else if (quizCompleted)
+        {
+            <div>
+                <h4>Quiz Completed!</h4>
+                <p>Your Score: @score / @totalQuestions</p>
+                <button @onclick="RestartQuiz">Retry Quiz</button>
+            </div>
+        }
+        else
+        {
+            <p>Loading...</p>
+        }
+
+        <div style="margin-top: 20px;">
+            <p>Question @((currentIndex)) of @questions.Count</p>
+        </div>
+
+        @if (quizCompleted)
+        {
+            <QuizFeedback QuizData="quizData"
+                          UserAnswers="userAnswers"
+                          IsChatbotDisabled="false" />
+        }
     </div>
-
-    @if (quizCompleted)
-    {
-        <QuizFeedback QuizData="quizData"
-                      UserAnswers="userAnswers"
-                      IsChatbotDisabled="false" />
-    }
 </div>
 
 @code {

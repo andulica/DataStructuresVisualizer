@@ -7,54 +7,58 @@
 
 <h3>Singly Linked List Quiz</h3>
 
-<div>
-    @if (isLoading)
-    {
-        <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-        </div>
-    }
-    else if (currentQuestion != null)
-    {
-        <div>
-            <p><strong>Question @currentIndex:</strong> @currentQuestion.QuestionText</p>
+<div class="blueprint-bg">
 
-            @foreach (var answer in currentQuestion.Answers)
-            {
-                <div>
-                    <input type="radio" id="@answer.AnswerId" name="answer"
-                           value="@answer.AnswerId" @onchange="OnAnswerSelected" />
-                    <label for="@answer.AnswerId">@answer.AnswerText</label>
+    <div class="quiz-container">
+
+        @if (isLoading)
+        {
+            <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
                 </div>
-            }
+            </div>
+        }
+        else if (currentQuestion != null)
+        {
+            <div>
+                <p><strong>Question @currentIndex:</strong> @currentQuestion.QuestionText</p>
 
-            <button @onclick="NextQuestion">Next</button>
+                @foreach (var answer in currentQuestion.Answers)
+                {
+                    <div>
+                        <input type="radio" id="@answer.AnswerId" name="answer"
+                               value="@answer.AnswerId" @onchange="OnAnswerSelected" />
+                        <label for="@answer.AnswerId">@answer.AnswerText</label>
+                    </div>
+                }
+
+                <button @onclick="NextQuestion">Next</button>
+            </div>
+        }
+        else if (quizCompleted)
+        {
+            <div>
+                <h4>Quiz Completed!</h4>
+                <p>Your Score: @score / @totalQuestions</p>
+                <button @onclick="RestartQuiz">Retry Quiz</button>
+            </div>
+        }
+        else
+        {
+            <p>Loading...</p>
+        }
+
+        @if (quizCompleted)
+        {
+            <QuizFeedback QuizData="quizData"
+                          UserAnswers="userAnswers"
+                          IsChatbotDisabled="false" />
+        }
+
+        <div style="margin-top: 20px;">
+            <p>Question @((currentIndex)) of @questions.Count</p>
         </div>
-    }
-    else if (quizCompleted)
-    {
-        <div>
-            <h4>Quiz Completed!</h4>
-            <p>Your Score: @score / @totalQuestions</p>
-            <button @onclick="RestartQuiz">Retry Quiz</button>
-        </div>
-    }
-    else
-    {
-        <p>Loading...</p>
-    }
-
-@if (quizCompleted)
-{
-    <QuizFeedback QuizData="quizData"
-                  UserAnswers="userAnswers"
-                  IsChatbotDisabled="false" />
-}
-
-    <div style="margin-top: 20px;">
-        <p>Question @((currentIndex)) of @questions.Count</p>
     </div>
 </div>
 
@@ -142,23 +146,23 @@
     private QuizDto ConvertToQuizDto(List<Question> questions, string topicName)
     {
         var quizDto = new QuizDto
-        {
-            TopicId = 0,
-            Name = topicName,
-            Questions = questions.Select(q => new QuestionDto
             {
-                QuestionId = q.QuestionId,
-                TopicId = q.TopicId,
-                QuestionText = q.QuestionText,
-                Answers = q.Answers.Select(a => new AnswerDto
+                TopicId = 0,
+                Name = topicName,
+                Questions = questions.Select(q => new QuestionDto
                 {
-                    AnswerId = a.AnswerId,
-                    QuestionId = a.QuestionId,
-                    AnswerText = a.AnswerText,
-                    IsCorrect = a.IsCorrect
+                    QuestionId = q.QuestionId,
+                    TopicId = q.TopicId,
+                    QuestionText = q.QuestionText,
+                    Answers = q.Answers.Select(a => new AnswerDto
+                    {
+                        AnswerId = a.AnswerId,
+                        QuestionId = a.QuestionId,
+                        AnswerText = a.AnswerText,
+                        IsCorrect = a.IsCorrect
+                    }).ToList()
                 }).ToList()
-            }).ToList()
-        };
+            };
         return quizDto;
     }
 }

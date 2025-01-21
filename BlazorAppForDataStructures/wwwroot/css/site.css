@@ -147,3 +147,151 @@ a {
         color: darken(var(--primary-color), 10%);
     }
 
+
+
+/* Blueprint background using repeating linear gradients */
+.blueprint-bg {
+    /* Dark blueprint color */
+    background-color: #00c1ff;
+    /* Horizontal lines */
+    background-image: repeating-linear-gradient( to bottom, #1590cf 0px, rgba(0, 0, 0, 0.1) 1px, transparent 1px, transparent 30px ),
+    /* Vertical lines */
+    repeating-linear-gradient( to right, rgba(255,255,255,0.1) 0px, rgba(0,0,0,0.2) 1px, transparent 1px, transparent 30px );
+    /* Let the background cover the full page */
+    background-repeat: repeat;
+    min-height: 100vh; /* ensure vertical fill */
+    /* Default text styling for readability */
+    color: #ffffff;
+    font-family: "Courier New", Courier, monospace;
+}
+
+/* Styling for quiz container, so it doesn't stick to edges */
+.quiz-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+    /* Headings in a blueprint style */
+    .quiz-container h4, .quiz-container h3 {
+        color: #ffffff; /* white text on dark blueprint */
+    }
+
+    /* Buttons */
+    .quiz-container button {
+        background-color: #1e81b0;
+        color: #fff;
+        border: none;
+        padding: 0.5rem 1rem;
+        margin-top: 1rem;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+        .quiz-container button:hover {
+            background-color: #1590cf; /* slight hover effect */
+        }
+
+    /* Label and input styling */
+    .quiz-container label {
+        margin-left: 0.5rem;
+    }
+
+    .quiz-container input[type="radio"] {
+        margin-right: 0.3rem;
+    }
+
+    /* Misc text styles */
+    .quiz-container p {
+        margin: 0.5rem 0;
+    }
+
+
+/* 2. Container styling for the linked-list area */
+.linked-list-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* 3. Operation selection styling */
+.operation-selection {
+    margin-bottom: 1rem;
+}
+
+    .operation-selection select {
+        padding: 0.5rem;
+        margin-right: 1rem;
+        background-color: #1e81b0;
+        color: #fff;
+        border: 1px solid #127396;
+        outline: none;
+        cursor: pointer;
+    }
+
+/* 4. Shared input styles */
+.insertion-fields,
+.create-fields {
+    margin-top: 1rem;
+}
+
+    .insertion-fields label,
+    .create-fields label {
+        display: inline-block;
+        margin-right: 0.5rem;
+    }
+
+    .insertion-fields input[type="number"],
+    .create-fields input[type="number"] {
+        width: 80px;
+        margin-right: 1rem;
+        padding: 0.3rem;
+        border: 1px solid #ccc;
+        outline: none;
+    }
+
+/* 5. Button styling */
+.custom-button {
+    background-color: #1e81b0;
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    margin-top: 0.5rem;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+    .custom-button:hover {
+        background-color: #1590cf;
+    }
+
+/* 6. Notification container */
+.notification-container {
+    background-color: #f09c00;
+    color: #fff;
+    padding: 0.5rem 1rem;
+    margin-top: 1rem;
+    border-radius: 3px;
+    display: inline-block;
+    position: relative;
+}
+
+.notification-message {
+    margin-right: 1.5rem;
+}
+
+.notification-close {
+    background: none;
+    border: none;
+    color: #fff;
+    position: absolute;
+    right: 0.5rem;
+    top: 0.3rem;
+    cursor: pointer;
+}
+
+/* 7. Headings */
+.container h3, .container label, .container p {
+    color: #ffffff; /* ensure text is visible on blueprint background */
+}

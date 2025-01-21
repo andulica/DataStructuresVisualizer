@@ -134,9 +134,15 @@
     private string BuildAllQuestionsPrompt(QuizDto quiz, Dictionary<int, int> userAnswers)
     {
         var sb = new StringBuilder();
-        sb.AppendLine("Please return a JSON array of { \"QuestionNumber\", \"Feedback\" } for each question. Example:");
-        sb.AppendLine(@"[ { ""QuestionNumber"": 1, ""Feedback"": ""2-sentence feedback here"" }, ... ]");
-        sb.AppendLine("Do NOT include extra text outside the JSON.");
+   
+        sb.AppendLine("Instructions:");
+        sb.AppendLine("1. For each question, read the user answer and the correct answer.");
+        sb.AppendLine("2. If the user is correct, provide 2-3 sentences:");
+        sb.AppendLine("- A short congratulation and " +
+                      "- A brief mention of how the answer could change under different conditions." +
+                      "3. If the user is incorrect, provide 2-3 sentences:" +
+                      "- A short explanation of why the answer is incorrect" +
+                      "- A concise description of the correct answer.");
         sb.AppendLine("Here are the questions and user answers:");
 
         int count = 1;

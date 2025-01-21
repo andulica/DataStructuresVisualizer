@@ -4,29 +4,33 @@
 
 <h3>Binary Search Tree</h3>
 
-<!-- Input for operations -->
-<div>
-    <input @bind="inputValue" type="number" placeholder="Enter value" />
-    <button @onclick="() => InsertValue()">Insert</button>
-    <button @onclick="() => SearchValue()">Search</button>
-    <button @onclick="() => RemoveValue()">Remove</button>
-    <button @onclick="() => CreateTree()">Create</button>
-</div>
+<div class="blueprint-bg">
 
-<!-- Traversal operations -->
-<div>
-    @* <button @onclick="() => InOrderTraversal()">In-Order</button> *@
-@*     <button @onclick="() => PreOrderTraversal()">Pre-Order</button>
-    <button @onclick="() => PostOrderTraversal()">Post-Order</button> *@
-</div>
+    <!-- Input for operations -->
+    <div>
+        <input @bind="inputValue" type="number" placeholder="Enter value" />
+        <button @onclick="() => InsertValue()">Insert</button>
+        <button @onclick="() => SearchValue()">Search</button>
+        <button @onclick="() => RemoveValue()">Remove</button>
+        <button @onclick="() => CreateTree()">Create</button>
+    </div>
 
-<!-- Display area for the BST -->
-<div id="bst-display">
-    @* Render the tree here *@
-</div>
+    <!-- Traversal operations -->
+    <div>
+        @* <button @onclick="() => InOrderTraversal()">In-Order</button> *@
+        @*     <button @onclick="() => PreOrderTraversal()">Pre-Order</button>
+        <button @onclick="() => PostOrderTraversal()">Post-Order</button> *@
+    </div>
 
-<!-- Messages -->
-<div>@message</div>
+    <!-- Display area for the BST -->
+    <div id="bst-display">
+        @* Render the tree here *@
+    </div>
+
+    <!-- Messages -->
+    <div>@message</div>
+
+</div>
 
 
 @code {

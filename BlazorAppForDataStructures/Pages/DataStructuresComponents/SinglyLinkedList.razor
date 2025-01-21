@@ -14,9 +14,10 @@
 <head>
     <link rel="stylesheet" href="/css/styles.css" />
 </head>
+<div class="blueprint-bg">
 
-<div id="linked-list" class="container">
-    <h3>Singly Linked List Operations</h3>
+    <div id="linked-list" class="linked-list-container">
+        <h3>Singly Linked List Operations</h3>
 
     <div class="operation-selection">
         <select @onchange="OnActionChanged">
@@ -99,6 +100,7 @@
             <button class="notification-close" @onclick="() => NotificationService.ClearMessage()">✖</button>
         </div>
     }
+</div>
 </div>
 
 @code {

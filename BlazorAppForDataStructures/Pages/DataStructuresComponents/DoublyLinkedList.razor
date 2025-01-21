@@ -11,82 +11,85 @@
     <link rel="stylesheet" href="/css/styles.css" />
 </head>
 
-<div id="linked-list" class="container">
+<div class="blueprint-bg">
 
-    <h3>Doubly Linked List Operations</h3>
+    <div id="linked-list" class="linked-list-container">
 
-    <div class="operation-selection">
-        <select @onchange="OnActionChanged">
-            <option value="" disabled selected>Select an Operation</option> <!-- Initial message -->
-            <option value="insertAtPosition">Insert At Position</option>
-            <option value="prepend">Prepend</option>
-            <option value="append">Append</option>
-            <option value="search">Search</option>
-            <option value="remove">Remove</option>
-            <option value="create">Create</option>
-        </select>
-        @switch (selectedAction)
-        {
-            case "insertAtPosition":
-                <div class="insertion-fields">
-                    <label>Input Value:</label>
-                    <input type="number" @bind="inputValue" placeholder="Enter Value" />
-                    <label>Insert Position:</label>
-                    <input type="number" @bind="insertPosition" placeholder="Enter Position" />
-                    <button class="custom-button" @onclick="PerformInsertion" disabled="@isOperationInProgress">Insert</button>
-                </div>
-                break;
-            case "prepend":
-                <div class="insertion-fields">
-                    <label>Input Value:</label>
-                    <input type="number" @bind="inputValue" placeholder="Enter Value" />
-                    <button class="custom-button" @onclick="PrependValue" disabled="@isOperationInProgress">Prepend</button>
-                </div>
-                break;
-            case "append":
-                <div class="insertion-fields">
-                    <label>Input Value:</label>
-                    <input type="number" @bind="inputValue" placeholder="Enter Value" />
-                    <button class="custom-button" @onclick="AppendValue" disabled="@isOperationInProgress">Append</button>
-                </div>
-                break;
-            case "search":
-                <div class="insertion-fields">
-                    <label>Input Value:</label>
-                    <input type="number" @bind="inputValue" placeholder="Enter Value" />
-                    <button class="custom-button" @onclick="SearchValue" disabled="@isOperationInProgress">Search</button>
-                </div>
-                break;
-            case "remove":
-                <div class="insertion-fields">
-                    <label>Input Index:</label>
-                    <input type="number" @bind="inputValue" placeholder="Enter Index" />
-                    <button class="custom-button" @onclick="RemoveValue" disabled="@isOperationInProgress">Remove</button>
-                </div>
-                break;
-            case "create":
-                <div class="create-fields">
-                    <label>Number of Nodes:</label>
-                    <input type="number" @bind="inputValue" placeholder="Enter Value" />
-                    <button class="custom-button" @onclick="CreateDoublyLinkedList">Create List</button>
-                </div>
-                break;
-            default:
-                break;
-        }
+        <h3>Doubly Linked List Operations</h3>
 
-        @if (!string.IsNullOrEmpty(messageOutput))
-        {
-            <div class="notification-container">
-                <span class="notification-message">@messageOutput</span>
-                <button class="notification-close" @onclick="() => NotificationService.ClearMessage()">✖</button>
-            </div>
-        }
+        <div class="operation-selection">
+            <select @onchange="OnActionChanged">
+                <option value="" disabled selected>Select an Operation</option> <!-- Initial message -->
+                <option value="insertAtPosition">Insert At Position</option>
+                <option value="prepend">Prepend</option>
+                <option value="append">Append</option>
+                <option value="search">Search</option>
+                <option value="remove">Remove</option>
+                <option value="create">Create</option>
+            </select>
+            @switch (selectedAction)
+            {
+                case "insertAtPosition":
+                    <div class="insertion-fields">
+                        <label>Input Value:</label>
+                        <input type="number" @bind="inputValue" placeholder="Enter Value" />
+                        <label>Insert Position:</label>
+                        <input type="number" @bind="insertPosition" placeholder="Enter Position" />
+                        <button class="custom-button" @onclick="PerformInsertion" disabled="@isOperationInProgress">Insert</button>
+                    </div>
+                    break;
+                case "prepend":
+                    <div class="insertion-fields">
+                        <label>Input Value:</label>
+                        <input type="number" @bind="inputValue" placeholder="Enter Value" />
+                        <button class="custom-button" @onclick="PrependValue" disabled="@isOperationInProgress">Prepend</button>
+                    </div>
+                    break;
+                case "append":
+                    <div class="insertion-fields">
+                        <label>Input Value:</label>
+                        <input type="number" @bind="inputValue" placeholder="Enter Value" />
+                        <button class="custom-button" @onclick="AppendValue" disabled="@isOperationInProgress">Append</button>
+                    </div>
+                    break;
+                case "search":
+                    <div class="insertion-fields">
+                        <label>Input Value:</label>
+                        <input type="number" @bind="inputValue" placeholder="Enter Value" />
+                        <button class="custom-button" @onclick="SearchValue" disabled="@isOperationInProgress">Search</button>
+                    </div>
+                    break;
+                case "remove":
+                    <div class="insertion-fields">
+                        <label>Input Index:</label>
+                        <input type="number" @bind="inputValue" placeholder="Enter Index" />
+                        <button class="custom-button" @onclick="RemoveValue" disabled="@isOperationInProgress">Remove</button>
+                    </div>
+                    break;
+                case "create":
+                    <div class="create-fields">
+                        <label>Number of Nodes:</label>
+                        <input type="number" @bind="inputValue" placeholder="Enter Value" />
+                        <button class="custom-button" @onclick="CreateDoublyLinkedList">Create List</button>
+                    </div>
+                    break;
+                default:
+                    break;
+            }
+
+            @if (!string.IsNullOrEmpty(messageOutput))
+            {
+                <div class="notification-container">
+                    <span class="notification-message">@messageOutput</span>
+                    <button class="notification-close" @onclick="() => NotificationService.ClearMessage()">✖</button>
+                </div>
+            }
+        </div>
+
+        <div id="dll-display"></div>
+
+        <CodeDisplay CodeLines="@currentCode" />
     </div>
-
-    <div id="dll-display"></div>
-
-    <CodeDisplay CodeLines="@currentCode" />
 </div>
 
 @code {
@@ -505,7 +508,7 @@
         await UpdateDisplay();
     }
 
-    private async Task UpdateDisplay ()
+    private async Task UpdateDisplay()
     {
         var dllData = ConvertListToJavaScriptFormat(doublyLinkedList);
         await JSRuntime.InvokeVoidAsync("drawDoublyLinkedList", dllData);
