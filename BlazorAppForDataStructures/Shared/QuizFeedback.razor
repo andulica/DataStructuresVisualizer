@@ -1,0 +1,295 @@
+﻿@using System.Text
+@using System.Text.Json
+@inject HttpClient Http
+
+<div class="quiz-feedback-container">
+    @if (!IsFeedbackVisible)
+    {
+        <button class="btn btn-primary" @onclick="GenerateQuizFeedbackAsync">
+            Show Feedback
+        </button>
+    }
+    else
+    {
+        <!-- Section to navigate question-by-question -->
+        <div class="single-question-feedback">
+            @if (QuestionFeedbackList is not null && QuestionFeedbackList.Count > 0)
+            {
+                var currentFb = QuestionFeedbackList[CurrentFeedbackIndex];
+
+                <h5>Question @currentFb.QuestionNumber</h5>
+                <p><strong>Question Text:</strong> @currentFb.QuestionText</p>
+                <p><strong>Your Answer:</strong> @currentFb.UserAnswer</p>
+                <p><strong>Correct Answer:</strong> @currentFb.CorrectAnswer</p>
+                <p><strong>AI Feedback:</strong> @currentFb.Feedback</p>
+
+                <div>
+                    <button class="btn btn-secondary me-2"
+                            @onclick="PrevQuestion"
+                            disabled="@(!CanGoPrev)">
+                        Prev
+                    </button>
+                    <button class="btn btn-secondary"
+                            @onclick="NextQuestion"
+                            disabled="@(!CanGoNext)">
+                        Next
+                    </button>
+                </div>
+            }
+            else
+            {
+                <p>No feedback available or parse error.</p>
+            }
+        </div>
+
+        <hr />
+
+        <!-- Follow-up Questions Section -->
+        <div class="follow-up-container">
+            <div class="chat-window" style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
+                @foreach (var message in DisplayChatMessages)
+                {
+                    <div class="chat-message">
+                        <strong>@message.Sender:</strong> @message.Content
+                    </div>
+                }
+            </div>
+
+            <input type="text" @bind="FollowUpQuestion"
+                   placeholder="Ask a follow-up question..."
+                   style="width:70%;" />
+            <button class="btn btn-primary" @onclick="AskFollowUpAsync">Send</button>
+        </div>
+    }
+</div>
+
+@code {
+    // Inputs from parent
+    [Parameter] public QuizDto QuizData { get; set; }
+    [Parameter] public Dictionary<int, int> UserAnswers { get; set; }
+    [Parameter] public bool IsChatbotDisabled { get; set; }
+
+    // Display logic
+    private bool IsFeedbackVisible;
+    private List<QuestionFeedback> QuestionFeedbackList = new();
+    private int CurrentFeedbackIndex;
+
+    // For Next/Prev
+    private bool CanGoNext => CurrentFeedbackIndex < QuestionFeedbackList.Count - 1;
+    private bool CanGoPrev => CurrentFeedbackIndex > 0;
+
+    // Chat context
+    private List<Dictionary<string, string>> chatMessages = new()
+    {
+        new Dictionary<string, string>
+            {
+                ["role"] = "system",
+                ["content"] =
+                  $"You are an AI tutor focusing on the topic that we will send to you " +
+                  $"Answer only questions related to the topic of the quiz feedback. " +
+                  "If the user’s question is unclear, ask for clarification (e.g., Which question number are you referring to?"
+            }
+
+    };
+    private List<ChatMessage> DisplayChatMessages = new();
+    private string FollowUpQuestion;
+
+    /// <summary>
+    /// Invoked when the user clicks "Show Feedback".
+    /// </summary>
+    private async Task GenerateQuizFeedbackAsync()
+    {
+        if (IsChatbotDisabled)
+        {
+            // If disabled
+            DisplayChatMessages.Add(new ChatMessage { Sender = "System", Content = "Chatbot feedback is disabled for this quiz." });
+            IsFeedbackVisible = true;
+            return;
+        }
+
+        string multiQuestionPrompt = BuildAllQuestionsPrompt(QuizData, UserAnswers);
+
+        chatMessages.Add(new Dictionary<string, string>
+            {
+                ["role"] = "user",
+                ["content"] = multiQuestionPrompt
+            });
+
+        var rawResponse = await GetOpenAiResponseAsync(chatMessages);
+
+        // DisplayChatMessages.Add(new ChatMessage { Sender = "Chatbot", Content = rawResponse });
+
+        // Now parse the rawResponse into a list of QuestionFeedback
+        QuestionFeedbackList = ParseFeedback(rawResponse, QuizData, UserAnswers);
+
+        // Show the first question
+        CurrentFeedbackIndex = 0;
+        IsFeedbackVisible = true;
+    }
+
+    /// <summary>
+    /// Builds a single prompt that instructs GPT to return feedback for each question in JSON or structured form.
+    /// </summary>
+    private string BuildAllQuestionsPrompt(QuizDto quiz, Dictionary<int, int> userAnswers)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("Please return a JSON array of { \"QuestionNumber\", \"Feedback\" } for each question. Example:");
+        sb.AppendLine(@"[ { ""QuestionNumber"": 1, ""Feedback"": ""2-sentence feedback here"" }, ... ]");
+        sb.AppendLine("Do NOT include extra text outside the JSON.");
+        sb.AppendLine("Here are the questions and user answers:");
+
+        int count = 1;
+        foreach (var q in quiz.Questions)
+        {
+            if (!userAnswers.ContainsKey(q.QuestionId)) continue;
+            var selected = q.Answers.First(a => a.AnswerId == userAnswers[q.QuestionId]);
+            var correct = q.Answers.First(a => a.IsCorrect);
+
+            sb.AppendLine($"{count}. Question: {q.QuestionText}");
+            sb.AppendLine($"   User Answer: {selected.AnswerText}");
+            sb.AppendLine($"   Correct Answer: {correct.AnswerText}");
+            count++;
+        }
+
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// Parses GPT's JSON feedback into a list of QuestionFeedback objects.
+    /// If GPT doesn't strictly follow JSON, might need more robust parsing or re-prompt with stricter instructions. TO DO
+    /// </summary>
+    private List<QuestionFeedback> ParseFeedback(string rawJson, QuizDto quiz, Dictionary<int, int> answers)
+    {
+        var result = new List<QuestionFeedback>();
+        try
+        {
+            var feedbackItems = JsonSerializer.Deserialize<List<GptFeedbackItem>>(rawJson);
+            if (feedbackItems == null) return result;
+
+            int index = 0;
+            // We'll iterate each question in quiz + user's answers
+            int count = 1;
+            foreach (var q in quiz.Questions)
+            {
+                if (!answers.ContainsKey(q.QuestionId)) continue;
+                if (index >= feedbackItems.Count) break;
+
+                var item = feedbackItems[index];
+                var selectedAns = q.Answers.First(a => a.AnswerId == answers[q.QuestionId]);
+                var correctAns = q.Answers.First(a => a.IsCorrect);
+
+                result.Add(new QuestionFeedback
+                    {
+                        QuestionNumber = item.QuestionNumber,
+                        QuestionText = q.QuestionText,
+                        UserAnswer = selectedAns.AnswerText,
+                        CorrectAnswer = correctAns.AnswerText,
+                        Feedback = item.Feedback
+                    });
+
+                index++;
+                count++;
+            }
+        }
+        catch (Exception ex)
+        {
+            // If GPT didn't return valid JSON
+            DisplayChatMessages.Add(new ChatMessage { Sender = "System", Content = "An error has occurred. Apologies but you will need to retake the quiz for a tailored feedback... You can still ask questions to our chat bot." });
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// Used to parse the minimal JSON structure from GPT: { "QuestionNumber": N, "Feedback": "..."}.
+    /// </summary>
+    // Model for parsing GPT's JSON array
+    private class GptFeedbackItem
+    {
+        public int QuestionNumber { get; set; }
+        public string Feedback { get; set; }
+    }
+
+
+    // Navigation
+    private void NextQuestion()
+    {
+        if (CanGoNext) CurrentFeedbackIndex++;
+    }
+
+    private void PrevQuestion()
+    {
+        if (CanGoPrev) CurrentFeedbackIndex--;
+    }
+
+    /// <summary>
+    /// User asks a follow-up question, we add it to the chat and retrieve an answer from GPT using the same conversation (chatMessages).
+    /// </summary>
+    private async Task AskFollowUpAsync()
+    {
+        if (string.IsNullOrWhiteSpace(FollowUpQuestion))
+            return;
+
+        // Add the user's question to the conversation
+        chatMessages.Add(new Dictionary<string, string>
+            {
+                ["role"] = "user",
+                ["content"] = FollowUpQuestion
+            });
+
+        // Show in UI
+        DisplayChatMessages.Add(new ChatMessage { Sender = "User", Content = FollowUpQuestion });
+
+        // Re-call GPT with entire conversation
+        var response = await GetOpenAiResponseAsync(chatMessages);
+
+        DisplayChatMessages.Add(new ChatMessage { Sender = "Chatbot", Content = response });
+
+        // Clear input
+        FollowUpQuestion = string.Empty;
+    }
+
+    private async Task<string> GetOpenAiResponseAsync(List<Dictionary<string, string>> messages)
+    {
+        string apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
+        Console.WriteLine($"API Key: {apiKey}");
+
+        if (string.IsNullOrEmpty(apiKey))
+        {
+            throw new InvalidOperationException("OpenAI API Key is missing.");
+        }
+        var requestBody = new
+        {
+            model = "gpt-3.5-turbo",
+            messages = messages,
+            max_tokens = 800,
+            temperature = 0.7
+        };
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, "https://api.openai.com/v1/chat/completions")
+            {
+                Headers = { { "Authorization", $"Bearer {apiKey}" } },
+                Content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json")
+            };
+
+        var response = await Http.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+
+        var responseJson = await response.Content.ReadAsStringAsync();
+        using var doc = JsonDocument.Parse(responseJson);
+
+        var result = doc
+            .RootElement
+            .GetProperty("choices")[0]
+            .GetProperty("message")
+            .GetProperty("content")
+            .GetString();
+
+        return result?.Trim() ?? "No response from OpenAI.";
+    }
+
+    private class ChatMessage
+    {
+        public string Sender { get; set; }
+        public string Content { get; set; }
+    }
+}

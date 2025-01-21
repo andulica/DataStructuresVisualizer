@@ -1,9 +1,13 @@
 ﻿@page "/SinglyLinkedListQuiz"
 @using BlazorAppForDataStructures.Models
-@inject QuizService QuizService 
+@inject QuizService QuizService
 @inject NavigationManager NavigationManager
+@inject HttpClient Http
+@using System.Net.Http.Json
 
 <h3>Singly Linked List Quiz</h3>
+
+<p>Please be advised that at the end of the quiz, you can receive tailored feedback based on your answers and ask our AI bot for any clarifications related to the topic.</p>
 
 <div>
     @if (isLoading)
@@ -22,7 +26,7 @@
             @foreach (var answer in currentQuestion.Answers)
             {
                 <div>
-                    <input type="radio" id="@answer.AnswerId" name="answer" 
+                    <input type="radio" id="@answer.AnswerId" name="answer"
                            value="@answer.AnswerId" @onchange="OnAnswerSelected" />
                     <label for="@answer.AnswerId">@answer.AnswerText</label>
                 </div>
@@ -44,6 +48,13 @@
         <p>Loading...</p>
     }
 
+@if (quizCompleted)
+{
+    <QuizFeedback QuizData="quizData"
+                  UserAnswers="userAnswers"
+                  IsChatbotDisabled="false" />
+}
+
     <div style="margin-top: 20px;">
         <p>Question @((currentIndex)) of @questions.Count</p>
     </div>
@@ -59,9 +70,16 @@
     private List<Question> questions = new List<Question>();
     private bool isLoading = false;
 
+    // For Chatbot
+    private QuizDto quizData;
+    private Dictionary<int, int> userAnswers = new();
+    private bool IsChatbotDisabled = false;
+
     protected override async Task OnInitializedAsync()
     {
         await LoadQuizData();
+        quizData = ConvertToQuizDto(questions, "SinglyLinkedList");
+
     }
 
     private async Task LoadQuizData()
@@ -89,12 +107,13 @@
     {
         if (selectedAnswerId != -1 && currentQuestion != null)
         {
-            // Check if the selected answer is correct
-            var isCorrect = currentQuestion.Answers
-                .Any(a => a.AnswerId == selectedAnswerId && a.IsCorrect);
+            // Record user answer
+            userAnswers[currentQuestion.QuestionId] = selectedAnswerId;
 
-            if (isCorrect)
-                score++;
+            // Check correctness
+            bool isCorrect = currentQuestion.Answers
+                .Any(a => a.AnswerId == selectedAnswerId && a.IsCorrect);
+            if (isCorrect) score++;
 
             currentIndex++;
             if (currentIndex <= totalQuestions)
@@ -117,7 +136,31 @@
         currentIndex = 1;
         score = 0;
         quizCompleted = false;
+        userAnswers.Clear();
 
         await LoadQuizData();
+    }
+
+    private QuizDto ConvertToQuizDto(List<Question> questions, string topicName)
+    {
+        var quizDto = new QuizDto
+        {
+            TopicId = 0,
+            Name = topicName,
+            Questions = questions.Select(q => new QuestionDto
+            {
+                QuestionId = q.QuestionId,
+                TopicId = q.TopicId,
+                QuestionText = q.QuestionText,
+                Answers = q.Answers.Select(a => new AnswerDto
+                {
+                    AnswerId = a.AnswerId,
+                    QuestionId = a.QuestionId,
+                    AnswerText = a.AnswerText,
+                    IsCorrect = a.IsCorrect
+                }).ToList()
+            }).ToList()
+        };
+        return quizDto;
     }
 }

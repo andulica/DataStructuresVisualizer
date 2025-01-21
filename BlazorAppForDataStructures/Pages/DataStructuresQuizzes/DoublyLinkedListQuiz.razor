@@ -47,6 +47,13 @@
     <div style="margin-top: 20px;">
         <p>Question @((currentIndex)) of @questions.Count</p>
     </div>
+
+    @if (quizCompleted)
+    {
+        <QuizFeedback QuizData="quizData"
+                      UserAnswers="userAnswers"
+                      IsChatbotDisabled="false" />
+    }
 </div>
 
 @code {
@@ -59,9 +66,15 @@
     private List<Question> questions = new List<Question>();
     private bool isLoading = false;
 
+    // For Chatbot
+    private QuizDto quizData;
+    private Dictionary<int, int> userAnswers = new();
+    private bool IsChatbotDisabled = false;
+
     protected override async Task OnInitializedAsync()
     {
         await LoadQuizData();
+        quizData = ConvertToQuizDto(questions, "DoublyLinkedList");
     }
 
     private async Task LoadQuizData()
@@ -89,12 +102,13 @@
     {
         if (selectedAnswerId != -1 && currentQuestion != null)
         {
-            // Check if the selected answer is correct
-            var isCorrect = currentQuestion.Answers
-                .Any(a => a.AnswerId == selectedAnswerId && a.IsCorrect);
+            // Record user answer
+            userAnswers[currentQuestion.QuestionId] = selectedAnswerId;
 
-            if (isCorrect)
-                score++;
+            // Check correctness
+            bool isCorrect = currentQuestion.Answers
+                .Any(a => a.AnswerId == selectedAnswerId && a.IsCorrect);
+            if (isCorrect) score++;
 
             currentIndex++;
             if (currentIndex <= totalQuestions)
@@ -119,5 +133,28 @@
         quizCompleted = false;
 
         await LoadQuizData();
+    }
+
+    private QuizDto ConvertToQuizDto(List<Question> questions, string topicName)
+    {
+        var quizDto = new QuizDto
+            {
+                TopicId = 0,
+                Name = topicName,
+                Questions = questions.Select(q => new QuestionDto
+                {
+                    QuestionId = q.QuestionId,
+                    TopicId = q.TopicId,
+                    QuestionText = q.QuestionText,
+                    Answers = q.Answers.Select(a => new AnswerDto
+                    {
+                        AnswerId = a.AnswerId,
+                        QuestionId = a.QuestionId,
+                        AnswerText = a.AnswerText,
+                        IsCorrect = a.IsCorrect
+                    }).ToList()
+                }).ToList()
+            };
+        return quizDto;
     }
 }
