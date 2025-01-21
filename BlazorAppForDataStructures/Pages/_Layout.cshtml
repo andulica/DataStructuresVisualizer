@@ -24,6 +24,28 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+    <div style="padding: 10px; position: fixed; top: 10px; right: 10px; z-index: 1000;">
+        <label for="blueprint-bg-color-picker" style="color: #fff;">Change Background Color:</label>
+        <input type="color" id="blueprint-bg-color-picker" value="#d9d7e3" />
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const colorPicker = document.getElementById("blueprint-bg-color-picker");
+
+            const savedColor = localStorage.getItem("blueprint-bg-color");
+            if (savedColor) {
+                document.documentElement.style.setProperty("--blueprint-bg-color", savedColor);
+                colorPicker.value = savedColor;
+            }
+
+            colorPicker.addEventListener("input", (event) => {
+                const selectedColor = event.target.value;
+                document.documentElement.style.setProperty("--blueprint-bg-color", selectedColor);
+                localStorage.setItem("blueprint-bg-color", selectedColor);
+            });
+        });
+    </script>
 
 </head>
 <body>

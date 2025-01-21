@@ -147,16 +147,18 @@ a {
         color: darken(var(--primary-color), 10%);
     }
 
-
+:root {
+    --blueprint-bg-color: #07c7f6; /* Default color */
+}
 
 /* Blueprint background using repeating linear gradients */
 .blueprint-bg {
     /* Dark blueprint color */
-    background-color: #00c1ff;
+    background-color: var(--blueprint-bg-color); /* Use the variable */
     /* Horizontal lines */
-    background-image: repeating-linear-gradient( to bottom, #1590cf 0px, rgba(0, 0, 0, 0.1) 1px, transparent 1px, transparent 30px ),
+    background-image: repeating-linear-gradient( to bottom, #1590cf 0px, #000 1px, transparent 1px, transparent 30px ),
     /* Vertical lines */
-    repeating-linear-gradient( to right, rgba(255,255,255,0.1) 0px, rgba(0,0,0,0.2) 1px, transparent 1px, transparent 30px );
+    repeating-linear-gradient( to right, #000 0px, rgba(0,0,0,0.2) 1px, transparent 1px, transparent 30px );
     /* Let the background cover the full page */
     background-repeat: repeat;
     min-height: 100vh; /* ensure vertical fill */
