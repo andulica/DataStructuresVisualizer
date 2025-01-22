@@ -1,4 +1,4 @@
-﻿@page "/DoublyLinkedListQuiz"
+﻿@page "/Quiz/{TopicName}"
 @using BlazorAppForDataStructures.Models
 @inject QuizService QuizService
 @inject NavigationManager NavigationManager
@@ -6,10 +6,8 @@
 @using System.Net.Http.Json
 
 <div class="blueprint-bg">
-
     <div class="quiz-container">
-
-        <h3>Doubly Linked List Quiz</h3>
+        <h3>@TopicName Quiz</h3>
 
         @if (isLoading)
         {
@@ -28,7 +26,8 @@
                 {
                     <div>
                         <input type="radio" id="@answer.AnswerId" name="answer"
-                               value="@answer.AnswerId" @onchange="OnAnswerSelected" />
+                               value="@answer.AnswerId" @onchange="OnAnswerSelected"
+                               checked="@(@answer.AnswerId == selectedAnswerId)" />
                         <label for="@answer.AnswerId">@answer.AnswerText</label>
                     </div>
                 }
@@ -49,38 +48,43 @@
             <p>Loading...</p>
         }
 
-        <div style="margin-top: 20px;">
-            <p>Question @((currentIndex)) of @questions.Count</p>
-        </div>
-
         @if (quizCompleted)
         {
             <QuizFeedback QuizData="quizData"
                           UserAnswers="userAnswers"
-                          IsChatbotDisabled="false" />
+                          IsChatbotDisabled="IsChatbotDisabled" />
         }
+
+        <div style="margin-top: 20px;">
+            <p>Question @currentIndex of @questions.Count</p>
+        </div>
     </div>
 </div>
 
 @code {
+    [Parameter]
+    public string TopicName { get; set; } 
+
+    [Parameter]
+    public bool IsChatbotDisabled { get; set; } = false;
+
     private Question? currentQuestion;
     private int currentIndex = 1;
     private int selectedAnswerId = -1;
     private int score = 0;
     private int totalQuestions = 0;
     private bool quizCompleted = false;
-    private List<Question> questions = new List<Question>();
+    private List<Question> questions = new();
     private bool isLoading = false;
 
     // For Chatbot
     private QuizDto quizData;
     private Dictionary<int, int> userAnswers = new();
-    private bool IsChatbotDisabled = false;
 
     protected override async Task OnInitializedAsync()
     {
         await LoadQuizData();
-        quizData = ConvertToQuizDto(questions, "DoublyLinkedList");
+        quizData = ConvertToQuizDto(questions, TopicName);
     }
 
     private async Task LoadQuizData()
@@ -88,7 +92,7 @@
         isLoading = true;
         StateHasChanged(); // show spinner
 
-        questions = await QuizService.GetQuestionsAsync("DoublyLinkedList");
+        questions = await QuizService.GetQuestionsAsync(TopicName);
         if (questions != null && questions.Any())
         {
             currentQuestion = questions[0];
@@ -137,13 +141,14 @@
         currentIndex = 1;
         score = 0;
         quizCompleted = false;
+        userAnswers.Clear();
 
         await LoadQuizData();
     }
 
     private QuizDto ConvertToQuizDto(List<Question> questions, string topicName)
     {
-        var quizDto = new QuizDto
+        return new QuizDto
             {
                 TopicId = 0,
                 Name = topicName,
@@ -161,6 +166,5 @@
                     }).ToList()
                 }).ToList()
             };
-        return quizDto;
     }
 }

@@ -4,63 +4,74 @@
 @using BlazorAppForDataStructures.Models
 
 <div class="quiz-feedback-container">
-    @if (!IsFeedbackVisible)
+    @if (isLoadingFeedback)
     {
-        <button class="btn btn-primary" @onclick="GenerateQuizFeedbackAsync">
-            Show Feedback
-        </button>
+        <div class="d-flex justify-content-center align-items-center" style="height: 100px;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading feedback...</span>
+            </div>
+        </div>
     }
     else
     {
-        <!-- Section to navigate question-by-question -->
-        <div class="single-question-feedback">
-            @if (QuestionFeedbackList is not null && QuestionFeedbackList.Count > 0)
-            {
-                var currentFb = QuestionFeedbackList[CurrentFeedbackIndex];
-
-                <h5>Question @currentFb.QuestionNumber</h5>
-                <p><strong>Question Text:</strong> @currentFb.QuestionText</p>
-                <p><strong>Your Answer:</strong> @currentFb.UserAnswer</p>
-                <p><strong>Correct Answer:</strong> @currentFb.CorrectAnswer</p>
-                <p><strong>AI Feedback:</strong> @currentFb.Feedback</p>
-
-                <div>
-                    <button class="btn btn-secondary me-2"
-                            @onclick="PrevQuestion"
-                            disabled="@(!CanGoPrev)">
-                        Prev
-                    </button>
-                    <button class="btn btn-secondary"
-                            @onclick="NextQuestion"
-                            disabled="@(!CanGoNext)">
-                        Next
-                    </button>
-                </div>
-            }
-            else
-            {
-                <p>No feedback available or parse error.</p>
-            }
-        </div>
-
-        <hr />
-
-        <!-- Follow-up Questions Section -->
-        <div class="follow-up-container">
-            <div class="chat-window" style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
-                @foreach (var message in DisplayChatMessages)
+        @if (!IsFeedbackVisible)
+        {
+            <button class="btn btn-primary" @onclick="GenerateQuizFeedbackAsync">
+                Show Feedback
+            </button>
+        }
+        else
+        {
+            <!-- Section to navigate question-by-question -->
+            <div class="single-question-feedback">
+                @if (QuestionFeedbackList is not null && QuestionFeedbackList.Count > 0)
                 {
-                    <div class="chat-message">
-                        <strong>@message.Sender:</strong> @message.Content
+                    var currentFb = QuestionFeedbackList[CurrentFeedbackIndex];
+
+                    <h5>Question @currentFb.QuestionNumber</h5>
+                    <p><strong>Question Text:</strong> @currentFb.QuestionText</p>
+                    <p><strong>Your Answer:</strong> @currentFb.UserAnswer</p>
+                    <p><strong>Correct Answer:</strong> @currentFb.CorrectAnswer</p>
+                    <p><strong>AI Feedback:</strong> @currentFb.Feedback</p>
+
+                    <div>
+                        <button class="btn btn-secondary me-2"
+                                @onclick="PrevQuestion"
+                                disabled="@(!CanGoPrev)">
+                            Prev
+                        </button>
+                        <button class="btn btn-secondary"
+                                @onclick="NextQuestion"
+                                disabled="@(!CanGoNext)">
+                            Next
+                        </button>
                     </div>
+                }
+                else
+                {
+                    <p>No feedback available or parse error.</p>
                 }
             </div>
 
-            <input type="text" @bind="FollowUpQuestion"
-                   placeholder="Ask a follow-up question..."
-                   style="width:70%;" />
-            <button class="btn btn-primary" @onclick="AskFollowUpAsync">Send</button>
-        </div>
+            <hr />
+
+            <!-- Follow-up Questions Section -->
+            <div class="follow-up-container">
+                <div class="chat-window" style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
+                    @foreach (var message in DisplayChatMessages)
+                    {
+                        <div class="chat-message">
+                            <strong>@message.Sender:</strong> @message.Content
+                        </div>
+                    }
+                </div>
+
+                <input type="text" @bind="FollowUpQuestion"
+                       placeholder="Ask a follow-up question..."
+                       style="width:70%;" />
+                <button class="btn btn-primary" @onclick="AskFollowUpAsync">Send</button>
+            </div>
+        }
     }
 </div>
 
@@ -74,6 +85,7 @@
     private bool IsFeedbackVisible;
     private List<QuestionFeedback> QuestionFeedbackList = new();
     private int CurrentFeedbackIndex;
+    private bool isLoadingFeedback = false;
 
     // For Next/Prev
     private bool CanGoNext => CurrentFeedbackIndex < QuestionFeedbackList.Count - 1;
@@ -108,24 +120,38 @@
             return;
         }
 
-        string multiQuestionPrompt = BuildAllQuestionsPrompt(QuizData, UserAnswers);
+        isLoadingFeedback = true;
+        StateHasChanged();
 
-        chatMessages.Add(new Dictionary<string, string>
-            {
-                ["role"] = "user",
-                ["content"] = multiQuestionPrompt
-            });
+        try
+        {
+            string multiQuestionPrompt = BuildAllQuestionsPrompt(QuizData, UserAnswers);
 
-        var rawResponse = await GetOpenAiResponseAsync(chatMessages);
+            chatMessages.Add(new Dictionary<string, string>
+                {
+                    ["role"] = "user",
+                    ["content"] = multiQuestionPrompt
+                });
 
-        // DisplayChatMessages.Add(new ChatMessage { Sender = "Chatbot", Content = rawResponse });
+            var rawResponse = await GetOpenAiResponseAsync(chatMessages);
 
-        // Now parse the rawResponse into a list of QuestionFeedback
-        QuestionFeedbackList = ParseFeedback(rawResponse, QuizData, UserAnswers);
+            // Parse feedback
+            QuestionFeedbackList = ParseFeedback(rawResponse, QuizData, UserAnswers);
 
-        // Show the first question
-        CurrentFeedbackIndex = 0;
-        IsFeedbackVisible = true;
+            // Show the first question
+            CurrentFeedbackIndex = 0;
+            IsFeedbackVisible = true;
+        }
+        catch (Exception ex)
+        {
+            DisplayChatMessages.Add(new ChatMessage { Sender = "System", Content = $"An error occurred: {ex.Message}" });
+        }
+        finally
+        {
+            // Hide spinner
+            isLoadingFeedback = false;
+            StateHasChanged();
+        }
     }
 
     /// <summary>
@@ -241,23 +267,34 @@
         if (string.IsNullOrWhiteSpace(FollowUpQuestion))
             return;
 
-        // Add the user's question to the conversation
-        chatMessages.Add(new Dictionary<string, string>
-            {
-                ["role"] = "user",
-                ["content"] = FollowUpQuestion
-            });
+        isLoadingFeedback = true;
+        StateHasChanged();
 
-        // Show in UI
-        DisplayChatMessages.Add(new ChatMessage { Sender = "User", Content = FollowUpQuestion });
+        try
+        {
+            chatMessages.Add(new Dictionary<string, string>
+                {
+                    ["role"] = "user",
+                    ["content"] = FollowUpQuestion
+                });
 
-        // Re-call GPT with entire conversation
-        var response = await GetOpenAiResponseAsync(chatMessages);
+            DisplayChatMessages.Add(new ChatMessage { Sender = "User", Content = FollowUpQuestion });
 
-        DisplayChatMessages.Add(new ChatMessage { Sender = "Chatbot", Content = response });
+            var response = await GetOpenAiResponseAsync(chatMessages);
 
-        // Clear input
-        FollowUpQuestion = string.Empty;
+            DisplayChatMessages.Add(new ChatMessage { Sender = "Chatbot", Content = response });
+
+            FollowUpQuestion = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            DisplayChatMessages.Add(new ChatMessage { Sender = "System", Content = $"An error occurred: {ex.Message}" });
+        }
+        finally
+        {
+            isLoadingFeedback = false;
+            StateHasChanged();
+        }
     }
 
     private async Task<string> GetOpenAiResponseAsync(List<Dictionary<string, string>> messages)

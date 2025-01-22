@@ -65,7 +65,7 @@
     else
     {
         <div class="button-container">
-            @foreach (var dsQuiz in dataStructuresQuizzes)
+            @foreach (var dsQuiz in dataStructures)
             {
                 <div class="data-structure-wrapper">
                     <button class="data-structure-button" @onclick="() => NavigateToQuiz(dsQuiz)">
@@ -142,6 +142,7 @@
 @code {
     private string[] dataStructures = { "SinglyLinkedList", "DoublyLinkedList", "BinarySearchTree", "Queue", "Stack" };
     private bool showWelcomeMessage = false;
+    private bool IsLoading;
 
     protected override void OnInitialized()
     {
@@ -163,19 +164,11 @@
         NavigationManager.NavigateTo($"/visualize/{dataStructure}");
     }
 
-    private string[] dataStructuresQuizzes =
-        { "SinglyLinkedListQuiz", "DoublyLinkedListQuiz", "BinarySearchTreeQuiz", "QueueQuiz", "StackQuiz" };
-
-    private bool IsLoading;
-
-
-    private async Task NavigateToQuiz(string dataStructureQuiz)
+    private void NavigateToQuiz(string dataStructureQuiz)
     {
         IsLoading = true;
         StateHasChanged();
 
-        var questions = await QuizService.GetQuestionsAsync(dataStructureQuiz);
-
-        NavigationManager.NavigateTo(dataStructureQuiz);
+        NavigationManager.NavigateTo($"/Quiz/{dataStructureQuiz}");
     }
 }
