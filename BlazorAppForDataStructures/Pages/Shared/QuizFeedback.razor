@@ -300,7 +300,6 @@
     private async Task<string> GetOpenAiResponseAsync(List<Dictionary<string, string>> messages)
     {
         string apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
-        Console.WriteLine($"API Key: {apiKey}");
 
         if (string.IsNullOrEmpty(apiKey))
         {

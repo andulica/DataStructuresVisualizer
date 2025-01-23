@@ -15,14 +15,6 @@
         <button @onclick="() => CreateTree()">Create</button>
     </div>
 
-    <!-- Traversal operations -->
-    <div>
-        @* <button @onclick="() => InOrderTraversal()">In-Order</button> *@
-        @*     <button @onclick="() => PreOrderTraversal()">Pre-Order</button>
-        <button @onclick="() => PostOrderTraversal()">Post-Order</button> *@
-    </div>
-
-    <!-- Display area for the BST -->
     <div id="bst-display">
         @* Render the tree here *@
     </div>
@@ -49,7 +41,6 @@
     {
         if (firstRender)
         {
-            // Convert the linked list to a format suitable for JavaScript
             var bstData = ConvertBSTToD3Format(bst.Root);
             await JSRuntime.InvokeVoidAsync("drawBST", bstData);
         }
@@ -75,7 +66,6 @@
     private async Task SearchValue()
     {
         await JSRuntime.InvokeVoidAsync("searchValueInBST", inputValue);
-        // await UpdateDisplay().ContinueWith(_ => { }); Handle async call without await
     }
 
     private void RemoveValue()
@@ -83,11 +73,6 @@
         bst.Remove(inputValue);
         UpdateDisplay(this.bst).ContinueWith(_ => { }); // Handle async call without await
     }
-
-    // private void InOrderTraversal()
-    // {
-    //     // Implement traversal logic and update display
-    // }
 
     private async Task UpdateDisplay(BinarySearchTree<int> bst)
     {
@@ -107,20 +92,15 @@
         var leftChild = node.Left != null ? ConvertBSTToD3Format(node.Left) : null;
         var rightChild = node.Right != null ? ConvertBSTToD3Format(node.Right) : null;
 
-        // Construct the result object. Include 'left' and 'right' only if they exist.
         var result = new
         {
-            id = node.Id.ToString(), // Convert Guid to string for JavaScript compatibility
+            id = node.Id.ToString(),
             name = node.Data.ToString(),
-            left = leftChild, // Directly assign the left child (can be null)
-            right = rightChild, // Directly assign the right child (can be null)
+            left = leftChild,
+            right = rightChild,
             visited = node.IsVisited
         };
 
         return result;
     }
-
-
-
-    // Similar methods for PreOrder and PostOrder
 }
