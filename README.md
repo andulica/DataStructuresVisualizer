@@ -23,7 +23,7 @@ Link for the app: https://datastructviz.co.uk/
 
   <img src="BlazorAppForDataStructures/wwwroot/images/2025-02-0614-46-56-ezgif.com-video-to-gif-converter.gif" width="570"/>
 
-- Adding and editing quiz topics, questions and answers have never been easier! Of course, if you have Admin privilegies :) .
+- Adding and editing quiz topics, questions, and answers has never been easier—assuming you have admin privileges, of course!
    
   <img src="BlazorAppForDataStructures/wwwroot/images/2025-02-0617-36-02-ezgif.com-video-to-gif-converter.gif" width="570"/>
 
