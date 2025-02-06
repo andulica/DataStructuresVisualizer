@@ -39,6 +39,8 @@ Link for the app: https://datastructviz.co.uk/
 
 You can download the zip file from this repository and just run it on visual studio. Be careful to run BlazorAppForDataStructures project because the solution consists of 2 projects, one is for the underlying logic of data structures and the other one is a Blazor project, the one that you actually want to run.
 
+--IMPORTANT POINT! You won't be able to access the quiz section and neither the login because you are not connected to a database. My suggestion is to create an in memory data base, change the connection string in the Program.cs and run a migration from the respective folder. Bear in mind that data will be deleted once the app is closed. If you prefer data persistance build a local SQL Server database and you are good to go.
+
 ## 🤝 Contributing
 DataStructViz does not stop here and I would love more people to get involved in the project. Whether you have ideas to share, bugs to report, or features to implement, your contributions are welcome!
 
