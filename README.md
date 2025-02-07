@@ -30,7 +30,7 @@ Link for the app: https://datastructviz.co.uk/
 
 ## 🚧 Future features 
 
-- I’m on track with implementing a user quiz scoring system. So far, I’ve set up authentication and authorization using the Identity framework and JWT (JSON Web Tokens), which I need for the Admin role to manage quiz data.
+- I’m on track with implementing a user quiz scoring system. So far, I’ve set up authentication and authorization using the Identity library and JWT (JSON Web Tokens), which I need for the Admin role to manage quiz data.
 - By March I plan to add a few hundreds of questions and a system to randomise questions in quizzes.
 - Since this is still an MVP, I'll also improve the front end by using libraries like Bootstrap. Sure, I'm no Picasso or Einstein, but hey—full-stack engineering is trending, so let’s juggle brushstrokes and breakpoints like pros!
 - Also, I'll do my best to implement a caching system—or at least pagination—for quizzes. Querying the database can take a while… I know.
