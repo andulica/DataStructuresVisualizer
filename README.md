@@ -37,9 +37,9 @@ Link for the app: https://datastructviz.co.uk/
 
 ## 🛠️ Usage
 
-You can download the zip file from this repository and just run it on visual studio. Be careful to run BlazorAppForDataStructures project because the solution consists of 2 projects, one is for the underlying logic of data structures and the other one is a Blazor project, the one that you actually want to run.
-
---IMPORTANT POINT! You won't be able to access the quiz section and neither the login because you are not connected to a database. My suggestion is to create an in memory data base, change the connection string in the Program.cs and run a migration from the respective folder. Bear in mind that data will be deleted once the app is closed. If you prefer data persistance build a local SQL Server database and you are good to go.
+You can download the zip file from this repository and just run it on visual studio. Be careful to run BlazorAppForDataStructures project because the solution consists of 2 projects, one is for the underlying logic of data structures and the other one is a Blazor project, the one that you actually want to run. 
+- Also the app makes calls to OpenAI API for custom feedback at the end of the quiz and the API key is securely stored on the Azure Web Service Instance so you won't be able to access it. If you prefer you can put your own API key there and make use of the feature.
+- Another point that is worth mentioning is the fact that the app uses an internal CRUD API for managing quiz related businesses and also the login and register sections. The API is up and running but there is a hashing key stored securely on the API server and is not accessible making the previously mentioned features unusable. You can still make your own quizzes by updating the latest migration and add questions manually from SQL tool such as Azure SQL Studio.
 
 ## 🤝 Contributing
 DataStructViz does not stop here and I would love more people to get involved in the project. Whether you have ideas to share, bugs to report, or features to implement, your contributions are welcome!
