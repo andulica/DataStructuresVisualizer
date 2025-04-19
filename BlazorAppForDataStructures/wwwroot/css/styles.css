@@ -117,3 +117,21 @@ svg {
     cursor: pointer;
     border: 2px solid #000;
 }
+
+.answer-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 10px;
+    max-width: 100%;
+}
+
+    .answer-option input[type="radio"] {
+        margin-top: 4px;
+    }
+
+    .answer-option label {
+        word-break: break-word;
+        white-space: normal;
+    }
+

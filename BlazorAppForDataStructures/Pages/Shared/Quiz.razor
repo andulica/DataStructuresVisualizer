@@ -5,6 +5,10 @@
 @inject HttpClient Http
 @using System.Net.Http.Json
 
+
+<head>
+    <link rel="stylesheet" href="/css/styles.css" />
+</head>
 <div class="blueprint-bg">
     <div class="quiz-container">
         <h3>@TopicName Quiz</h3>
@@ -24,7 +28,7 @@
 
                 @foreach (var answer in currentQuestion.Answers)
                 {
-                    <div @key="answer.AnswerId">
+                    <div class="answer-option" @key="answer.AnswerId">
                         <input type="radio" id="@answer.AnswerId" name="answer"
                                value="@answer.AnswerId" @onchange="OnAnswerSelected"
                                checked="@(@answer.AnswerId == selectedAnswerId)" />
