@@ -1,13 +1,9 @@
 # Base runtime image with ASP.NET 6 (Debian-based, not Alpine)
+# Use ASP.NET 6 runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
-
-# Install ICU and disable globalization invariant mode in runtime image
-RUN apt-get update && apt-get install -y --no-install-recommends libicu67 \
-    && rm -rf /var/lib/apt/lists/*
-ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 ARG BUILD_CONFIGURATION=Release
@@ -23,9 +19,20 @@ FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./BlazorAppForDataStructures.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-#  Use the base with ICU for final image
-FROM base AS final
+# Final image: base + ICU installation + app copy + globalization enabled
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS final
 WORKDIR /app
+
+# Install ICU libraries for globalization
+RUN apt-get update && apt-get install -y --no-install-recommends libicu67 && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set the correct environment flag
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+
+#  Copy published output
 COPY --from=publish /app/publish .
+
 ENTRYPOINT ["dotnet", "BlazorAppForDataStructures.dll"]
+
 
