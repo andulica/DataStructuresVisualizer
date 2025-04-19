@@ -4,7 +4,6 @@ WORKDIR /src
 
 COPY ["BlazorAppForDataStructures/BlazorAppForDataStructures.csproj", "BlazorAppForDataStructures/"]
 COPY ["DataStructuresVisualizer/DataStructuresVisualizer.csproj", "DataStructuresVisualizer/"]
-
 RUN dotnet restore "BlazorAppForDataStructures/BlazorAppForDataStructures.csproj"
 COPY . .
 
@@ -14,8 +13,8 @@ RUN dotnet publish -c Release -o /app/publish /p:UseAppHost=false
 # -------- FINAL RUNTIME STAGE --------
 FROM mcr.microsoft.com/dotnet/aspnet:6.0
 
-# Install ICU manually
-RUN apt-get update && apt-get install -y libicu67 && rm -rf /var/lib/apt/lists/*
+# Install correct ICU package for Debian 12 (Bookworm)
+RUN apt-get update && apt-get install -y libicu72 && rm -rf /var/lib/apt/lists/*
 
 # Enable globalization support
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
@@ -24,6 +23,7 @@ WORKDIR /app
 COPY --from=build /app/publish .
 
 ENTRYPOINT ["dotnet", "BlazorAppForDataStructures.dll"]
+
 
 
 
