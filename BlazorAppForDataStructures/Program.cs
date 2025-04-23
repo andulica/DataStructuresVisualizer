@@ -11,7 +11,7 @@ namespace BlazorAppForDataStructures
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+            var connectionString = Environment.GetEnvironmentVariable("DefaultConnection");
 
             if (string.IsNullOrEmpty(connectionString))
             {
@@ -19,7 +19,7 @@ namespace BlazorAppForDataStructures
             }
 
             builder.Services.AddDbContext<BlazorAppForDataStructuresContext>(options =>
-                options.UseSqlServer(connectionString));
+            options.UseSqlServer(connectionString));
 
             builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
             {
