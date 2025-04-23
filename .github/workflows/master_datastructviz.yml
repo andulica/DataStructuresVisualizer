@@ -49,7 +49,7 @@ jobs:
             docker run -d \
               -e ASPNETCORE_ENVIRONMENT=Production \
               -e DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false \
-              -e ConnectionStrings__DefaultConnection="${{ secrets.DB_CONNECTION_STRING }}" \
+              -e DefaultConnection="${{ secrets.DB_CONNECTION_STRING }}" \
               -p 80:80 \
               --name elegant_nobel \
               abalan95/blazorapp:latest2
