@@ -1,19 +1,45 @@
-FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
- WORKDIR /app
- EXPOSE 80
- EXPOSE 443
- FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
- ARG BUILD_CONFIGURATION=Release
- WORKDIR /src
- COPY ["BlazorAppForDataStructures/BlazorAppForDataStructures.csproj", "BlazorAppForDataStructures/"]
- COPY ["DataStructuresVisualizer/DataStructuresVisualizer.csproj", "DataStructuresVisualizer/"]
- RUN dotnet restore "./BlazorAppForDataStructures/BlazorAppForDataStructures.csproj"
- COPY . .
- WORKDIR "/src/BlazorAppForDataStructures"
- RUN dotnet build "./BlazorAppForDataStructures.csproj" -c $BUILD_CONFIGURATION -o /app/build
- FROM build AS publish
- ARG BUILD_CONFIGURATION=Release
- RUN dotnet publish "./BlazorAppFFROM base AS final
- WORKDIR /app
- COPY --from=publish /app/publish .orDataStructures.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
- ENTRYPOINT ["dotnet", "BlazorAppForDataStructures.dll"]
+# --------------------
+# Build stage
+# --------------------
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+ARG BUILD_CONFIGURATION=Release
+WORKDIR /src
+
+# Copy project files
+COPY ["BlazorAppForDataStructures/BlazorAppForDataStructures.csproj", "BlazorAppForDataStructures/"]
+COPY ["DataStructuresVisualizer/DataStructuresVisualizer.csproj", "DataStructuresVisualizer/"]
+
+# Restore dependencies
+RUN dotnet restore "./BlazorAppForDataStructures/BlazorAppForDataStructures.csproj"
+
+# Copy full solution
+COPY . .
+
+# Build project
+WORKDIR "/src/BlazorAppForDataStructures"
+RUN dotnet build "BlazorAppForDataStructures.csproj" -c $BUILD_CONFIGURATION -o /app/build
+
+# Publish project
+FROM build AS publish
+RUN dotnet publish "BlazorAppForDataStructures.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+
+# --------------------
+# Runtime stage with ICU
+# --------------------
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS final
+
+# Install ICU
+RUN apt-get update && apt-get install -y libicu-dev
+
+# Set working directory and copy build output
+WORKDIR /app
+COPY --from=publish /app/publish .
+
+# Expose port
+EXPOSE 80
+
+# Set env (optional, but you can override in docker run too)
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+
+# Start the app
+ENTRYPOINT ["dotnet", "BlazorAppForDataStructures.dll"]
