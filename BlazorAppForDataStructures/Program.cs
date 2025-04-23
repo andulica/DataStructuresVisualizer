@@ -3,6 +3,8 @@ using BlazorAppForDataStructures.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
+
 
 namespace BlazorAppForDataStructures
 {
@@ -11,6 +13,10 @@ namespace BlazorAppForDataStructures
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+            CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
+
             var connectionString = Environment.GetEnvironmentVariable("DefaultConnection");
 
             if (string.IsNullOrEmpty(connectionString))
