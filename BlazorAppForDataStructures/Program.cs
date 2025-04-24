@@ -51,7 +51,7 @@ namespace BlazorAppForDataStructures
 
             builder.Services.AddScoped<QuizService>();
             builder.Services.AddScoped<CancellationService>();
-            builder.Services.AddScoped<SecureStorageService>();
+            //builder.Services.AddScoped<SecureStorageService>();
 
             if (builder.Environment.IsDevelopment())
             {
