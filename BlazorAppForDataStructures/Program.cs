@@ -17,9 +17,11 @@ namespace BlazorAppForDataStructures
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
             CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
 
-            var connectionString = Environment.GetEnvironmentVariable("DefaultConnection");
+            var connectionString = builder.Configuration["DefaultConnection"] ??
+                                                          Environment.GetEnvironmentVariable("SQLCONNSTR_DefaultConnection");
 
             if (string.IsNullOrEmpty(connectionString))
+
             {
                 throw new Exception("DefaultConnection is not configured.");
             }
@@ -51,7 +53,7 @@ namespace BlazorAppForDataStructures
 
             builder.Services.AddScoped<QuizService>();
             builder.Services.AddScoped<CancellationService>();
-            //builder.Services.AddScoped<SecureStorageService>();
+            builder.Services.AddScoped<SecureStorageService>();
 
             if (builder.Environment.IsDevelopment())
             {
