@@ -22,10 +22,8 @@ RUN dotnet publish "BlazorAppForDataStructures.csproj" -c $BUILD_CONFIGURATION -
 FROM mcr.microsoft.com/dotnet/aspnet:6.0
 
 # Install ICU for globalization support
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    libicu-dev && \
-    rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends libicu70 libicu70-dev && rm -rf /var/lib/apt/lists/*
+
 
 # Enable full globalization mode
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
