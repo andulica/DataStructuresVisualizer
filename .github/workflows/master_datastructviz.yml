@@ -22,15 +22,16 @@ jobs:
 
       - name: Build Docker image (force no-cache to fix ICU installation)
         run: |
-          docker build --no-cache -t abalan95/blazorapp:latest2 .
+            docker build --no-cache -t abalan95/blazorapp:latest2 .
 
-      - name: Check if ICU is installed inside container (optional but recommended)
+      - name: Check if ICU is installed inside container (safe way)
         run: |
-          docker run --rm abalan95/blazorapp:latest2 bash -c "ldconfig -p | grep libicu || echo 'ICU NOT FOUND'"
+            docker run --rm --entrypoint bash abalan95/blazorapp:latest2 -c "ldconfig -p | grep libicu || echo 'ICU NOT FOUND'"
 
       - name: Push Docker image to Docker Hub
         run: |
-          docker push abalan95/blazorapp:latest2
+            docker push abalan95/blazorapp:latest2
+
 
   deploy-to-vps:
     runs-on: ubuntu-latest
