@@ -1,11 +1,10 @@
 # --------------------
-# Build Stage
+# Build stage
 # --------------------
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-# Copy project files and restore
 COPY ["BlazorAppForDataStructures/BlazorAppForDataStructures.csproj", "BlazorAppForDataStructures/"]
 COPY ["DataStructuresVisualizer/DataStructuresVisualizer.csproj", "DataStructuresVisualizer/"]
 RUN dotnet restore "./BlazorAppForDataStructures/BlazorAppForDataStructures.csproj"
@@ -18,11 +17,11 @@ FROM build AS publish
 RUN dotnet publish "BlazorAppForDataStructures.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # --------------------
-# Runtime Stage (Debian + ICU support)
+# Runtime stage (Full Debian Bullseye)
 # --------------------
-FROM mcr.microsoft.com/dotnet/aspnet:6.0-bullseye-slim
+FROM mcr.microsoft.com/dotnet/aspnet:6.0-bullseye
 
-# Install ICU for globalization
+# Install ICU runtime
 RUN apt-get update && \
     apt-get install -y --no-install-recommends libicu70 && \
     rm -rf /var/lib/apt/lists/*
