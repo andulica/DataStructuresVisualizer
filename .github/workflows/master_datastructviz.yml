@@ -20,9 +20,13 @@ jobs:
       - name: Log in to Docker Hub
         run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
-      - name: Build Docker image
+      - name: Build Docker image (force no-cache to fix ICU installation)
         run: |
-          docker build -t abalan95/blazorapp:latest2 .
+          docker build --no-cache -t abalan95/blazorapp:latest2 .
+
+      - name: Check if ICU is installed inside container (optional but recommended)
+        run: |
+          docker run --rm abalan95/blazorapp:latest2 bash -c "ldconfig -p | grep libicu || echo 'ICU NOT FOUND'"
 
       - name: Push Docker image to Docker Hub
         run: |
@@ -54,6 +58,7 @@ jobs:
               --name elegant_nobel \
               abalan95/blazorapp:latest2
           EOF
+
 
 
 
