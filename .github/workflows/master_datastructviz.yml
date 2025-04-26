@@ -20,9 +20,9 @@ jobs:
       - name: Log in to Docker Hub
         run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
-      - name: Build Docker image (force no-cache to fix ICU installation)
+      - name: Build Docker image (force no-cache and pull latest base)
         run: |
-          docker build --no-cache -t abalan95/blazorapp:latest2 .
+          docker build --pull --no-cache -t abalan95/blazorapp:latest2 .
 
       - name: Push Docker image to Docker Hub
         run: |
@@ -54,10 +54,3 @@ jobs:
               --name elegant_nobel \
               abalan95/blazorapp:latest2
           EOF
-
-
-
-
-
-
-          
