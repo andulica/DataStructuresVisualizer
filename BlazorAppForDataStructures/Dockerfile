@@ -11,11 +11,13 @@ RUN dotnet publish BlazorAppForDataStructures/BlazorAppForDataStructures.csproj 
 FROM mcr.microsoft.com/dotnet/aspnet:6.0
 
 #  Install ICU manually
-RUN apt-get update && apt-get install -y --no-install-recommends libicu67 && \
+RUN apt-get update && apt-get install -y libicu-dev && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 #  Set invariant mode to false
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+ENV DOTNET_CULTURE=en-US
+
 
 WORKDIR /app
 COPY --from=build /app/publish .
