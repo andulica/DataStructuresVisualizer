@@ -71,6 +71,27 @@
                     <button class="data-structure-button" @onclick="() => NavigateToQuiz(dsQuiz)">
                         @dsQuiz
                     </button>
+                    @if (dsQuiz == "SinglyLinkedList")
+                    {
+                        <img src="/images/SinglyLinkedListQuiz.gif" alt="Singly Linked List Visualization" class="img-thumbnail" />
+                    }
+                    @if (dsQuiz == "BinarySearchTree")
+                    {
+                        <img src="/images/BinarySeachTreeQuiz.gif" alt="Binary Search Tree Visualization" class="img-thumbnail" />
+                    }
+                    @if (dsQuiz == "DoublyLinkedList")
+                    {
+                        <img src="/images/DoublyLinkedListQuiz.gif" alt="Doubly Linked List Visualisation" class="img-thumbnail" />
+                    }
+                    @if (dsQuiz == "Queue")
+                    {
+                        <img src="/images/QueueQuiz.gif" alt="Queue Visualization" class="img-thumbnail" />
+                    }
+                    @if (dsQuiz == "Stack")
+                    {
+                        <img src="/images/StackQuiz.gif" alt="Stack Visualization" class="img-thumbnail" />
+                    }
+
                 </div>
             }
         </div>
