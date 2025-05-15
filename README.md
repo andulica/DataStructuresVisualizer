@@ -3,7 +3,7 @@
 
 
 DataStructViz is a web application to visualise data-structure operations (e.g., insertion, deletion, searching) with interactive, step-by-step animations, aimed at students and educators to simplify complex algorithmic concepts.
-Link for the app: https://datastructviz.co.uk/
+Link for the app: https://datastructviz.ro/
 
 <div align="center">
   <img src="BlazorAppForDataStructures/wwwroot/images/bst_visual.gif" width="270"/>
